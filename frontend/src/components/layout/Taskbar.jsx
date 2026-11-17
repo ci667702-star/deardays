@@ -44,7 +44,7 @@ export default function Taskbar() {
           onClick={() => setMenuOpen((open) => !open)}
         >
           <PixelIcon name="heart" size={20} />
-          <span>시작</span>
+          <span className="start-label">시작</span>
         </button>
 
         <span className="mx-0.5 h-full w-[2px] shrink-0 shadow-[inset_1px_0_var(--color-shade),inset_-1px_0_var(--color-hilite)]" aria-hidden="true" />
@@ -55,11 +55,11 @@ export default function Taskbar() {
               key={item.to}
               to={item.to}
               end={item.end}
-              className="task-btn max-w-[160px] flex-1 justify-center sm:flex-none sm:justify-start"
+              className="task-btn max-w-[160px] flex-1 justify-center lg:flex-none lg:justify-start"
               title={item.label}
             >
               <PixelIcon name={item.icon} size={18} />
-              <span className="hidden truncate sm:inline">{item.label}</span>
+              <span className="hidden truncate lg:inline">{item.label}</span>
             </NavLink>
           ))}
         </div>
@@ -67,7 +67,7 @@ export default function Taskbar() {
         <div className="tray shrink-0 !gap-2 !px-1.5 sm:!gap-[10px] sm:!px-2.5">
           <NotificationTray />
           {currentRoom && (
-            <span className="hidden max-w-[160px] items-center gap-1.5 md:flex" title={`지금 보고 있는 공간: ${currentRoom.name}`}>
+            <span className="hidden max-w-[160px] items-center gap-1.5 xl:flex" title={`지금 보고 있는 공간: ${currentRoom.name}`}>
               <PixelIcon name="heartSmall" size={12} />
               <span className="truncate">{currentRoom.name}</span>
             </span>

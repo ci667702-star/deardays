@@ -151,10 +151,13 @@ function SearchView() {
               {partner && <option value="friend">{partner.nickname}</option>}
             </select>
           </div>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
-            <TextField label="날짜 (부터)" type="date" value={form.from} onChange={update('from')} />
-            <span className="pb-2">~</span>
-            <TextField label="(까지)" type="date" value={form.to} onChange={update('to')} />
+          {/* 날짜 칸은 브라우저가 정한 최소 폭보다 줄지 않으므로 좁은 화면에서는 위아래로 */}
+          <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-end">
+            <TextField className="min-w-0" label="날짜 (부터)" type="date" value={form.from} onChange={update('from')} />
+            <span className="hidden pb-2 sm:block" aria-hidden="true">
+              ~
+            </span>
+            <TextField className="min-w-0" label="날짜 (까지)" type="date" value={form.to} onChange={update('to')} />
           </div>
           {formError && <p className="hint hint--error sm:col-span-2">{formError}</p>}
         </div>

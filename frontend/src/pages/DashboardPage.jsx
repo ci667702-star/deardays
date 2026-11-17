@@ -174,7 +174,7 @@ function Dashboard() {
         <TodoWidget room={currentRoom} />
       </div>
 
-      <div className="flex min-w-0 flex-col gap-4">
+      <div className="grid min-w-0 content-start items-start gap-4 md:grid-cols-2 lg:grid-cols-1">
         <Window title="우리 둘" icon={<PixelIcon name="heart" size={14} />}>
           <MemberPair
             members={currentRoom.members}
