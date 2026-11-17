@@ -33,3 +33,13 @@ export const LETTER_MAX_YEARS = 10;
 
 /** 새 소식 목록에 한 번에 보여 줄 최대 개수 */
 export const NOTIFICATION_LIST_LIMIT = 50;
+
+/** 도장 종류 (화면의 도장 모양·글자와 짝: frontend/src/utils/stamps.js) */
+export const STAMP_KINDS = ['great', 'wow', 'lol', 'pat', 'same', 'best'];
+
+/** 오늘의 주제: 글자 수, 한 번에 여러 개 넣을 때 최대 개수 */
+export const TOPIC_MAX_LENGTH = 200;
+export const TOPIC_BULK_MAX = 100;
+
+/** 낙서 그림의 최대 가로·세로 (픽셀) */
+export const DOODLE_MAX_SIZE = 1200;

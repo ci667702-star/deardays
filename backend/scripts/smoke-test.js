@@ -513,6 +513,240 @@ async function main() {
   r = await call('DELETE', `/api/letters/${todayLetter.id}`, { token: tokenB });
   check('열어 본 편지는 받는 사람이 지움 204', r.status === 204);
 
+  console.log('\n[도장]');
+  r = await call('POST', `/api/diaries/${diary1.id}/stamps`, { token: tokenB, json: { kind: 'great' } });
+  check('친구 일기에 도장 찍기', r.status === 200 && r.data.stamps.length === 1 && r.data.stamps[0].kind === 'great' && r.data.stamps[0].user.id === userB.id, JSON.stringify(r.data));
+  r = await call('POST', `/api/diaries/${diary1.id}/stamps`, { token: tokenB, json: { kind: 'great' } });
+  check('같은 도장은 한 번만', r.status === 200 && r.data.stamps.length === 1);
+  r = await call('POST', `/api/diaries/${diary1.id}/stamps`, { token: tokenB, json: { kind: 'lol' } });
+  check('다른 도장은 더 찍을 수 있음', r.status === 200 && r.data.stamps.length === 2);
+  r = await call('POST', `/api/diaries/${diary1.id}/stamps`, { token: tokenA, json: { kind: 'wow' } });
+  check('내 일기에 도장 400', r.status === 400 && r.data.code === 'OWN_DIARY');
+  r = await call('POST', `/api/diaries/${diary1.id}/stamps`, { token: tokenB, json: { kind: 'boo' } });
+  check('없는 도장 종류 400', r.status === 400);
+  r = await call('POST', `/api/diaries/${diary1.id}/stamps`, { token: tokenC, json: { kind: 'wow' } });
+  check('멤버 아닌 사람 도장 404', r.status === 404);
+  r = await call('GET', `/api/diaries/${diary1.id}`, { token: tokenA });
+  check('일기에 도장 목록', r.data.diary.stamps.map((s) => s.kind).join(',') === 'great,lol');
+  r = await call('GET', '/api/notifications', { token: tokenA });
+  check('알림: 도장을 찍었어요', r.data.items.some((n) => n.type === 'STAMP_CREATED' && n.preview === '참 잘했어요' && n.diary?.id === diary1.id));
+  r = await call('DELETE', `/api/diaries/${diary1.id}/stamps/lol`, { token: tokenB });
+  check('내가 찍은 도장 떼기', r.status === 200 && r.data.stamps.length === 1 && r.data.stamps[0].kind === 'great');
+  r = await call('GET', '/api/notifications', { token: tokenA });
+  check('뗀 도장의 알림도 사라짐', !r.data.items.some((n) => n.type === 'STAMP_CREATED' && n.preview === 'ㅋㅋㅋ'));
+  r = await call('DELETE', `/api/diaries/${diary1.id}/stamps/nope`, { token: tokenB });
+  check('없는 도장 종류 떼기 400', r.status === 400);
+
+  console.log('\n[낙서]');
+  const doodleForm = (fields, doodle, type = 'image/png', name = 'doodle.png') => {
+    const form = diaryForm(fields);
+    form.append('doodle', new Blob([doodle], { type }), name);
+    return form;
+  };
+  r = await call('POST', '/api/diaries', {
+    token: tokenB,
+    form: doodleForm({ roomId: room.id, title: '낙서 일기', content: '그림을 그렸다', diaryDate: '2026-11-17' }, PNG),
+  });
+  check('낙서를 붙여 일기 쓰기 201', r.status === 201 && r.data.diary.doodleUrl?.endsWith('.webp') && r.data.diary.images.length === 0, JSON.stringify(r.data));
+  const doodleDiary = r.data.diary;
+  const firstDoodle = doodleDiary.doodleUrl;
+  check('낙서 파일 저장 (사진 목록과 따로)', uploadExists(firstDoodle));
+  r = await call('POST', '/api/diaries', {
+    token: tokenB,
+    form: doodleForm({ roomId: room.id, title: '낙서', content: 'x', diaryDate: '2026-11-17' }, GIF, 'image/gif', 'd.gif'),
+  });
+  check('낙서는 PNG 만 400', r.status === 400 && r.data.code === 'INVALID_FILE_TYPE');
+  r = await call('PUT', `/api/diaries/${doodleDiary.id}`, {
+    token: tokenB,
+    form: doodleForm({ title: '낙서 일기', content: '다시 그렸다', diaryDate: '2026-11-17' }, PNG),
+  });
+  check(
+    '낙서 다시 그리기 → 이전 파일 삭제',
+    r.status === 200 && r.data.diary.doodleUrl !== firstDoodle && !uploadExists(firstDoodle) && uploadExists(r.data.diary.doodleUrl),
+  );
+  const secondDoodle = r.data.diary.doodleUrl;
+  r = await call('PUT', `/api/diaries/${doodleDiary.id}`, {
+    token: tokenB,
+    form: diaryForm({ title: '낙서 일기', content: '그대로', diaryDate: '2026-11-17' }),
+  });
+  check('낙서를 안 보내면 그대로', r.status === 200 && r.data.diary.doodleUrl === secondDoodle);
+  r = await call('PUT', `/api/diaries/${doodleDiary.id}`, {
+    token: tokenB,
+    form: diaryForm({ title: '낙서 일기', content: '지웠다', diaryDate: '2026-11-17', removeDoodle: 'true' }),
+  });
+  check('낙서 빼기 → 파일 삭제', r.status === 200 && r.data.diary.doodleUrl === null && !uploadExists(secondDoodle));
+  r = await call('POST', '/api/diaries', {
+    token: tokenB,
+    form: doodleForm({ roomId: room.id, title: '지울 낙서', content: 'x', diaryDate: '2026-11-17' }, PNG),
+  });
+  const tempDoodle = r.data.diary.doodleUrl;
+  await call('DELETE', `/api/diaries/${r.data.diary.id}`, { token: tokenB });
+  check('일기를 지우면 낙서 파일도 삭제', !uploadExists(tempDoodle));
+  await call('DELETE', `/api/diaries/${doodleDiary.id}`, { token: tokenB });
+
+  console.log('\n[오늘의 주제 + 관리자]');
+  const ADMIN_PW = process.env.ADMIN_PASSWORD ?? '';
+  r = await call('GET', '/api/admin/status', { token: tokenA });
+  check('관리자 상태', r.status === 200 && r.data.enabled === ADMIN_PW.length >= 8 && r.data.isAdmin === false, JSON.stringify(r.data));
+  r = await call('GET', '/api/topics/today', { token: tokenB });
+  check('오늘의 주제 조회 (없으면 null)', r.status === 200 && r.data.date === localDate(0) && 'topic' in r.data);
+
+  if (ADMIN_PW.length < 8) {
+    console.log('  (ADMIN_PASSWORD 가 없어 관리자 기능이 꺼진 경우만 확인합니다)');
+    r = await call('POST', '/api/admin/unlock', { token: tokenA, json: { password: 'whatever-pass' } });
+    check('관리자 기능이 꺼져 있으면 403', r.status === 403 && r.data.code === 'ADMIN_DISABLED');
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '주제' } });
+    check('관리자 기능이 꺼져 있으면 주제 추가 403', r.status === 403);
+  } else {
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '관리자 아님' } });
+    check('관리자 아니면 주제 추가 403', r.status === 403 && r.data.code === 'NOT_ADMIN');
+    r = await call('POST', '/api/admin/unlock', { token: tokenA, json: { password: `${ADMIN_PW}x` } });
+    check('틀린 관리자 비밀번호 400', r.status === 400 && r.data.code === 'WRONG_ADMIN_PASSWORD');
+    r = await call('POST', '/api/admin/unlock', { token: tokenA, json: { password: ADMIN_PW } });
+    check('관리자 비밀번호로 관리자 되기', r.status === 200 && r.data.user.isAdmin === true);
+    r = await call('GET', '/api/auth/me', { token: tokenA });
+    check('내 정보에 관리자 표시', r.data.user.isAdmin === true);
+
+    // 다른 실행과 겹치지 않는 날짜: 지난 날짜 하나, 먼 미래 하나
+    const shiftDate = (base, days) => {
+      const d = new Date(`${base}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + days);
+      return d.toISOString().slice(0, 10);
+    };
+    const salt = Date.now() % 3000;
+    const pastDate = shiftDate('2001-01-01', salt);
+    const futureDate = shiftDate('2090-01-01', salt);
+    const created = [];
+
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '테스트: 어릴 때 꿈', date: pastDate } });
+    check('지난 날짜에 주제 넣기 201', r.status === 201 && r.data.topic.date === pastDate, JSON.stringify(r.data));
+    const pastTopic = r.data.topic;
+    created.push(pastTopic.id);
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '겹침', date: pastDate } });
+    check('같은 날짜 주제 409', r.status === 409 && r.data.code === 'TOPIC_DATE_TAKEN');
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '', date: futureDate } });
+    check('빈 주제 400', r.status === 400);
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '테스트: 미래 주제', date: futureDate } });
+    const futureTopic = r.data.topic;
+    created.push(futureTopic.id);
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '테스트: 날짜 없이' } });
+    check('날짜를 비우면 오늘부터 빈 날짜로', r.status === 201 && r.data.topic.date >= localDate(0), JSON.stringify(r.data));
+    created.push(r.data.topic.id);
+    const autoDate = r.data.topic.date;
+    r = await call('POST', '/api/admin/topics/bulk', {
+      token: tokenA,
+      json: { contents: ['테스트: 한꺼번에 1', '  ', '테스트: 한꺼번에 2'] },
+    });
+    check(
+      '여러 주제 한꺼번에 (빈 줄 무시, 빈 날짜에 차례로)',
+      r.status === 201 &&
+        r.data.topics.length === 2 &&
+        r.data.topics[0].date < r.data.topics[1].date &&
+        !r.data.topics.some((t) => t.date === autoDate),
+      JSON.stringify(r.data),
+    );
+    created.push(...(r.data.topics ?? []).map((t) => t.id));
+    r = await call('POST', '/api/admin/topics/bulk', { token: tokenA, json: { contents: [' ', ''] } });
+    check('빈 줄만 보내면 400', r.status === 400);
+
+    r = await call('GET', '/api/admin/topics?scope=upcoming&limit=100', { token: tokenA });
+    check('앞으로의 주제 목록 + 다음 빈 날짜', r.status === 200 && r.data.items.some((t) => t.id === futureTopic.id) && Boolean(r.data.nextEmptyDate));
+    r = await call('GET', '/api/admin/topics?scope=past&limit=100', { token: tokenA });
+    check('지난 주제 목록', r.status === 200 && r.data.items.some((t) => t.id === pastTopic.id));
+    r = await call('PUT', `/api/admin/topics/${futureTopic.id}`, {
+      token: tokenA,
+      json: { content: '테스트: 고친 주제', date: shiftDate(futureDate, 1) },
+    });
+    check('주제 고치기', r.status === 200 && r.data.topic.content === '테스트: 고친 주제' && r.data.topic.date === shiftDate(futureDate, 1));
+    r = await call('PUT', `/api/admin/topics/${futureTopic.id}`, { token: tokenA, json: { content: 'x', date: pastDate } });
+    check('다른 주제가 있는 날짜로 옮기기 409', r.status === 409);
+
+    r = await call('GET', `/api/topics/${futureTopic.id}`, { token: tokenB });
+    check('공개 전 주제는 일반 사용자에게 404', r.status === 404);
+    r = await call('GET', `/api/topics/${pastTopic.id}`, { token: tokenB });
+    check('공개된 주제 보기', r.status === 200 && r.data.topic.content === '테스트: 어릴 때 꿈');
+    r = await call('GET', '/api/admin/topics', { token: tokenB });
+    check('일반 사용자 관리 목록 403', r.status === 403);
+
+    r = await call('POST', '/api/diaries', {
+      token: tokenB,
+      json: { roomId: room.id, title: '꿈 이야기', content: '어릴 때는 우주 비행사가 되고 싶었다.', diaryDate: '2026-11-17', topicId: pastTopic.id },
+    });
+    check('주제로 일기 쓰기', r.status === 201 && r.data.diary.topic?.id === pastTopic.id && r.data.diary.topic.content === '테스트: 어릴 때 꿈');
+    const topicDiary = r.data.diary;
+    r = await call('POST', '/api/diaries', {
+      token: tokenB,
+      json: { roomId: room.id, title: '미래', content: 'x', diaryDate: '2026-11-17', topicId: futureTopic.id },
+    });
+    check('공개 전 주제로는 쓸 수 없음 400', r.status === 400 && r.data.code === 'TOPIC_NOT_OPEN');
+    r = await call('POST', '/api/diaries', {
+      token: tokenB,
+      json: { roomId: room.id, title: '없음', content: 'x', diaryDate: '2026-11-17', topicId: 999999999 },
+    });
+    check('없는 주제 400', r.status === 400 && r.data.code === 'TOPIC_NOT_FOUND');
+    r = await call('GET', `/api/topics?roomId=${room.id}&limit=30`, { token: tokenA });
+    const pastInList = r.data.items?.find((t) => t.id === pastTopic.id);
+    check(
+      '공간의 주제 기록: 공개된 주제 + 이 공간에서 쓴 글',
+      r.status === 200 &&
+        pastInList?.entries.length === 1 &&
+        pastInList.entries[0].id === topicDiary.id &&
+        !r.data.items.some((t) => t.id === futureTopic.id),
+      JSON.stringify(pastInList),
+    );
+    r = await call('GET', `/api/topics?roomId=${room.id}`, { token: tokenC });
+    check('멤버 아닌 사람 주제 기록 404', r.status === 404);
+    r = await call('GET', `/api/diaries?roomId=${room.id}&topicId=${pastTopic.id}`, { token: tokenA });
+    check('주제로 일기 거르기', r.data.total === 1 && r.data.items[0].id === topicDiary.id);
+
+    for (const id of created.filter((id) => id !== pastTopic.id)) {
+      await call('DELETE', `/api/admin/topics/${id}`, { token: tokenA });
+    }
+    r = await call('DELETE', `/api/admin/topics/${pastTopic.id}`, { token: tokenA });
+    check('주제 지우기 204', r.status === 204);
+    r = await call('GET', `/api/diaries/${topicDiary.id}`, { token: tokenB });
+    check('주제를 지워도 일기는 남고 주제만 비워짐', r.status === 200 && r.data.diary.topic === null);
+    r = await call('DELETE', `/api/admin/topics/${pastTopic.id}`, { token: tokenA });
+    check('없는 주제 지우기 404', r.status === 404);
+    await call('DELETE', `/api/diaries/${topicDiary.id}`, { token: tokenB });
+
+    r = await call('POST', '/api/admin/lock', { token: tokenA });
+    check('관리자 그만하기', r.status === 200 && r.data.user.isAdmin === false);
+    r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '다시 막힘' } });
+    check('그만둔 뒤 주제 추가 403', r.status === 403);
+  }
+
+  console.log('\n[연말 결산]');
+  const recapYear = Number(diary1.diaryDate.slice(0, 4));
+  r = await call('GET', `/api/diaries?roomId=${room.id}&from=${recapYear}-01-01&to=${recapYear}-12-31&limit=50`, { token: tokenA });
+  const yearDiaries = r.data.total;
+  r = await call('GET', `/api/rooms/${room.id}/recap?year=${recapYear}`, { token: tokenA });
+  const recap = r.data.recap;
+  check(
+    '연말 결산: 일기 수·사람별·월별',
+    r.status === 200 &&
+      recap.totals.diaries === yearDiaries &&
+      recap.members.length === 2 &&
+      recap.members.reduce((sum, m) => sum + m.diaries, 0) === yearDiaries &&
+      recap.monthly.length === 12 &&
+      recap.monthly.reduce((a, b) => a + b, 0) === yearDiaries,
+    JSON.stringify(recap?.totals),
+  );
+  check('연말 결산: 도장·공감·기분', recap.totals.stamps === 1 && recap.totals.likes >= 1 && recap.moods.some((m) => m.mood === 'happy'));
+  check(
+    '연말 결산: 연속 기록·낱말·기억에 남는 일기',
+    recap.longestStreak?.days >= 1 && Array.isArray(recap.topWords) && Boolean(recap.firstDiary && recap.longestDiary),
+  );
+  check('연말 결산: 고를 수 있는 해', recap.years.includes(recapYear) && recap.years.includes(new Date().getFullYear()));
+  r = await call('GET', `/api/rooms/${room.id}/recap?year=2001`, { token: tokenA });
+  check(
+    '일기 없는 해도 200 (모두 0)',
+    r.status === 200 && r.data.recap.totals.diaries === 0 && r.data.recap.longestStreak === null && r.data.recap.mostLoved === null,
+  );
+  r = await call('GET', `/api/rooms/${room.id}/recap?year=${new Date().getFullYear() + 1}`, { token: tokenA });
+  check('아직 오지 않은 해 400', r.status === 400);
+  r = await call('GET', `/api/rooms/${room.id}/recap`, { token: tokenC });
+  check('멤버 아닌 사람 결산 404', r.status === 404);
 
   console.log('\n[마이페이지]');
   r = await call('GET', '/api/users/me', { token: tokenA });

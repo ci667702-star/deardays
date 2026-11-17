@@ -28,6 +28,13 @@ function Counts({ diary }) {
           {diary.images.length}
         </span>
       )}
+      {diary.stamps?.length > 0 && (
+        <span className="inline-flex items-center gap-0.5" title={`도장 ${diary.stamps.length}개`}>
+          <PixelIcon name="stamp" size={13} />
+          <span className="sr-only">도장</span>
+          {diary.stamps.length}
+        </span>
+      )}
     </span>
   );
 }
@@ -96,6 +103,18 @@ export default function DiaryList({ diaries, showHeader = true, highlight = '' }
                     <Highlight text={diary.title} word={highlight} />
                   </span>
                   <MoodWeatherBadge mood={diary.mood} weather={diary.weather} compact />
+                  {diary.topic && (
+                    <span className="inline-flex shrink-0" title={`주제: ${diary.topic.content}`}>
+                      <PixelIcon name="note" size={14} />
+                      <span className="sr-only">주제로 쓴 일기</span>
+                    </span>
+                  )}
+                  {diary.doodleUrl && (
+                    <span className="inline-flex shrink-0" title="낙서가 있어요">
+                      <PixelIcon name="pencil" size={14} />
+                      <span className="sr-only">낙서 있음</span>
+                    </span>
+                  )}
                 </span>
                 <span className="ink block truncate text-[13px] opacity-70">
                   <Highlight text={excerpt(diary.content, highlight)} word={highlight} />

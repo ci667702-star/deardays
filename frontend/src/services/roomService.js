@@ -35,4 +35,10 @@ export const roomService = {
     const { data } = await api.delete(`/rooms/${roomId}/members/me`);
     return data; // { roomDeleted }
   },
+
+  /** 연말 결산: 그해 공간의 기록 */
+  async recap(roomId, year) {
+    const { data } = await api.get(`/rooms/${roomId}/recap`, { params: { year } });
+    return data.recap;
+  },
 };

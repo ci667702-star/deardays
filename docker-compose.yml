@@ -46,6 +46,8 @@ services:
       CLIENT_ORIGIN: ${PUBLIC_URL:-http://localhost}
       AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-30}
       TRUST_PROXY: ${TRUST_PROXY:-1}
+      # 관리자 비밀번호: 화면에서 이걸 입력한 계정이 '오늘의 주제'를 관리한다 (비우면 관리자 기능 꺼짐)
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       MAX_IMAGE_SIZE_MB: 5
       TZ: Asia/Seoul
     volumes:

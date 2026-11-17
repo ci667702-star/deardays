@@ -1,9 +1,13 @@
 import * as diaryService from '../services/diaryService.js';
 import * as commentService from '../services/commentService.js';
 import * as likeService from '../services/likeService.js';
+import * as stampService from '../services/stampService.js';
+
+/** multer 가 받은 파일을 { images, doodle } 로 나눈다 */
+const uploads = (req) => ({ images: req.files?.images ?? [], doodle: req.files?.doodle?.[0] ?? null });
 
 export async function createDiary(req, res) {
-  const diary = await diaryService.createDiary(req.user.id, req.valid.body, req.files ?? []);
+  const diary = await diaryService.createDiary(req.user.id, req.valid.body, uploads(req));
   res.status(201).json({ diary });
 }
 
@@ -23,7 +27,7 @@ export async function getDiary(req, res) {
 }
 
 export async function updateDiary(req, res) {
-  const diary = await diaryService.updateDiary(req.user.id, req.valid.params.id, req.valid.body, req.files ?? []);
+  const diary = await diaryService.updateDiary(req.user.id, req.valid.params.id, req.valid.body, uploads(req));
   res.json({ diary });
 }
 
@@ -49,5 +53,15 @@ export async function likeDiary(req, res) {
 
 export async function unlikeDiary(req, res) {
   const result = await likeService.unlikeDiary(req.user.id, req.valid.params.id);
+  res.json(result);
+}
+
+export async function addStamp(req, res) {
+  const result = await stampService.addStamp(req.user.id, req.valid.params.id, req.valid.body.kind);
+  res.json(result);
+}
+
+export async function removeStamp(req, res) {
+  const result = await stampService.removeStamp(req.user.id, req.valid.params.id, req.valid.params.kind);
   res.json(result);
 }

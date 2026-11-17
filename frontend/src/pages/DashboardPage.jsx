@@ -8,6 +8,7 @@ import InviteCodeBox from '../components/room/InviteCodeBox.jsx';
 import MemberPair from '../components/room/MemberPair.jsx';
 import RoomGate from '../components/room/RoomGate.jsx';
 import TodoWidget from '../components/todo/TodoWidget.jsx';
+import TodayTopicWindow from '../components/topic/TodayTopicWindow.jsx';
 import Avatar from '../components/ui/Avatar.jsx';
 import Button, { ButtonLink } from '../components/ui/Button.jsx';
 import { EmptyState, ErrorMessage, Loading } from '../components/ui/Feedback.jsx';
@@ -84,6 +85,27 @@ function TodayNote({ nickname }) {
   );
 }
 
+/** 12월부터 1월 15일까지 홈에 '결산 마법사' 안내를 띄운다 */
+function RecapInvite() {
+  const today = todayString();
+  const md = today.slice(5);
+  if (!(md >= '12-01' || md <= '01-15')) return null;
+  const year = md >= '12-01' ? Number(today.slice(0, 4)) : Number(today.slice(0, 4)) - 1;
+  return (
+    <Window title="연말 결산" icon={<PixelIcon name="trophy" size={14} />}>
+      <div className="flex items-center gap-3">
+        <PixelIcon name="trophy" size={40} />
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px]">우리의 {year}년을 정리해 봤어요.</p>
+          <ButtonLink to="/recap" size="sm" variant="accent" className="mt-2">
+            결산 마법사 열기
+          </ButtonLink>
+        </div>
+      </div>
+    </Window>
+  );
+}
+
 function Dashboard() {
   const { user } = useAuth();
   const { currentRoom, partner, refreshRoom } = useRooms();
@@ -134,6 +156,7 @@ function Dashboard() {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-4">
         <TodayNote nickname={user.nickname} />
+        <TodayTopicWindow room={currentRoom} />
 
         <Window
           title={`최근 일기 - ${currentRoom.name}`}
@@ -175,6 +198,7 @@ function Dashboard() {
       </div>
 
       <div className="grid min-w-0 content-start items-start gap-4 md:grid-cols-2 lg:grid-cols-1">
+        <RecapInvite />
         <Window title="우리 둘" icon={<PixelIcon name="heart" size={14} />}>
           <MemberPair
             members={currentRoom.members}

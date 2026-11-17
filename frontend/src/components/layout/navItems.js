@@ -10,7 +10,9 @@ export const NAV_ITEMS = [
   { to: '/diaries/new', label: '새 일기 쓰기', desktopLabel: '새 일기.txt', icon: 'letter', taskbar: false },
   { to: '/todos', label: '할 일', desktopLabel: '할 일.txt', icon: 'checklist', taskbar: true },
   { to: '/letters', label: '편지함', desktopLabel: '편지함', icon: 'letter', palette: LETTERBOX_PALETTE, taskbar: false },
+  { to: '/topics', label: '오늘의 주제', desktopLabel: '오늘의 주제', icon: 'note', taskbar: false },
   { to: '/calendar', label: '달력', desktopLabel: '달력', icon: 'calendar', taskbar: true },
   { to: '/search', label: '찾기', desktopLabel: null, icon: 'search', taskbar: false },
+  { to: '/recap', label: '연말 결산', desktopLabel: '우리의 한 해', icon: 'trophy', taskbar: false },
   { to: '/me', label: '내 정보', desktopLabel: '내 컴퓨터', icon: 'computer', taskbar: true },
 ];

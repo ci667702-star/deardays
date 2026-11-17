@@ -2,15 +2,19 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import CommentSection from '../components/diary/CommentSection.jsx';
+import { DoodleView } from '../components/diary/Doodle.jsx';
+import { STAMP_SPACE, StampInkFilter, StampLayer, StampPad } from '../components/diary/Stamps.jsx';
 import LikeButton from '../components/diary/LikeButton.jsx';
 import { MoodWeatherBadge } from '../components/diary/MoodWeather.jsx';
 import PhotoGallery from '../components/diary/PhotoGallery.jsx';
+import TopicBanner from '../components/topic/TopicBanner.jsx';
 import Avatar from '../components/ui/Avatar.jsx';
 import { ButtonLink } from '../components/ui/Button.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import { ErrorMessage, Loading } from '../components/ui/Feedback.jsx';
 import PixelIcon from '../components/ui/PixelIcon.jsx';
 import Window from '../components/ui/Window.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js';
 import { useFetch } from '../hooks/useFetch.js';
@@ -29,6 +33,8 @@ function DiaryDetail({ diaryId }) {
   const { data: diary, loading, error, reload, setData } = useFetch(() => diaryService.get(diaryId), [diaryId]);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [freshStampIds, setFreshStampIds] = useState([]);
+  const { user } = useAuth();
   useDocumentTitle(diary?.title ?? '일기');
 
   const goBack = () => {
@@ -116,12 +122,32 @@ function DiaryDetail({ diaryId }) {
           </div>
         </header>
 
+        {diary.topic && (
+          <div className="mt-4">
+            <TopicBanner topic={diary.topic} showLink />
+          </div>
+        )}
+
         <h1 className="ink mt-4 text-[24px] leading-snug">{diary.title}</h1>
         <MoodWeatherBadge mood={diary.mood} weather={diary.weather} className="mt-2" />
 
         <div className="sunken mt-3 p-[2px]">
-          <div className="paper min-h-[200px]">{diary.content}</div>
+          <div className="relative">
+            <div
+              className="paper min-h-[200px]"
+              style={diary.stamps.length > 0 ? { paddingBottom: `calc(var(--line) + ${STAMP_SPACE}px)` } : undefined}
+            >
+              {diary.content}
+            </div>
+            <StampLayer stamps={diary.stamps} freshIds={freshStampIds} />
+          </div>
         </div>
+
+        {diary.doodleUrl && (
+          <div className="mt-4">
+            <DoodleView url={diary.doodleUrl} title={diary.title} />
+          </div>
+        )}
 
         {diary.images.length > 0 && (
           <div className="mt-4">
@@ -137,9 +163,26 @@ function DiaryDetail({ diaryId }) {
             onChange={(result) => setData((d) => ({ ...d, likedByMe: result.liked, likeCount: result.likeCount }))}
           />
           <span className="font-small text-[12px] text-muted">
-            {diary.isMine ? '친구의 공감과 댓글을 기다려 봐요.' : `${diary.author.nickname}님에게 마음을 전해 보세요.`}
+            {diary.isMine ? '친구의 공감과 댓글, 도장을 기다려 봐요.' : `${diary.author.nickname}님에게 마음을 전해 보세요.`}
           </span>
         </div>
+
+        {!diary.isMine && (
+          <div className="mt-3 flex flex-col gap-1.5">
+            <span className="font-small flex items-center gap-1 text-[12px] text-muted">
+              <PixelIcon name="stamp" size={16} /> 도장 찍기 (한 번 더 누르면 떼요)
+            </span>
+            <StampPad
+              diaryId={diary.id}
+              stamps={diary.stamps}
+              meId={user.id}
+              onChange={(stamps, freshId) => {
+                setData((d) => ({ ...d, stamps }));
+                if (freshId) setFreshStampIds((ids) => [...ids, freshId]);
+              }}
+            />
+          </div>
+        )}
 
         <hr className="etched my-5" />
 
@@ -148,6 +191,8 @@ function DiaryDetail({ diaryId }) {
           onCountChange={(delta) => setData((d) => ({ ...d, commentCount: d.commentCount + delta }))}
         />
       </Window>
+
+      <StampInkFilter />
 
       <ConfirmDialog
         open={confirmDelete}

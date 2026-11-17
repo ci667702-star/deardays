@@ -16,6 +16,7 @@ export function toMe(user) {
   return {
     ...toPublicUser(user),
     email: user.email,
+    isAdmin: Boolean(user.isAdmin),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -48,14 +49,35 @@ export function toDiary(diary, viewerId) {
     diaryDate: fromDbDate(diary.diaryDate),
     mood: diary.mood ?? null,
     weather: diary.weather ?? null,
+    doodleUrl: diary.doodleUrl ?? null,
+    topic: diary.topic ? toTopic(diary.topic) : null,
     createdAt: diary.createdAt,
     updatedAt: diary.updatedAt,
     author: toPublicUser(diary.author),
     images: (diary.images ?? []).map(toImage),
+    stamps: (diary.stamps ?? []).map(toStamp),
     likeCount: diary._count?.likes ?? 0,
     commentCount: diary._count?.comments ?? 0,
     likedByMe: Array.isArray(diary.likes) ? diary.likes.some((like) => like.userId === viewerId) : false,
     isMine: diary.authorId === viewerId,
+  };
+}
+
+export function toStamp(stamp) {
+  return { id: stamp.id, kind: stamp.kind, createdAt: stamp.createdAt, user: toPublicUser(stamp.user) };
+}
+
+/** 오늘의 주제 (관리자 화면에는 만든 시각도 함께) */
+export function toTopic(topic) {
+  return { id: topic.id, date: fromDbDate(topic.date), content: topic.content };
+}
+
+export function toTopicForAdmin(topic) {
+  return {
+    ...toTopic(topic),
+    diaryCount: topic._count?.diaries ?? 0,
+    createdAt: topic.createdAt,
+    updatedAt: topic.updatedAt,
   };
 }
 

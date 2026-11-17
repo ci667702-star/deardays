@@ -3,7 +3,7 @@ import * as roomController from '../controllers/roomController.js';
 import { requireAuth } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
 import { roomIdParamSchema } from '../validators/common.js';
-import { joinRoomSchema, roomNameSchema } from '../validators/room.validators.js';
+import { joinRoomSchema, recapQuerySchema, roomNameSchema } from '../validators/room.validators.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -24,5 +24,7 @@ router.post(
   roomController.regenerateInviteCode,
 );
 router.delete('/:roomId/members/me', validate(roomIdParamSchema, 'params'), roomController.leaveRoom);
+// 연말 결산: 그해 공간의 기록 모아 보기
+router.get('/:roomId/recap', validate(roomIdParamSchema, 'params'), validate(recapQuerySchema, 'query'), roomController.getRecap);
 
 export default router;

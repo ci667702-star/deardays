@@ -15,11 +15,10 @@ import { generateInviteCode } from '../src/utils/inviteCode.js';
 const prisma = new PrismaClient();
 const PASSWORD = 'diary1234';
 
+// 이 컴퓨터 시간대의 오늘에서 offset 일 전 (DB 의 DATE 값처럼 UTC 자정으로)
 const day = (offset) => {
-  const date = new Date();
-  date.setUTCHours(0, 0, 0, 0);
-  date.setUTCDate(date.getUTCDate() - offset);
-  return date;
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() - offset));
 };
 
 async function upsertUser(email, nickname, introduction) {
@@ -31,7 +30,29 @@ async function upsertUser(email, nickname, introduction) {
   });
 }
 
+// 체험용 '오늘의 주제': 그저께부터 모레까지. 그 날짜에 이미 주제가 있으면 건드리지 않는다.
+const SAMPLE_TOPICS = [
+  '요즘 제일 자주 듣는 노래는?',
+  '어릴 때 꿈은 뭐였어?',
+  '오늘 가장 웃겼던 순간',
+  '올해 가장 잘한 일 하나',
+  '지금 가장 먹고 싶은 음식과 그 이유',
+];
+
+async function seedTopics() {
+  let added = 0;
+  for (const [index, content] of SAMPLE_TOPICS.entries()) {
+    const date = day(2 - index); // 그저께(2) → 모레(-2)
+    const exists = await prisma.dailyTopic.findUnique({ where: { date }, select: { id: true } });
+    if (exists) continue;
+    await prisma.dailyTopic.create({ data: { date, content } });
+    added += 1;
+  }
+  if (added) console.log(`체험용 오늘의 주제 ${added}개를 넣었어요.`);
+}
+
 async function main() {
+  await seedTopics();
   const haru = await upsertUser('haru@deardays.test', '하루', '노을과 도서관을 좋아해요.');
   const byeol = await upsertUser('byeol@deardays.test', '별이', '비 오는 날 카페 탐방 중.');
 

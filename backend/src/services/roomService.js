@@ -3,7 +3,7 @@ import { prisma } from '../config/prisma.js';
 import { MAX_ROOM_MEMBERS } from '../config/constants.js';
 import { HttpError } from '../utils/HttpError.js';
 import { generateInviteCode } from '../utils/inviteCode.js';
-import { removeUploadUrls } from '../utils/files.js';
+import { diaryFileUrls, removeUploadUrls } from '../utils/files.js';
 import { toRoom } from '../utils/serializers.js';
 import { notify } from './notificationService.js';
 
@@ -121,12 +121,9 @@ export async function leaveRoom(roomId, userId) {
 
       const remaining = await tx.diaryRoomMember.count({ where: { diaryRoomId: roomId } });
       if (remaining === 0) {
-        const images = await tx.diaryImage.findMany({
-          where: { diary: { diaryRoomId: roomId } },
-          select: { imageUrl: true },
-        });
+        const fileUrls = await diaryFileUrls({ diaryRoomId: roomId }, tx);
         await tx.diaryRoom.delete({ where: { id: roomId } });
-        return { roomDeleted: true, imageUrls: images.map((image) => image.imageUrl) };
+        return { roomDeleted: true, imageUrls: fileUrls };
       }
 
       // 나간 사람이 맡았던 할 일은 '함께' 하는 일로 돌린다.

@@ -19,6 +19,8 @@ model User {
   introduction      String?   @db.VarChar(300)
   // 비밀번호를 바꾸면 이 시각 이전에 발급된 로그인 토큰은 모두 무효
   passwordChangedAt DateTime?
+  // 관리자: 서버에 정한 관리자 비밀번호(ADMIN_PASSWORD)를 입력하면 켜진다. '오늘의 주제'를 관리한다.
+  isAdmin           Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -33,6 +35,8 @@ model User {
   notificationsCaused Notification[]    @relation("NotificationActor")
   lettersSent         Letter[]          @relation("LetterSender")
   lettersReceived     Letter[]          @relation("LetterRecipient")
+  stamps              Stamp[]
+  topicsCreated       DailyTopic[]
 
   @@map("users")
 }
@@ -77,18 +81,25 @@ model Diary {
   // 기분(happy/excited/calm/sad/angry)과 날씨(sunny/cloudy/rainy/snowy/windy), 선택
   mood        String?  @db.VarChar(16)
   weather     String?  @db.VarChar(16)
+  // 낙서 창에서 그린 그림 (일기 한 편에 하나, 선택)
+  doodleUrl   String?  @db.VarChar(255)
+  // '오늘의 주제'로 쓴 일기면 그 주제 (주제가 지워지면 비워짐)
+  topicId     Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   diaryRoom     DiaryRoom      @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
   author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  topic         DailyTopic?    @relation(fields: [topicId], references: [id], onDelete: SetNull)
   images        DiaryImage[]
   comments      Comment[]
   likes         Like[]
+  stamps        Stamp[]
   notifications Notification[]
 
   @@index([diaryRoomId, diaryDate])
   @@index([authorId])
+  @@index([topicId])
   @@map("diaries")
 }
 
@@ -135,6 +146,39 @@ model Like {
   @@map("likes")
 }
 
+// 도장: 친구 일기에 '참 잘했어요' 같은 도장을 찍는다. 한 사람이 같은 일기에 같은 도장은 한 번만.
+// kind: great, wow, lol, pat, same, best (backend/src/config/constants.js 의 STAMP_KINDS)
+model Stamp {
+  id        Int      @id @default(autoincrement())
+  diaryId   Int
+  userId    Int
+  kind      String   @db.VarChar(16)
+  createdAt DateTime @default(now())
+
+  diary Diary @relation(fields: [diaryId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([diaryId, userId, kind])
+  @@index([userId])
+  @@map("stamps")
+}
+
+// 오늘의 주제: 관리자가 날짜마다 하나씩 넣어 두면 모든 공간에 그날의 글감으로 보인다.
+model DailyTopic {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @unique @db.Date
+  content     String   @db.VarChar(200)
+  createdById Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  diaries   Diary[]
+
+  @@index([createdById])
+  @@map("daily_topics")
+}
+
 // 공유 공간의 '우리 할 일' 목록. 두 사람 모두 추가하고 완료 표시할 수 있다.
 model Todo {
   id            Int       @id @default(autoincrement())
@@ -163,7 +207,7 @@ model Todo {
 }
 
 // 새 소식 알림. 받는 사람(recipient)마다 한 줄씩 만든다.
-// type: DIARY_CREATED, COMMENT_CREATED, LIKE_CREATED, TODO_ASSIGNED, MEMBER_JOINED,
+// type: DIARY_CREATED, COMMENT_CREATED, LIKE_CREATED, STAMP_CREATED, TODO_ASSIGNED, MEMBER_JOINED,
 //       LETTER_SENT, LETTER_ARRIVED, LETTER_OPENED
 model Notification {
   id          Int      @id @default(autoincrement())

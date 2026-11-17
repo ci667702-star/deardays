@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { Save } from 'lucide-react';
+import { DoodleField } from '../components/diary/Doodle.jsx';
 import ImageUploader from '../components/diary/ImageUploader.jsx';
 import { checkImageFiles } from '../components/diary/imageRules.js';
 import { MoodWeatherPicker } from '../components/diary/MoodWeather.jsx';
 import RoomGate from '../components/room/RoomGate.jsx';
+import TopicBanner from '../components/topic/TopicBanner.jsx';
 import Button, { ButtonLink } from '../components/ui/Button.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import Dialog from '../components/ui/Dialog.jsx';
@@ -18,7 +20,9 @@ import { useToast } from '../context/ToastContext.jsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js';
 import { useFetch } from '../hooks/useFetch.js';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges.js';
+import { assetUrl } from '../services/api.js';
 import { diaryService } from '../services/diaryService.js';
+import { topicService } from '../services/topicService.js';
 import { formatDateTime, isValidDateString, todayString } from '../utils/date.js';
 import { drafts } from '../utils/drafts.js';
 import { getErrorMessage, getErrorStatus } from '../utils/errors.js';
@@ -122,13 +126,59 @@ function DiaryEditor({ original }) {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const titleRef = useRef(null);
 
+  // 오늘의 주제: 고칠 때는 원래 주제, 새로 쓸 때는 주소의 ?topic= 으로 받은 주제
+  const initialTopicId = useMemo(() => {
+    if (original) return original.topic?.id ?? null;
+    const fromQuery = Number(searchParams.get('topic'));
+    return Number.isInteger(fromQuery) && fromQuery > 0 ? fromQuery : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [original]);
+  const [topicId, setTopicId] = useState(initialTopicId);
+  const [topic, setTopic] = useState(original?.topic ?? null);
+  useEffect(() => {
+    if (original || !initialTopicId) return undefined;
+    let cancelled = false;
+    topicService
+      .get(initialTopicId)
+      .then((found) => {
+        if (!cancelled) setTopic(found);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setTopicId(null);
+        toast.error(getErrorMessage(error, '주제를 불러오지 못했어요. 주제 없이 써 주세요.'));
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTopicId]);
+
+  // 낙서: { src, blob } (blob 이 있으면 새로 그린 그림)
+  const [doodle, setDoodle] = useState(() => (original?.doodleUrl ? { src: assetUrl(original.doodleUrl), blob: null } : null));
+  const changeDoodle = (next) => {
+    setDoodle((previous) => {
+      if (previous?.blob) URL.revokeObjectURL(previous.src);
+      return next;
+    });
+  };
+  const doodleRef = useRef(doodle);
+  doodleRef.current = doodle;
+  useEffect(
+    () => () => {
+      if (doodleRef.current?.blob) URL.revokeObjectURL(doodleRef.current.src);
+    },
+    [],
+  );
+  const doodleChanged = Boolean(doodle?.blob) || (Boolean(original?.doodleUrl) && !doodle);
+
   const textChanged =
     form.title !== initial.title ||
     form.content !== initial.content ||
     form.diaryDate !== initial.diaryDate ||
     form.mood !== initial.mood ||
     form.weather !== initial.weather;
-  const dirty = textChanged || removedIds.length > 0 || newItems.length > 0;
+  const dirty = textChanged || removedIds.length > 0 || newItems.length > 0 || doodleChanged || topicId !== initialTopicId;
   useUnsavedChanges(dirty && !saving);
 
   // 쓰는 동안 0.8초마다 임시 저장 (사진은 저장되지 않음). 복원 여부를 묻는 동안에는 덮어쓰지 않는다.
@@ -231,7 +281,10 @@ function DiaryEditor({ original }) {
       diaryDate: form.diaryDate,
       mood: form.mood,
       weather: form.weather,
+      topicId,
       newImages: newItems.map((item) => item.file),
+      doodle: doodle?.blob ?? null,
+      removeDoodle: isEdit && Boolean(original.doodleUrl) && !doodle,
     };
     const onUploadProgress = (e) => {
       if (e.total) setProgress(Math.round((e.loaded / e.total) * 100));
@@ -282,6 +335,7 @@ function DiaryEditor({ original }) {
         }
       >
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          {topicId && topic && <TopicBanner topic={topic} onRemove={() => setTopicId(null)} />}
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px]">
             <TextField
               ref={titleRef}
@@ -290,7 +344,7 @@ function DiaryEditor({ original }) {
               maxLength={TITLE_MAX}
               onChange={update('title')}
               error={errors.title}
-              placeholder="오늘에 제목을 붙인다면?"
+              placeholder={topicId ? '주제에 어울리는 제목을 붙여 볼까요?' : '오늘에 제목을 붙인다면?'}
               autoFocus={!isEdit}
             />
             <TextField label="날짜" type="date" value={form.diaryDate} onChange={update('diaryDate')} error={errors.diaryDate} max="2100-12-31" min="1900-01-01" />
@@ -333,6 +387,8 @@ function DiaryEditor({ original }) {
             onRemoveNew={removeNew}
             error={imageError}
           />
+
+          <DoodleField value={doodle} onChange={changeDoodle} />
 
           {formError && (
             <div role="alert" className="flex items-start gap-2 bg-pink-soft px-3 py-2 shadow-[var(--bevel-thin-in)]">

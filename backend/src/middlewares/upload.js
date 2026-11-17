@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import multer from 'multer';
 import sharp from 'sharp';
 import { env } from '../config/env.js';
-import { ALLOWED_IMAGE_TYPES, MAX_DIARY_IMAGES } from '../config/constants.js';
+import { ALLOWED_IMAGE_TYPES, DOODLE_MAX_SIZE, MAX_DIARY_IMAGES } from '../config/constants.js';
 import { HttpError } from '../utils/HttpError.js';
 import { collectRequestFiles } from '../utils/files.js';
 
@@ -26,11 +26,17 @@ function createImageUploader(subDir) {
     storage,
     limits: {
       fileSize: env.maxImageSizeMb * 1024 * 1024,
-      files: MAX_DIARY_IMAGES,
+      // 사진 + 낙서 그림 1장
+      files: MAX_DIARY_IMAGES + 1,
       fields: 20,
     },
     fileFilter: (_req, file, cb) => {
       const ext = path.extname(file.originalname).toLowerCase();
+      // 낙서는 화면의 그림 창이 만든 PNG 만 받는다
+      if (file.fieldname === 'doodle' && (ext !== '.png' || file.mimetype !== 'image/png')) {
+        cb(HttpError.badRequest('낙서 그림은 PNG 파일로만 올릴 수 있어요.', 'INVALID_FILE_TYPE'));
+        return;
+      }
       const allowedMimes = ALLOWED_IMAGE_TYPES[ext];
       if (!allowedMimes || !allowedMimes.includes(file.mimetype)) {
         cb(HttpError.badRequest('사진은 JPG, PNG, GIF, WEBP 파일만 올릴 수 있어요.', 'INVALID_FILE_TYPE'));
@@ -44,7 +50,11 @@ function createImageUploader(subDir) {
 const diaryUploader = createImageUploader('diaries');
 const profileUploader = createImageUploader('profiles');
 
-export const uploadDiaryImages = diaryUploader.array('images', MAX_DIARY_IMAGES);
+/** 일기: 사진(images) 최대 6장 + 낙서(doodle) 1장 → req.files = { images: [...], doodle: [...] } */
+export const uploadDiaryImages = diaryUploader.fields([
+  { name: 'images', maxCount: MAX_DIARY_IMAGES },
+  { name: 'doodle', maxCount: 1 },
+]);
 export const uploadProfileImage = profileUploader.single('image');
 
 // 파일 앞부분의 시그니처(매직 넘버)로 실제 이미지인지 한 번 더 확인한다.
@@ -88,6 +98,12 @@ const IMAGE_PRESETS = {
   profile: (pipeline) => pipeline.resize(320, 320, { fit: 'cover', position: 'attention' }),
 };
 
+// 낙서: 도트 그림이 뭉개지지 않게 무손실 WebP, 너무 크면 가장 가까운 픽셀로 줄인다
+const DOODLE_PIPELINE = (pipeline) =>
+  pipeline
+    .resize(DOODLE_MAX_SIZE, DOODLE_MAX_SIZE, { fit: 'inside', withoutEnlargement: true, kernel: 'nearest' })
+    .webp({ lossless: true });
+
 /**
  * 업로드한 사진 최적화.
  * - 촬영 방향(EXIF)대로 돌린 뒤 위치(GPS)를 포함한 메타데이터를 모두 지운다 (개인정보 보호)
@@ -104,7 +120,9 @@ export function optimizeImages(preset) {
       const target = file.path.replace(/\.[^.]+$/, '.webp');
       const output = target === file.path ? `${file.path}.tmp` : target;
       try {
-        await apply(sharp(file.path, { failOn: 'error' }).rotate()).webp({ quality: 82 }).toFile(output);
+        const source = sharp(file.path, { failOn: 'error' }).rotate();
+        const pipeline = file.fieldname === 'doodle' ? DOODLE_PIPELINE(source) : apply(source).webp({ quality: 82 });
+        await pipeline.toFile(output);
       } catch {
         throw HttpError.badRequest('사진을 처리하지 못했어요. 다른 사진으로 다시 시도해 주세요.', 'IMAGE_PROCESS_FAILED');
       }

@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { prisma } from '../config/prisma.js';
 import { BCRYPT_ROUNDS } from '../config/constants.js';
 import { HttpError } from '../utils/HttpError.js';
-import { filePathToUploadUrl, removeUploadUrls } from '../utils/files.js';
+import { diaryFileUrls, filePathToUploadUrl, removeUploadUrls } from '../utils/files.js';
 import { signAccessToken } from '../utils/jwt.js';
 import { toMe } from '../utils/serializers.js';
 import { leaveRoom, listRooms } from './roomService.js';
@@ -93,14 +93,11 @@ export async function deleteAccount(userId, { password }) {
     await leaveRoom(diaryRoomId, userId);
   }
 
-  // 친구가 남아 있는 공간에 있던 내 일기의 사진 파일
-  const images = await prisma.diaryImage.findMany({
-    where: { diary: { authorId: userId } },
-    select: { imageUrl: true },
-  });
+  // 친구가 남아 있는 공간에 있던 내 일기의 사진·낙서 파일
+  const fileUrls = await diaryFileUrls({ authorId: userId });
   await prisma.user.delete({ where: { id: userId } });
 
-  await removeUploadUrls([...images.map((image) => image.imageUrl), user.profileImage].filter(Boolean));
+  await removeUploadUrls([...fileUrls, user.profileImage].filter(Boolean));
 }
 
 export async function removeProfileImage(userId) {

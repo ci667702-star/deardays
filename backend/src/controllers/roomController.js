@@ -1,4 +1,5 @@
 import * as roomService from '../services/roomService.js';
+import * as recapService from '../services/recapService.js';
 
 export async function createRoom(req, res) {
   const room = await roomService.createRoom(req.user.id, req.valid.body);
@@ -33,4 +34,9 @@ export async function regenerateInviteCode(req, res) {
 export async function leaveRoom(req, res) {
   const result = await roomService.leaveRoom(req.valid.params.roomId, req.user.id);
   res.json(result);
+}
+
+export async function getRecap(req, res) {
+  const recap = await recapService.getRecap(req.user.id, req.valid.params.roomId, req.valid.query);
+  res.json({ recap });
 }

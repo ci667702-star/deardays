@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_DIARY_IMAGES, MOODS, WEATHERS } from '../config/constants.js';
+import { MAX_DIARY_IMAGES, MOODS, STAMP_KINDS, WEATHERS } from '../config/constants.js';
 import { isValidDateString, isValidMonthString } from '../utils/date.js';
 import { idSchema, requiredText } from './common.js';
 
@@ -17,13 +17,26 @@ const emptyToNull = (value) => (value === '' || value === undefined ? null : val
 const pickOne = (values, label) =>
   z.preprocess(emptyToNull, z.union([z.null(), z.enum(values)], { error: `${label} 값이 올바르지 않아요.` }));
 
+// 오늘의 주제로 쓴 일기면 주제 번호. 비우면 주제 없음(null)
+const topicIdSchema = z.preprocess(
+  (value) => (value === '' || value === undefined || value === 'null' ? null : value),
+  z.union([z.null(), idSchema('주제')]),
+);
+
 const diaryFields = {
   title: requiredText('제목', 100),
   content: requiredText('내용', 20000),
   diaryDate: diaryDateSchema,
   mood: pickOne(MOODS, '기분'),
   weather: pickOne(WEATHERS, '날씨'),
+  topicId: topicIdSchema,
 };
+
+// multipart/form-data 의 참/거짓 값 ("true" / "false")
+const formBoolean = z.preprocess(
+  (value) => value === true || value === 'true' || value === '1',
+  z.boolean(),
+);
 
 export const createDiarySchema = z.object({
   roomId: idSchema('공유 공간'),
@@ -49,6 +62,8 @@ const removeImageIdsSchema = z.preprocess(
 export const updateDiarySchema = z.object({
   ...diaryFields,
   removeImageIds: removeImageIdsSchema,
+  // 낙서 그림 빼기 (새 낙서를 함께 보내면 새 그림으로 바뀐다)
+  removeDoodle: formBoolean,
 });
 
 const pageSchema = z.coerce.number().int().min(1).max(10000).default(1);
@@ -67,6 +82,7 @@ export const listDiaryQuerySchema = z
     date: z.string().refine(isValidDateString, '날짜 형식이 올바르지 않아요.').optional(),
     month: z.string().refine(isValidMonthString, '월 형식이 올바르지 않아요. (예: 2026-11)').optional(),
     authorId: z.preprocess((value) => (value === '' ? undefined : value), idSchema('작성자').optional()),
+    topicId: z.preprocess((value) => (value === '' ? undefined : value), idSchema('주제').optional()),
     // 검색: 제목·내용 낱말, 날짜 범위
     q: z.preprocess(
       (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
@@ -90,4 +106,13 @@ export const calendarQuerySchema = z.object({
 
 export const commentSchema = z.object({
   content: requiredText('댓글', 500),
+});
+
+export const stampSchema = z.object({
+  kind: z.enum(STAMP_KINDS, { error: '도장 종류가 올바르지 않아요.' }),
+});
+
+export const stampParamSchema = z.object({
+  id: idSchema(),
+  kind: z.enum(STAMP_KINDS, { error: '도장 종류가 올바르지 않아요.' }),
 });

@@ -30,6 +30,14 @@ export function describeNotification(notification, meId) {
       };
     case 'LIKE_CREATED':
       return { icon: 'heart', text: `${who} '${diaryTitle}'에 공감했어요`, to: diary ? `/diaries/${diary.id}` : '/room', roomId };
+    case 'STAMP_CREATED':
+      return {
+        icon: 'stamp',
+        text: `${who} '${diaryTitle}'에 도장을 찍었어요`,
+        detail: preview ? `[${preview}]` : null,
+        to: diary ? `/diaries/${diary.id}` : '/room',
+        roomId,
+      };
     case 'TODO_ASSIGNED':
       return { icon: 'checklist', text: `${who} 할 일을 맡겼어요`, detail: preview, to: '/todos', roomId };
     case 'MEMBER_JOINED':

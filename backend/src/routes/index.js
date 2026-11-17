@@ -8,6 +8,8 @@ import userRoutes from './user.routes.js';
 import todoRoutes from './todo.routes.js';
 import notificationRoutes from './notification.routes.js';
 import letterRoutes from './letter.routes.js';
+import topicRoutes from './topic.routes.js';
+import adminRoutes from './admin.routes.js';
 
 const router = Router();
 
@@ -24,5 +26,7 @@ router.use('/users', userRoutes);
 router.use('/todos', todoRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/letters', letterRoutes);
+router.use('/topics', topicRoutes);
+router.use('/admin', adminRoutes);
 
 export default router;

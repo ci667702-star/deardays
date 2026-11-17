@@ -9,6 +9,8 @@ import {
   commentSchema,
   createDiarySchema,
   listDiaryQuerySchema,
+  stampParamSchema,
+  stampSchema,
   updateDiarySchema,
 } from '../validators/diary.validators.js';
 
@@ -38,5 +40,9 @@ router.post('/:id/comments', byId, validate(commentSchema), diaryController.crea
 
 router.post('/:id/likes', byId, diaryController.likeDiary);
 router.delete('/:id/likes', byId, diaryController.unlikeDiary);
+
+// 도장: 친구 일기에 찍고(같은 도장은 한 번만), 내가 찍은 도장은 뗄 수 있다
+router.post('/:id/stamps', byId, validate(stampSchema), diaryController.addStamp);
+router.delete('/:id/stamps/:kind', validate(stampParamSchema, 'params'), diaryController.removeStamp);
 
 export default router;

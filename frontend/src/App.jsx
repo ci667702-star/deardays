@@ -17,10 +17,12 @@ const {
   LoginPage,
   MyPage,
   NotFoundPage,
+  RecapPage,
   RegisterPage,
   RoomPage,
   SearchPage,
   TodoPage,
+  TopicsPage,
 } = Pages;
 
 export default function App() {
@@ -60,6 +62,8 @@ function AppRoutes() {
           <Route path="/letters" element={<LettersPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/topics" element={<TopicsPage />} />
+          <Route path="/recap" element={<RecapPage />} />
           <Route path="/me" element={<MyPage />} />
         </Route>
       </Route>

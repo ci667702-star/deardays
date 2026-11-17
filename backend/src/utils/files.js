@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { env } from '../config/env.js';
+import { prisma } from '../config/prisma.js';
 
 /**
  * '/uploads/...' 형태의 공개 URL을 실제 파일 경로로 바꾼다.
@@ -43,4 +44,17 @@ export function collectRequestFiles(req) {
   if (Array.isArray(req.files)) files.push(...req.files);
   else if (req.files && typeof req.files === 'object') files.push(...Object.values(req.files).flat());
   return files;
+}
+
+/**
+ * 조건에 맞는 일기들의 업로드 파일(사진 + 낙서) 주소.
+ * 일기를 지우기 전에 모아 두었다가, 지운 뒤 파일을 정리할 때 쓴다. (트랜잭션 안에서도 쓰도록 차례로 조회)
+ */
+export async function diaryFileUrls(diaryWhere, db = prisma) {
+  const images = await db.diaryImage.findMany({ where: { diary: diaryWhere }, select: { imageUrl: true } });
+  const doodles = await db.diary.findMany({
+    where: { ...diaryWhere, doodleUrl: { not: null } },
+    select: { doodleUrl: true },
+  });
+  return [...images.map((image) => image.imageUrl), ...doodles.map((diary) => diary.doodleUrl)];
 }

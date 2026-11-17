@@ -135,3 +135,8 @@ export async function markReadFor(userId, { diaryId, letterId }) {
 export async function removeLikeNotification(actorId, diaryId) {
   await prisma.notification.deleteMany({ where: { type: 'LIKE_CREATED', actorId, diaryId } });
 }
+
+/** 도장을 떼면 그 도장 알림도 지운다 */
+export async function removeStampNotification(actorId, diaryId, preview) {
+  await prisma.notification.deleteMany({ where: { type: 'STAMP_CREATED', actorId, diaryId, preview } });
+}

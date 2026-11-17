@@ -12,6 +12,8 @@ const loaders = {
   LettersPage: () => import('./LettersPage.jsx'),
   CalendarPage: () => import('./CalendarPage.jsx'),
   SearchPage: () => import('./SearchPage.jsx'),
+  TopicsPage: () => import('./TopicsPage.jsx'),
+  RecapPage: () => import('./RecapPage.jsx'),
   MyPage: () => import('./MyPage.jsx'),
   NotFoundPage: () => import('./NotFoundPage.jsx'),
 };
