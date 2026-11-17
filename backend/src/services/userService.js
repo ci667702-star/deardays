@@ -12,17 +12,18 @@ async function findUserOrThrow(userId) {
 
 /** 마이페이지: 내 정보 + 작성 통계 + 참여 중인 공간 */
 export async function getMyPage(userId) {
-  const [user, diaryCount, likesReceived, commentsWritten, rooms] = await Promise.all([
+  const [user, diaryCount, likesReceived, commentsWritten, todosDone, rooms] = await Promise.all([
     findUserOrThrow(userId),
     prisma.diary.count({ where: { authorId: userId } }),
     prisma.like.count({ where: { diary: { authorId: userId } } }),
     prisma.comment.count({ where: { userId } }),
+    prisma.todo.count({ where: { completedById: userId } }),
     listRooms(userId),
   ]);
 
   return {
     ...toMe(user),
-    stats: { diaryCount, likesReceived, commentsWritten, roomCount: rooms.length },
+    stats: { diaryCount, likesReceived, commentsWritten, todosDone, roomCount: rooms.length },
     rooms,
   };
 }

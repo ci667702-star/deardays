@@ -5,6 +5,7 @@ import roomRoutes from './room.routes.js';
 import diaryRoutes from './diary.routes.js';
 import commentRoutes from './comment.routes.js';
 import userRoutes from './user.routes.js';
+import todoRoutes from './todo.routes.js';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/rooms', roomRoutes);
 router.use('/diaries', diaryRoutes);
 router.use('/comments', commentRoutes);
 router.use('/users', userRoutes);
+router.use('/todos', todoRoutes);
 
 export default router;

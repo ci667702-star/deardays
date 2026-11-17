@@ -12,6 +12,7 @@ import MyPage from './pages/MyPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import RoomPage from './pages/RoomPage.jsx';
+import TodoPage from './pages/TodoPage.jsx';
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/diaries/new" element={<DiaryEditorPage />} />
           <Route path="/diaries/:id" element={<DiaryDetailPage />} />
           <Route path="/diaries/:id/edit" element={<DiaryEditorPage />} />
+          <Route path="/todos" element={<TodoPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/me" element={<MyPage />} />
         </Route>

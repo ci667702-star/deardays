@@ -20,10 +20,13 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  memberships DiaryRoomMember[]
-  diaries     Diary[]
-  comments    Comment[]
-  likes       Like[]
+  memberships    DiaryRoomMember[]
+  diaries        Diary[]
+  comments       Comment[]
+  likes          Like[]
+  todosCreated   Todo[]            @relation("TodoCreator")
+  todosAssigned  Todo[]            @relation("TodoAssignee")
+  todosCompleted Todo[]            @relation("TodoCompleter")
 
   @@map("users")
 }
@@ -36,6 +39,7 @@ model DiaryRoom {
 
   members DiaryRoomMember[]
   diaries Diary[]
+  todos   Todo[]
 
   @@map("diary_rooms")
 }
@@ -117,4 +121,31 @@ model Like {
   @@unique([diaryId, userId])
   @@index([userId])
   @@map("likes")
+}
+
+// 공유 공간의 '우리 할 일' 목록. 두 사람 모두 추가하고 완료 표시할 수 있다.
+model Todo {
+  id            Int       @id @default(autoincrement())
+  diaryRoomId   Int
+  creatorId     Int
+  // 맡은 사람. 비어 있으면 '함께' 하는 일
+  assigneeId    Int?
+  completedById Int?
+  content       String    @db.VarChar(200)
+  isDone        Boolean   @default(false)
+  dueDate       DateTime? @db.Date
+  doneAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  diaryRoom   DiaryRoom @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
+  creator     User      @relation("TodoCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  assignee    User?     @relation("TodoAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  completedBy User?     @relation("TodoCompleter", fields: [completedById], references: [id], onDelete: SetNull)
+
+  @@index([diaryRoomId, isDone])
+  @@index([creatorId])
+  @@index([assigneeId])
+  @@index([completedById])
+  @@map("todos")
 }

@@ -11,6 +11,7 @@
 | 우리 일기장 | 두 사람 프로필, 초대 코드 복사·재발급, 일기 목록(최신순/과거순, 더 보기), 공간 이름 변경, 공간 나가기, 다른 공간 만들기/참여 |
 | 일기 쓰기·수정 | 제목, 날짜, 줄 노트 본문, 사진 최대 6장(끌어다 놓기 지원), 업로드 진행률, 작성 중 이탈 확인 |
 | 일기 보기 | 작성자·날짜, 본문, 사진 크게 보기, 하트 공감/취소, 댓글 작성·수정·삭제 (작성자 본인만) |
+| 할 일 | 두 사람이 함께 보는 할 일 목록. 기한(선택)과 맡을 사람(함께/나/친구), 누구든 체크, 누가 끝냈는지 기록, 기한 지남·오늘·내일 강조, 남은 일/끝낸 일/전체 탭, 진행 막대. 홈 화면에서 빠르게 추가·체크 |
 | 달력 | 월 이동, 오늘 강조, 내가 쓴 날(분홍 하트)과 친구가 쓴 날(라벤더 하트), 날짜별 일기, 그 날짜로 일기 쓰기 |
 | 내 정보 | 프로필 사진 변경/기본 이미지로, 닉네임·자기소개 수정, 이메일 확인, 작성 통계, 참여 공간 목록, 로그아웃 |
 
@@ -80,7 +81,7 @@ DATABASE_URL="mysql://root:1234@localhost:3306/deardays"
 npm run db:migrate
 ```
 
-`deardays` 데이터베이스가 없으면 새로 만들고, 테이블 7개(users, diary_rooms, diary_room_members, diaries, diary_images, comments, likes)를 생성합니다.
+`deardays` 데이터베이스가 없으면 새로 만들고, 테이블 8개(users, diary_rooms, diary_room_members, diaries, diary_images, comments, likes, todos)를 생성합니다.
 `All migrations have been successfully applied.` 가 나오면 성공입니다.
 
 ### 6. (선택) 체험용 데이터 넣기
@@ -89,7 +90,7 @@ npm run db:migrate
 npm run db:seed
 ```
 
-서로 연결된 계정 두 개와 일기 4편이 만들어집니다. 바로 둘러보고 싶을 때 쓰세요. 여러 번 실행해도 중복으로 만들어지지 않습니다.
+서로 연결된 계정 두 개와 일기 4편, 할 일 4개가 만들어집니다. 바로 둘러보고 싶을 때 쓰세요. 여러 번 실행해도 중복으로 만들어지지 않습니다.
 
 | 이메일 | 비밀번호 | 닉네임 |
 | --- | --- | --- |
@@ -228,7 +229,7 @@ deardays/
 ├── package.json                 # 한 번에 설치·실행하는 편의 스크립트
 ├── backend/
 │   ├── prisma/
-│   │   ├── schema.prisma        # DB 모델 (User, DiaryRoom, DiaryRoomMember, Diary, DiaryImage, Comment, Like)
+│   │   ├── schema.prisma        # DB 모델 (User, DiaryRoom, DiaryRoomMember, Diary, DiaryImage, Comment, Like, Todo)
 │   │   ├── migrations/          # 마이그레이션 SQL
 │   │   └── seed.js              # 체험용 계정·일기
 │   ├── scripts/
@@ -248,7 +249,7 @@ deardays/
 │   └── .env.example
 ├── frontend/
 │   ├── src/
-│   │   ├── components/          # ui(창·버튼·대화상자 등), diary, room, calendar, layout
+│   │   ├── components/          # ui(창·버튼·대화상자 등), diary, room, todo, calendar, layout
 │   │   ├── context/             # 로그인, 공유 공간, 알림 상태
 │   │   ├── hooks/               # useFetch, useCalendarDays 등
 │   │   ├── layouts/             # 바탕 화면(작업 표시줄) / 로그인 화면
@@ -291,6 +292,11 @@ deardays/
 | DELETE | `/api/comments/:id` | 댓글 삭제, 작성자만 | 인증 |
 | POST | `/api/diaries/:id/likes` | 공감 (여러 번 눌러도 1회) → `{ liked, likeCount }` | 인증 |
 | DELETE | `/api/diaries/:id/likes` | 공감 취소 | 인증 |
+| GET | `/api/todos?roomId=` | 할 일 목록 + 개수 `{ items, counts: { total, done, open } }` (남은 일·기한 가까운 순) | 인증 |
+| POST | `/api/todos` | 할 일 추가 `{ roomId, content, dueDate?, assigneeId? }` (맡은 사람 비우면 '함께') | 인증 |
+| PUT | `/api/todos/:id` | 내용·기한·맡은 사람 수정, 추가한 사람만 | 인증 |
+| PATCH | `/api/todos/:id/status` | 완료 표시/취소 `{ isDone }`, 공간의 두 사람 모두 가능 | 인증 |
+| DELETE | `/api/todos/:id` | 할 일 삭제, 추가한 사람만 | 인증 |
 | GET | `/api/users/me` | 내 정보 + 통계 + 참여 공간 | 인증 |
 | PUT | `/api/users/me` | 닉네임·자기소개 수정 | 인증 |
 | POST | `/api/users/me/profile-image` | 프로필 사진 업로드 (multipart: `image`) | 인증 |
@@ -303,6 +309,7 @@ deardays/
 - 모든 보호 API는 JWT 미들웨어를 거치고, 토큰이 유효해도 계정이 사라졌으면 거부합니다.
 - 공유 공간·일기·댓글·공감은 **그 공간의 멤버만** 접근할 수 있습니다. 멤버가 아니면 존재 여부도 숨기고 404로 응답합니다.
 - 일기와 댓글의 수정·삭제는 작성자 본인만 할 수 있습니다(403).
+- 할 일은 공간의 두 사람 모두 추가하고 체크할 수 있고, 내용 수정과 삭제는 추가한 사람만 할 수 있습니다. 맡을 사람은 그 공간의 멤버만 지정할 수 있습니다.
 - 한 공간은 최대 2명입니다. 두 사람이 동시에 같은 코드로 참여해도 DB 행 잠금(`SELECT ... FOR UPDATE`)으로 한 명만 들어갑니다.
 - 같은 일기에 같은 사람이 두 번 공감할 수 없도록 `(diaryId, userId)` 복합 unique 제약을 둡니다.
 - 업로드는 확장자(.jpg .jpeg .png .gif .webp)와 MIME 타입을 함께 검사하고, 저장 후 파일 앞부분의 시그니처로 실제 이미지인지 한 번 더 확인합니다. 파일 이름은 추측할 수 없는 UUID로 바꿉니다. 실패한 요청에서 저장된 파일은 지웁니다.
@@ -311,8 +318,8 @@ deardays/
 
 ### 공간 나가기 규칙
 
-- 두 사람 중 한 명이 나가면 공간과 일기는 남은 사람에게 그대로 남고, 예전 초대 코드는 무효가 되며 새 코드가 발급됩니다.
-- 마지막 사람이 나가면 공간과 모든 일기·사진·댓글이 삭제됩니다. (화면에서 한 번 더 확인합니다.)
+- 두 사람 중 한 명이 나가면 공간과 일기는 남은 사람에게 그대로 남고, 예전 초대 코드는 무효가 되며 새 코드가 발급됩니다. 나간 사람이 맡았던 할 일은 '함께' 하는 일로 바뀝니다.
+- 마지막 사람이 나가면 공간과 모든 일기·사진·댓글·할 일이 삭제됩니다. (화면에서 한 번 더 확인합니다.)
 
 > 업로드한 사진은 `/uploads/...` 주소로 제공됩니다. 주소가 추측 불가능한 UUID라 링크를 아는 사람만 열 수 있지만, 로그인 검사는 하지 않습니다. 더 엄격하게 하려면 서명된 URL 방식으로 바꾸는 것을 권합니다.
 
@@ -324,7 +331,7 @@ API 서버를 켠 상태(`npm run dev` 또는 `npm run dev:api`)에서 다른 �
 npm run test:api
 ```
 
-세 명의 사용자로 가입·로그인, 공간 생성/참여(정원 초과, 동시 참여 경쟁 포함), 사진 업로드 검증(가짜 이미지·허용되지 않는 확장자·장수 초과), 일기 CRUD와 권한, 정렬·날짜 필터·페이지네이션·달력, 공감 중복 방지, 댓글 권한, 마이페이지, 공간 나가기와 파일 정리까지 73개 항목을 확인합니다. 테스트 계정은 실행할 때마다 새로 만들어집니다.
+세 명의 사용자로 가입·로그인, 공간 생성/참여(정원 초과, 동시 참여 경쟁 포함), 사진 업로드 검증(가짜 이미지·허용되지 않는 확장자·장수 초과), 일기 CRUD와 권한, 정렬·날짜 필터·페이지네이션·달력, 공감 중복 방지, 댓글 권한, 할 일(추가·정렬·체크·수정/삭제 권한·맡을 사람 검증), 마이페이지, 공간 나가기와 파일 정리까지 92개 항목을 확인합니다. 테스트 계정은 실행할 때마다 새로 만들어집니다.
 
 ## 디자인 노트
 

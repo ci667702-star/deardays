@@ -210,6 +210,7 @@ export default function MyPage() {
                 <StatRow label="내가 쓴 일기" value={me.stats.diaryCount} unit="편" />
                 <StatRow label="받은 공감" value={me.stats.likesReceived} unit="개" />
                 <StatRow label="남긴 댓글" value={me.stats.commentsWritten} unit="개" />
+                <StatRow label="끝낸 할 일" value={me.stats.todosDone ?? 0} unit="개" />
                 <StatRow label="참여한 공간" value={me.stats.roomCount} unit="곳" />
               </dl>
             </GroupBox>

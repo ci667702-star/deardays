@@ -379,6 +379,66 @@
     outline-offset: 1px;
   }
 
+  /* 라벨과 따로 배치하는 체크박스 (할 일 목록) */
+  .checkbox {
+    appearance: none;
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    background: #fff;
+    box-shadow: var(--bevel-in);
+    cursor: pointer;
+  }
+
+  .checkbox:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M6 0h1v3H6v1H5v1H4v1H3v1H2V6H1V5H0V2h1v1h1v1h1V3h1V2h1V1h1z' fill='%23c24f7e'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 9px 9px;
+  }
+
+  .checkbox:focus-visible {
+    outline: 1px dotted var(--color-dark);
+    outline-offset: 2px;
+  }
+
+  /* 작은 꼬리표 (기한, 맡은 사람) */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 6px;
+    min-height: 20px;
+    font-family: var(--font-small);
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    background: var(--color-light);
+    color: var(--color-muted);
+    box-shadow: var(--bevel-thin-in);
+  }
+
+  .chip--overdue {
+    background: var(--color-pink-soft);
+    color: var(--color-danger);
+  }
+
+  .chip--today {
+    background: var(--color-select);
+    color: #fff;
+    box-shadow: none;
+  }
+
+  .chip--soon {
+    background: var(--color-cream);
+    color: var(--color-ink);
+  }
+
+  .progress--static > span {
+    animation: none;
+  }
+
   /* 편지지: 사람이 쓴 글은 줄 노트 위에 */
   .paper {
     background-color: var(--color-paper);

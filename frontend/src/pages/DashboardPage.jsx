@@ -7,6 +7,7 @@ import Logo from '../components/layout/Logo.jsx';
 import InviteCodeBox from '../components/room/InviteCodeBox.jsx';
 import MemberPair from '../components/room/MemberPair.jsx';
 import RoomGate from '../components/room/RoomGate.jsx';
+import TodoWidget from '../components/todo/TodoWidget.jsx';
 import Avatar from '../components/ui/Avatar.jsx';
 import Button, { ButtonLink } from '../components/ui/Button.jsx';
 import { EmptyState, ErrorMessage, Loading } from '../components/ui/Feedback.jsx';
@@ -169,6 +170,8 @@ function Dashboard() {
           )}
           {recent.data && recent.data.items.length > 0 && <DiaryList diaries={recent.data.items} />}
         </Window>
+
+        <TodoWidget room={currentRoom} />
       </div>
 
       <div className="flex min-w-0 flex-col gap-4">

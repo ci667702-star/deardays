@@ -57,6 +57,23 @@ export function toDiary(diary, viewerId) {
   };
 }
 
+export function toTodo(todo, viewerId) {
+  return {
+    id: todo.id,
+    roomId: todo.diaryRoomId,
+    content: todo.content,
+    isDone: todo.isDone,
+    dueDate: todo.dueDate ? fromDbDate(todo.dueDate) : null,
+    doneAt: todo.doneAt,
+    createdAt: todo.createdAt,
+    updatedAt: todo.updatedAt,
+    creator: toPublicUser(todo.creator),
+    assignee: toPublicUser(todo.assignee),
+    completedBy: toPublicUser(todo.completedBy),
+    isMine: todo.creatorId === viewerId,
+  };
+}
+
 export function toComment(comment, viewerId) {
   return {
     id: comment.id,

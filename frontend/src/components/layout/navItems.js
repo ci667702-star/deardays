@@ -3,6 +3,7 @@ export const NAV_ITEMS = [
   { to: '/', label: '홈', desktopLabel: null, icon: 'heart', end: true, taskbar: true },
   { to: '/room', label: '우리 일기장', desktopLabel: '우리 일기장', icon: 'book', taskbar: true },
   { to: '/diaries/new', label: '새 일기 쓰기', desktopLabel: '새 일기.txt', icon: 'letter', taskbar: false },
+  { to: '/todos', label: '할 일', desktopLabel: '할 일.txt', icon: 'checklist', taskbar: true },
   { to: '/calendar', label: '달력', desktopLabel: '달력', icon: 'calendar', taskbar: true },
   { to: '/me', label: '내 정보', desktopLabel: '내 컴퓨터', icon: 'computer', taskbar: true },
 ];

@@ -6,6 +6,9 @@ export const MAX_ROOM_MEMBERS = 2;
 /** 일기 한 편에 첨부할 수 있는 최대 사진 수 */
 export const MAX_DIARY_IMAGES = 6;
 
+/** 한 공간에 둘 수 있는 최대 할 일 수 */
+export const MAX_TODOS_PER_ROOM = 300;
+
 /** 초대 코드 길이와 문자 집합 (헷갈리는 0/O, 1/I 제외) */
 export const INVITE_CODE_LENGTH = 8;
 export const INVITE_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';

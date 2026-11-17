@@ -95,7 +95,24 @@ async function main() {
     });
   }
 
-  console.log(`체험용 공간 '${room.name}'을 만들었어요. (일기 ${entries.length}편)`);
+  const ahead = (offset) => day(-offset);
+  await prisma.todo.createMany({
+    data: [
+      { diaryRoomId: room.id, creatorId: haru.id, content: '토요일 2시, 그 카페에서 딸기 라떼 마시기', dueDate: ahead(4) },
+      { diaryRoomId: room.id, creatorId: byeol.id, assigneeId: byeol.id, content: '같이 찍은 사진 인화하기', dueDate: ahead(1) },
+      { diaryRoomId: room.id, creatorId: haru.id, assigneeId: haru.id, content: '도서관에서 빌린 책 반납하기', dueDate: day(1) },
+      {
+        diaryRoomId: room.id,
+        creatorId: byeol.id,
+        content: '혼자 영화 보기 도전',
+        isDone: true,
+        doneAt: new Date(),
+        completedById: byeol.id,
+      },
+    ],
+  });
+
+  console.log(`체험용 공간 '${room.name}'을 만들었어요. (일기 ${entries.length}편, 할 일 4개)`);
   console.log('로그인: haru@deardays.test 또는 byeol@deardays.test / 비밀번호 diary1234');
 }
 

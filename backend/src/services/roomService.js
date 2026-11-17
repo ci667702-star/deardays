@@ -104,6 +104,7 @@ export async function regenerateInviteCode(roomId, userId) {
  * 공간에서 나간다.
  * - 마지막 멤버가 나가면 공간과 모든 일기·사진을 삭제한다.
  * - 한 명이 남으면 예전 초대 코드를 무효화하고 새 코드를 발급한다.
+ *   나간 사람이 맡았던 할 일은 '함께' 하는 일이 된다.
  */
 export async function leaveRoom(roomId, userId) {
   await assertRoomMember(roomId, userId);
@@ -125,6 +126,11 @@ export async function leaveRoom(roomId, userId) {
         return { roomDeleted: true, imageUrls: images.map((image) => image.imageUrl) };
       }
 
+      // 나간 사람이 맡았던 할 일은 '함께' 하는 일로 돌린다.
+      await tx.todo.updateMany({
+        where: { diaryRoomId: roomId, assigneeId: userId },
+        data: { assigneeId: null },
+      });
       await tx.diaryRoom.update({
         where: { id: roomId },
         data: { inviteCode: await createUniqueInviteCode(tx) },

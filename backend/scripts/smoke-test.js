@@ -95,6 +95,7 @@ async function main() {
   const userB = r.data.user;
   r = await call('POST', '/api/auth/register', { json: { email: emailC, nickname: '찬희', password: pw } });
   const tokenC = r.data.token;
+  const userC = r.data.user;
   check('B, C 회원가입', Boolean(tokenB && tokenC));
 
   r = await call('POST', '/api/auth/login', { json: { email: emailA, password: 'wrong-pass1' } });
@@ -281,11 +282,83 @@ async function main() {
   r = await call('DELETE', `/api/comments/${comment.id}`, { token: tokenB });
   check('본인 댓글 삭제 204', r.status === 204);
 
+  console.log('\n[할 일]');
+  r = await call('POST', '/api/todos', {
+    token: tokenA,
+    json: { roomId: room.id, content: '토요일에 카페 가기', dueDate: '2026-11-21', assigneeId: userB.id },
+  });
+  check(
+    '할 일 추가 (기한·맡은 사람)',
+    r.status === 201 && r.data.todo.assignee?.id === userB.id && r.data.todo.dueDate === '2026-11-21' && !r.data.todo.isDone,
+    JSON.stringify(r.data),
+  );
+  const todo1 = r.data.todo;
+  r = await call('POST', '/api/todos', { token: tokenB, json: { roomId: room.id, content: '사진 인화하기' } });
+  check('기한·맡은 사람 없이 추가하면 함께 하는 일', r.status === 201 && r.data.todo.assignee === null && r.data.todo.dueDate === null);
+  const todo2 = r.data.todo;
+  r = await call('POST', '/api/todos', { token: tokenA, json: { roomId: room.id, content: '   ' } });
+  check('빈 할 일 400', r.status === 400);
+  r = await call('POST', '/api/todos', { token: tokenA, json: { roomId: room.id, content: '맡기기', assigneeId: userC.id } });
+  check('멤버 아닌 사람에게 맡기기 400', r.status === 400 && r.data.code === 'INVALID_ASSIGNEE', JSON.stringify(r.data));
+  r = await call('POST', '/api/todos', { token: tokenA, json: { roomId: room.id, content: '날짜 오류', dueDate: '2026-13-01' } });
+  check('잘못된 기한 400', r.status === 400);
+  r = await call('POST', '/api/todos', { token: tokenC, json: { roomId: room.id, content: '침입' } });
+  check('멤버 아닌 사람 할 일 추가 404', r.status === 404);
+
+  r = await call('GET', `/api/todos?roomId=${room.id}`, { token: tokenB });
+  check(
+    '목록: 기한 있는 일이 먼저, 개수',
+    r.status === 200 && r.data.items[0].id === todo1.id && r.data.counts.total === 2 && r.data.counts.open === 2,
+    JSON.stringify(r.data.counts),
+  );
+  r = await call('GET', `/api/todos?roomId=${room.id}`, { token: tokenC });
+  check('멤버 아닌 사람 할 일 목록 404', r.status === 404);
+
+  r = await call('PATCH', `/api/todos/${todo1.id}/status`, { token: tokenB, json: { isDone: true } });
+  check(
+    '친구가 추가한 일도 완료 표시 (완료한 사람 기록)',
+    r.status === 200 && r.data.todo.isDone && r.data.todo.completedBy?.id === userB.id && Boolean(r.data.todo.doneAt),
+  );
+  r = await call('PATCH', `/api/todos/${todo1.id}/status`, { token: tokenB, json: { isDone: 'yes' } });
+  check('완료 여부 형식 오류 400', r.status === 400);
+  r = await call('GET', `/api/todos?roomId=${room.id}`, { token: tokenA });
+  check('끝낸 일은 뒤로, 개수 갱신', r.data.items[1].id === todo1.id && r.data.counts.done === 1 && r.data.counts.open === 1);
+  r = await call('PATCH', `/api/todos/${todo1.id}/status`, { token: tokenA, json: { isDone: false } });
+  check(
+    '완료 취소',
+    r.status === 200 && !r.data.todo.isDone && r.data.todo.completedBy === null && r.data.todo.doneAt === null,
+  );
+
+  r = await call('PUT', `/api/todos/${todo2.id}`, { token: tokenA, json: { content: '남의 할 일 수정' } });
+  check('남이 추가한 할 일 수정 403', r.status === 403);
+  r = await call('PUT', `/api/todos/${todo2.id}`, {
+    token: tokenB,
+    json: { content: '사진 10장 인화하기', dueDate: '2026-11-20', assigneeId: userB.id },
+  });
+  check(
+    '본인 할 일 수정',
+    r.status === 200 && r.data.todo.content === '사진 10장 인화하기' && r.data.todo.assignee?.id === userB.id,
+  );
+  r = await call('DELETE', `/api/todos/${todo2.id}`, { token: tokenA });
+  check('남이 추가한 할 일 삭제 403', r.status === 403);
+  r = await call('PATCH', `/api/todos/${todo2.id}/status`, { token: tokenC, json: { isDone: true } });
+  check('멤버 아닌 사람 완료 표시 404', r.status === 404);
+  r = await call('PATCH', `/api/todos/${todo2.id}/status`, { token: tokenA, json: { isDone: true } });
+  check('A가 B의 할 일 완료', r.status === 200 && r.data.todo.completedBy?.id === userA.id);
+
+  const extra = await call('POST', '/api/todos', { token: tokenB, json: { roomId: room.id, content: '지울 할 일' } });
+  r = await call('DELETE', `/api/todos/${extra.data.todo.id}`, { token: tokenB });
+  check('본인 할 일 삭제 204', r.status === 204);
+
   console.log('\n[마이페이지]');
   r = await call('GET', '/api/users/me', { token: tokenA });
   check(
-    '통계: 일기 1편, 받은 공감 1',
-    r.status === 200 && r.data.user.stats.diaryCount === 1 && r.data.user.stats.likesReceived === 1 && r.data.user.rooms.length === 1,
+    '통계: 일기 1편, 받은 공감 1, 끝낸 할 일 1',
+    r.status === 200 &&
+      r.data.user.stats.diaryCount === 1 &&
+      r.data.user.stats.likesReceived === 1 &&
+      r.data.user.stats.todosDone === 1 &&
+      r.data.user.rooms.length === 1,
     JSON.stringify(r.data.user?.stats),
   );
   r = await call('PUT', '/api/users/me', { token: tokenA, json: { nickname: '앨리스2', introduction: '매일 쓰는 사람' } });
@@ -320,6 +393,11 @@ async function main() {
   check('남은 멤버 1명 + 초대 코드 재발급', r.data.room.members.length === 1 && r.data.room.inviteCode !== oldCode);
   r = await call('GET', `/api/diaries/${diary1.id}`, { token: tokenB });
   check('나간 사람은 일기 조회 불가 404', r.status === 404);
+  r = await call('GET', `/api/todos?roomId=${room.id}`, { token: tokenA });
+  check(
+    '나간 사람이 맡았던 할 일은 함께 하는 일로',
+    r.status === 200 && r.data.items.find((t) => t.id === todo1.id)?.assignee === null,
+  );
 
   r = await call('DELETE', `/api/rooms/${room.id}/members/me`, { token: tokenA });
   check('마지막 멤버 나가기 → 공간 삭제', r.status === 200 && r.data.roomDeleted === true);
