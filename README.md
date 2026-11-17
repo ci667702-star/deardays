@@ -11,8 +11,208 @@
 | 우리 일기장 | 두 사람 프로필, 초대 코드 복사·재발급, 일기 목록(최신순/과거순, 더 보기), 공간 이름 변경, 공간 나가기, 다른 공간 만들기/참여 |
 | 일기 쓰기·수정 | 제목, 날짜, 줄 노트 본문, 사진 최대 6장(끌어다 놓기 지원), 업로드 진행률, 작성 중 이탈 확인 |
 | 일기 보기 | 작성자·날짜, 본문, 사진 크게 보기, 하트 공감/취소, 댓글 작성·수정·삭제 (작성자 본인만) |
-| 달력 | 월 이동, 오늘 강조, 내가 쓴 날(분홍 하트)·친구가 쓴 날(라벤더 하트), 날짜별 일기, 그 날짜로 일기 쓰기 |
+| 달력 | 월 이동, 오늘 강조, 내가 쓴 날(분홍 하트)과 친구가 쓴 날(라벤더 하트), 날짜별 일기, 그 날짜로 일기 쓰기 |
 | 내 정보 | 프로필 사진 변경/기본 이미지로, 닉네임·자기소개 수정, 이메일 확인, 작성 통계, 참여 공간 목록, 로그아웃 |
+
+---
+
+## 실행하기
+
+처음 한 번은 아래 1~7단계를 순서대로 따라 하면 됩니다. 명령어는 **PowerShell, Git Bash, macOS 터미널** 어디서나 같습니다.
+
+### 1. 준비물 확인
+
+| 필요한 것 | 확인 방법 |
+| --- | --- |
+| Node.js 20 이상 | `node -v` → `v20` 이상이면 OK. 없으면 https://nodejs.org 에서 LTS 설치 |
+| MySQL 8 (켜져 있어야 함) | Windows: PowerShell에서 `Get-Service MySQL80` → `Running` 이면 OK |
+| MySQL 비밀번호 | 설치할 때 정한 `root` 비밀번호 |
+| Git | `git --version` |
+
+> MySQL이 꺼져 있으면(`Stopped`) **관리자 권한** PowerShell에서 `net start MySQL80` 으로 켜세요.
+
+### 2. 코드 받기
+
+```bash
+git clone https://github.com/ci667702-star/deardays.git
+```
+
+```bash
+cd deardays
+```
+
+> 비공개 저장소라서, 다른 사람이 받으려면 GitHub 저장소 Settings → Collaborators 에서 초대해야 합니다.
+
+### 3. 패키지 설치
+
+`deardays` 폴더(맨 위)에서 한 번만 실행하면 backend, frontend 패키지까지 모두 설치됩니다.
+
+```bash
+npm install
+```
+
+### 4. 환경변수 파일 만들기
+
+```bash
+npm run setup:env
+```
+
+`backend/.env` 파일이 생깁니다. 이 파일을 메모장이나 VS Code로 열어 **딱 한 곳**만 고치세요.
+
+```env
+DATABASE_URL="mysql://root:YOUR_MYSQL_PASSWORD@localhost:3306/deardays"
+```
+
+`YOUR_MYSQL_PASSWORD` 를 내 MySQL `root` 비밀번호로 바꿉니다. 예를 들어 비밀번호가 `1234` 라면:
+
+```env
+DATABASE_URL="mysql://root:1234@localhost:3306/deardays"
+```
+
+> 비밀번호에 `@ : / # %` 같은 특수문자가 있으면 바꿔 써야 합니다. `@` → `%40`, `#` → `%23`, `%` → `%25`, `/` → `%2F`, `:` → `%3A`
+> (예: 비밀번호 `pass@123` → `root:pass%40123@localhost`)
+
+`JWT_SECRET` 은 `setup:env` 가 임의 값으로 채워 두었으니 그대로 두면 됩니다. `.env` 파일은 git에 올라가지 않습니다.
+
+### 5. 데이터베이스 테이블 만들기
+
+```bash
+npm run db:migrate
+```
+
+`deardays` 데이터베이스가 없으면 새로 만들고, 테이블 7개(users, diary_rooms, diary_room_members, diaries, diary_images, comments, likes)를 생성합니다.
+`All migrations have been successfully applied.` 가 나오면 성공입니다.
+
+### 6. (선택) 체험용 데이터 넣기
+
+```bash
+npm run db:seed
+```
+
+서로 연결된 계정 두 개와 일기 4편이 만들어집니다. 바로 둘러보고 싶을 때 쓰세요. 여러 번 실행해도 중복으로 만들어지지 않습니다.
+
+| 이메일 | 비밀번호 | 닉네임 |
+| --- | --- | --- |
+| `haru@deardays.test` | `diary1234` | 하루 |
+| `byeol@deardays.test` | `diary1234` | 별이 |
+
+> 내 컴퓨터에서만 쓰는 체험용 계정입니다. 실제 서비스로 공개할 때는 시드를 넣지 마세요.
+
+### 7. 실행
+
+```bash
+npm run dev
+```
+
+API 서버와 화면 서버가 한 터미널에서 같이 켜집니다. 아래 줄들이 보이면 준비 완료입니다.
+
+```
+[api] [DearDays] API 서버가 http://localhost:4000 에서 실행 중입니다.
+[api] [DearDays] MySQL 연결 확인 완료
+[web]   ➜  Local:   http://localhost:5173/
+```
+
+브라우저에서 **http://localhost:5173** 을 엽니다.
+
+끌 때는 터미널에서 `Ctrl + C` 를 누르세요.
+
+### 다음부터 실행할 때
+
+설치와 설정은 한 번이면 됩니다. 다음부터는 `deardays` 폴더에서 이것만 실행하세요.
+
+```bash
+npm run dev
+```
+
+코드를 새로 받아 왔다면(`git pull`) 패키지와 테이블이 바뀌었을 수 있으니 한 번씩 더 실행합니다.
+
+```bash
+npm install
+```
+
+```bash
+npm run db:migrate
+```
+
+### 두 사람으로 써 보기
+
+한 브라우저에서는 한 계정만 로그인됩니다. 두 번째 사람은 **다른 브라우저**나 **시크릿 창**(Chrome: `Ctrl + Shift + N`)으로 접속하세요.
+
+1. A가 회원가입 → 홈에서 **새 공간 만들기** → 초대 코드 **복사**
+2. B가 회원가입 → **초대 코드로 참여** 탭에 코드 입력
+3. 서로 일기를 쓰고 공감과 댓글을 남깁니다. 다른 탭에 갔다 돌아오면 친구의 새 일기가 반영됩니다.
+
+> 같은 와이파이의 휴대폰으로 접속해 보고 싶다면 `frontend/vite.config.js` 의 `server` 에 `host: true` 를 추가하고 `npm run dev` 를 다시 실행하세요. 터미널에 나오는 `Network: http://192.168.x.x:5173/` 주소를 휴대폰에서 열면 됩니다. (Windows 방화벽이 물어보면 '허용')
+
+### 명령어 모음
+
+모두 `deardays` 폴더(맨 위)에서 실행합니다.
+
+| 명령어 | 하는 일 |
+| --- | --- |
+| `npm install` | backend, frontend 패키지까지 모두 설치 |
+| `npm run setup:env` | `backend/.env` 만들기 (이미 있으면 건드리지 않음) |
+| `npm run db:migrate` | DB 테이블 만들기/갱신 |
+| `npm run db:seed` | 체험용 계정과 일기 넣기 |
+| `npm run dev` | API 서버(4000)와 화면(5173)을 같이 실행 |
+| `npm run dev:api` | API 서버만 실행 |
+| `npm run dev:web` | 화면만 실행 |
+| `npm run test:api` | API 통합 테스트 (API 서버를 켠 상태에서) |
+| `npm run build:web` | 배포용 화면 빌드 (`frontend/dist`) |
+
+### 문제 해결
+
+| 증상 | 해결 방법 |
+| --- | --- |
+| `YOUR_MYSQL_PASSWORD 가 그대로 있어요` | 4단계: `backend/.env` 의 비밀번호 자리를 실제 비밀번호로 바꾸고 다시 실행 |
+| `P1000: Authentication failed` | 비밀번호가 틀렸거나, 특수문자를 바꿔 쓰지 않았습니다 (4단계 표 참고) |
+| `P1001: Can't reach database server` | MySQL이 꺼져 있습니다. 관리자 PowerShell에서 `net start MySQL80` |
+| `환경변수 ... 이(가) 비어 있습니다` | `backend/.env` 가 없습니다. `npm run setup:env` 실행 |
+| `4000번 포트를 이미 다른 프로그램이 쓰고 있어요` | 이미 켜 둔 서버가 있습니다. 그 터미널에서 `Ctrl + C`. 어떤 프로그램인지 모르면 PowerShell에서 `Get-NetTCPConnection -LocalPort 4000` 으로 확인 |
+| `npm install` 중 `EPERM ... query_engine-windows.dll.node` | API 서버가 켜져 있어서 파일이 잠겼습니다. 서버를 끄고(`Ctrl + C`) 다시 `npm install` |
+| 화면에 "서버에 연결할 수 없어요" | API 서버가 꺼져 있습니다. `npm run dev` 터미널에 `[api]` 오류가 있는지 확인 |
+| "시도가 너무 많아요" | 로그인 실패나 가입을 짧은 시간에 많이 했습니다. 15분 뒤 다시 하거나, 개발 중에는 `.env` 의 `AUTH_RATE_LIMIT` 를 늘리기 |
+| 화면이 예전 모습 그대로 | 브라우저에서 `Ctrl + F5` (강력 새로 고침) |
+
+<details>
+<summary>root 대신 DearDays 전용 MySQL 계정을 쓰고 싶다면</summary>
+
+MySQL Workbench나 아래 명령으로 접속합니다. (Windows에서 `mysql` 명령이 없다고 나오면 전체 경로로 실행)
+
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p
+```
+
+접속한 뒤 실행할 SQL입니다. 비밀번호는 직접 정하세요.
+
+```sql
+CREATE DATABASE deardays CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'deardays'@'localhost' IDENTIFIED BY '여기에-비밀번호';
+GRANT ALL PRIVILEGES ON deardays.* TO 'deardays'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+그리고 `backend/.env` 를 이렇게 바꿉니다.
+
+```env
+DATABASE_URL="mysql://deardays:여기에-비밀번호@localhost:3306/deardays"
+```
+
+스키마를 고쳐 `npx prisma migrate dev` 로 새 마이그레이션을 만들 때는 Prisma가 임시 비교용 DB를 만들기 때문에, DB 생성 권한이 있는 계정(예: root)이 필요합니다. 설치·실행에 쓰는 `npm run db:migrate` 에는 필요 없습니다.
+
+</details>
+
+<details>
+<summary>배포할 때</summary>
+
+- `npm run build:web` 으로 만든 `frontend/dist` 를 정적 호스팅에 올리고, 빌드 전에 `frontend/.env` 의 `VITE_API_URL` 에 API 서버 주소를 적습니다.
+- API 서버는 `backend` 폴더에서 `npm start` 로 실행하고, `.env` 에 `NODE_ENV=production`, 실제 `CLIENT_ORIGIN`(화면 주소), 32자 이상 `JWT_SECRET` 을 설정합니다.
+- 서버에서는 `npm run db:migrate` 로 테이블을 만들고, 시드는 넣지 않습니다.
+- `backend/uploads` 폴더는 사용자가 올린 사진이 쌓이는 곳이므로 백업 대상에 넣으세요.
+
+</details>
+
+---
 
 ## 기술 스택
 
@@ -25,12 +225,15 @@
 
 ```
 deardays/
+├── package.json                 # 한 번에 설치·실행하는 편의 스크립트
 ├── backend/
 │   ├── prisma/
 │   │   ├── schema.prisma        # DB 모델 (User, DiaryRoom, DiaryRoomMember, Diary, DiaryImage, Comment, Like)
 │   │   ├── migrations/          # 마이그레이션 SQL
 │   │   └── seed.js              # 체험용 계정·일기
-│   ├── scripts/smoke-test.js    # API 통합 테스트 (두 사용자 시나리오 전체)
+│   ├── scripts/
+│   │   ├── create-env.js        # npm run setup:env
+│   │   └── smoke-test.js        # API 통합 테스트 (두 사용자 시나리오 전체)
 │   ├── src/
 │   │   ├── config/              # 환경변수, Prisma 클라이언트, 서비스 규칙 상수
 │   │   ├── controllers/         # 요청 → 서비스 호출 → 응답
@@ -40,7 +243,7 @@ deardays/
 │   │   ├── utils/               # 날짜, 초대 코드, 직렬화, 파일 등
 │   │   ├── validators/          # zod 입력 스키마
 │   │   ├── app.js               # Express 앱 구성
-│   │   └── server.js            # 서버 실행
+│   │   └── server.js            # 서버 실행 + 시작 시 DB 연결 확인
 │   ├── uploads/                 # 업로드 이미지 (diaries/, profiles/)
 │   └── .env.example
 ├── frontend/
@@ -57,81 +260,6 @@ deardays/
 │   └── .env.example
 └── README.md
 ```
-
-## 설치와 실행
-
-### 1. 준비물
-
-- Node.js 20 이상 (`node -v`)
-- MySQL 8 이 실행 중이어야 합니다. (Windows: 서비스 `MySQL80` 이 "실행 중"인지 확인)
-
-### 2. 데이터베이스 만들기
-
-MySQL에 접속해 데이터베이스와 전용 계정을 만듭니다. 비밀번호는 직접 정해 주세요.
-
-```sql
-CREATE DATABASE deardays CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'deardays'@'localhost' IDENTIFIED BY '여기에-비밀번호';
-GRANT ALL PRIVILEGES ON deardays.* TO 'deardays'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-> 이미 쓰는 `root` 계정으로 연결해도 됩니다. 그 경우 위 단계는 `CREATE DATABASE` 만 하면 됩니다.
-> 스키마를 고쳐 `npx prisma migrate dev` 로 새 마이그레이션을 만들 때는 Prisma가 임시 비교용 DB를 만들므로 DB 생성 권한이 있는 계정(예: root)이 필요합니다. 설치·실행에 쓰는 `migrate deploy` 에는 필요 없습니다.
-
-### 3. 환경변수
-
-```bash
-cd deardays/backend
-cp .env.example .env
-```
-
-`backend/.env` 에서 최소한 아래 두 값을 채웁니다.
-
-| 이름 | 설명 |
-| --- | --- |
-| `DATABASE_URL` | `mysql://사용자:비밀번호@localhost:3306/deardays` — 비밀번호에 `@ : / #` 등이 있으면 URL 인코딩 (예: `@` → `%40`) |
-| `JWT_SECRET` | 32자 이상 임의 문자열. 만들기: `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
-
-나머지(`PORT`, `CLIENT_ORIGIN`, `UPLOAD_DIR`, `MAX_IMAGE_SIZE_MB`, `AUTH_RATE_LIMIT`)는 기본값으로 동작합니다. 프론트엔드는 개발 중 별도 설정이 필요 없습니다(`frontend/.env.example` 참고).
-
-### 4. 설치 · 마이그레이션 · 실행
-
-`deardays/` 폴더에서:
-
-```bash
-npm run install:all
-```
-
-```bash
-npm run db:migrate
-```
-
-```bash
-npm run db:seed
-```
-
-(선택) 체험용 계정 두 개와 일기가 만들어집니다. 계정 정보는 `backend/prisma/seed.js` 맨 위에 있습니다.
-
-터미널 두 개에서 각각 실행합니다.
-
-```bash
-npm run dev:api
-```
-
-```bash
-npm run dev:web
-```
-
-브라우저에서 http://localhost:5173 을 엽니다. API는 http://localhost:4000 에서 돌고, 개발 중에는 Vite가 `/api`, `/uploads` 요청을 API 서버로 넘겨 줍니다.
-
-### 두 사람으로 써 보기
-
-한 브라우저에서는 한 계정만 로그인됩니다. 두 번째 사람은 **다른 브라우저**나 **시크릿 창**에서 접속하세요.
-
-1. A가 가입 → 홈에서 "새 공간 만들기" → 초대 코드 복사
-2. B가 가입 → "초대 코드로 참여" 탭에 코드 입력
-3. 서로 일기를 쓰고, 공감과 댓글을 남겨 보세요. 다른 탭에 갔다 돌아오면 새 일기가 반영됩니다.
 
 ## API
 
@@ -155,12 +283,12 @@ npm run dev:web
 | GET | `/api/diaries?roomId=&sort=latest\|oldest&date=&month=&page=&limit=` | 일기 목록 | 인증 |
 | GET | `/api/diaries/calendar?roomId=&month=YYYY-MM` | 달력용 날짜별 일기 요약 | 인증 |
 | GET | `/api/diaries/:id` | 일기 상세 | 인증 |
-| PUT | `/api/diaries/:id` | 일기 수정 (multipart: `title, content, diaryDate, removeImageIds(JSON 배열), images[]`) — 작성자만 | 인증 |
-| DELETE | `/api/diaries/:id` | 일기 삭제 (사진 파일도 삭제) — 작성자만 | 인증 |
+| PUT | `/api/diaries/:id` | 일기 수정 (multipart: `title, content, diaryDate, removeImageIds(JSON 배열), images[]`), 작성자만 | 인증 |
+| DELETE | `/api/diaries/:id` | 일기 삭제 (사진 파일도 삭제), 작성자만 | 인증 |
 | POST | `/api/diaries/:id/comments` | 댓글 작성 `{ content }` | 인증 |
 | GET | `/api/diaries/:id/comments` | 댓글 목록 | 인증 |
-| PUT | `/api/comments/:id` | 댓글 수정 — 작성자만 | 인증 |
-| DELETE | `/api/comments/:id` | 댓글 삭제 — 작성자만 | 인증 |
+| PUT | `/api/comments/:id` | 댓글 수정, 작성자만 | 인증 |
+| DELETE | `/api/comments/:id` | 댓글 삭제, 작성자만 | 인증 |
 | POST | `/api/diaries/:id/likes` | 공감 (여러 번 눌러도 1회) → `{ liked, likeCount }` | 인증 |
 | DELETE | `/api/diaries/:id/likes` | 공감 취소 | 인증 |
 | GET | `/api/users/me` | 내 정보 + 통계 + 참여 공간 | 인증 |
@@ -190,7 +318,7 @@ npm run dev:web
 
 ## 테스트
 
-API 서버를 켠 상태에서:
+API 서버를 켠 상태(`npm run dev` 또는 `npm run dev:api`)에서 다른 터미널에 실행합니다.
 
 ```bash
 npm run test:api
@@ -205,13 +333,3 @@ npm run test:api
 - 내 일기는 분홍 봉인 편지, 친구 일기는 라벤더 봉인 편지 아이콘으로 표시하고, 달력의 하트 색도 같은 규칙을 따릅니다.
 - 아이콘은 `frontend/src/utils/pixelIcons.js` 의 16×16 문자 격자로 직접 그렸습니다.
 - 창의 접기(_)·최대화(□)·닫기(×) 버튼, 작업 표시줄, 시작 메뉴(↑↓ 키 이동), 달력(화살표 키 이동)이 모두 실제로 동작합니다.
-
-## 문제 해결
-
-| 증상 | 확인할 것 |
-| --- | --- |
-| API 서버 시작 시 `환경변수 ... 이(가) 비어 있습니다` | `backend/.env` 가 있는지, `DATABASE_URL`·`JWT_SECRET` 을 채웠는지 |
-| `P1001: Can't reach database server` | MySQL 서비스가 켜져 있는지, 포트(기본 3306)가 맞는지 |
-| `P1000: Authentication failed` | `DATABASE_URL` 의 사용자·비밀번호 (특수문자는 URL 인코딩) |
-| 화면에 "서버에 연결할 수 없어요" | API 서버(`npm run dev:api`)가 4000번 포트에서 실행 중인지 |
-| 시도가 너무 많다는 메시지 | 15분 뒤 다시 시도하거나 개발 중에는 `AUTH_RATE_LIMIT` 값을 늘리기 |
