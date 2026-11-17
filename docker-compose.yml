@@ -1,0 +1,64 @@
+# DearDays 를 한 서버에서 실행: 화면(nginx) + API(Node) + MySQL
+#
+#   1) cp .env.example .env  →  .env 의 비밀번호와 JWT_SECRET 채우기
+#   2) docker compose up -d --build
+#   3) 브라우저에서 http://서버주소:WEB_PORT
+#
+# DB 데이터와 업로드 사진은 볼륨(db-data, uploads)에 남으므로 컨테이너를 다시 만들어도 유지된다.
+
+name: deardays
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?.env 에 DB_ROOT_PASSWORD 를 설정해 주세요}
+      MYSQL_DATABASE: deardays
+      MYSQL_USER: deardays
+      MYSQL_PASSWORD: ${DB_PASSWORD:?.env 에 DB_PASSWORD 를 설정해 주세요}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      # 127.0.0.1(TCP)로 확인해야 초기화용 임시 서버가 아닌 실제 서버가 뜬 뒤에 healthy 가 된다
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -u root --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql://deardays:${DB_PASSWORD}@db:3306/deardays
+      JWT_SECRET: ${JWT_SECRET:?.env 에 JWT_SECRET 을 설정해 주세요 (32자 이상)}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CLIENT_ORIGIN: ${PUBLIC_URL:-http://localhost}
+      AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-30}
+      MAX_IMAGE_SIZE_MB: 5
+      TZ: Asia/Seoul
+    volumes:
+      - uploads:/data/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-80}:80"
+
+volumes:
+  db-data:
+  uploads:

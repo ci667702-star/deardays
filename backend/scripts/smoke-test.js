@@ -8,7 +8,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const API = process.env.API_URL ?? 'http://localhost:4000';
-const UPLOAD_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'uploads');
+const BACKEND_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// 서버와 같은 업로드 폴더를 본다 (Docker 컨테이너에서는 UPLOAD_DIR=/data/uploads)
+const UPLOAD_DIR = path.resolve(BACKEND_DIR, process.env.UPLOAD_DIR ?? 'uploads');
 const RUN = Date.now().toString(36);
 
 // 1x1 PNG, 1x1 GIF

@@ -145,6 +145,51 @@ npm run db:migrate
 
 > 같은 와이파이의 휴대폰으로 접속해 보고 싶다면 `frontend/vite.config.js` 의 `server` 에 `host: true` 를 추가하고 `npm run dev` 를 다시 실행하세요. 터미널에 나오는 `Network: http://192.168.x.x:5173/` 주소를 휴대폰에서 열면 됩니다. (Windows 방화벽이 물어보면 '허용')
 
+### Docker로 서버에 올리기 (학교 서버 등)
+
+서버에 Docker(Compose 포함)만 있으면 됩니다. Node나 MySQL을 따로 설치하지 않아도 됩니다.
+
+```bash
+git clone https://github.com/ci667702-star/deardays.git
+```
+
+```bash
+cd deardays
+```
+
+```bash
+cp .env.example .env
+```
+
+`.env` 를 열어 `DB_ROOT_PASSWORD`, `DB_PASSWORD`, `JWT_SECRET` 을 채웁니다. 값은 서버에서 `openssl rand -hex 24`(비밀번호), `openssl rand -hex 48`(JWT) 로 만들면 편합니다. 80번 포트를 이미 쓰고 있다면 `WEB_PORT` 를 `8080` 처럼 바꾸세요.
+
+```bash
+docker compose up -d --build
+```
+
+처음에는 이미지를 받고 빌드하느라 몇 분 걸립니다. `docker compose ps` 에서 세 개가 모두 `Up` 이면 `http://서버주소:WEB_PORT` 로 접속하세요.
+
+구성은 세 컨테이너입니다. 바깥으로 열리는 포트는 `web` 하나뿐입니다.
+
+| 컨테이너 | 하는 일 |
+| --- | --- |
+| `web` | nginx. 화면 파일을 주고, `/api` 와 `/uploads` 요청을 `api` 로 넘김 |
+| `api` | Node API 서버. 켜질 때 DB 마이그레이션을 자동으로 적용 |
+| `db` | MySQL 8.4. 데이터는 `db-data` 볼륨, 사진은 `uploads` 볼륨에 저장 |
+
+| 하고 싶은 일 | 명령어 |
+| --- | --- |
+| 상태 보기 | `docker compose ps` |
+| 로그 보기 | `docker compose logs -f api` |
+| 코드 업데이트 후 다시 배포 | `git pull` 후 `docker compose up -d --build` (마이그레이션 자동) |
+| 끄기 (데이터 유지) | `docker compose down` |
+| 데이터까지 모두 삭제 (되돌릴 수 없음) | `docker compose down -v` |
+| DB 백업 | `docker compose exec db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump -u root deardays' > backup.sql` |
+| 사진 백업 | `docker compose cp api:/data/uploads ./uploads-backup` |
+| 체험 데이터 넣기 (선택) | `docker compose exec api npm run db:seed` |
+
+> HTTPS가 필요하면 학교 서버 앞단의 웹 서버(또는 Caddy 같은 프록시)에서 인증서를 붙이고 `WEB_PORT` 로 넘겨 주세요.
+
 ### 명령어 모음
 
 모두 `deardays` 폴더(맨 위)에서 실행합니다.
@@ -204,7 +249,9 @@ DATABASE_URL="mysql://deardays:여기에-비밀번호@localhost:3306/deardays"
 </details>
 
 <details>
-<summary>배포할 때</summary>
+<summary>Docker 없이 직접 배포할 때</summary>
+
+서버에 Docker가 있다면 위의 "Docker로 서버에 올리기"가 가장 간단합니다. Docker를 쓸 수 없을 때만 참고하세요.
 
 - `npm run build:web` 으로 만든 `frontend/dist` 를 정적 호스팅에 올리고, 빌드 전에 `frontend/.env` 의 `VITE_API_URL` 에 API 서버 주소를 적습니다.
 - API 서버는 `backend` 폴더에서 `npm start` 로 실행하고, `.env` 에 `NODE_ENV=production`, 실제 `CLIENT_ORIGIN`(화면 주소), 32자 이상 `JWT_SECRET` 을 설정합니다.
