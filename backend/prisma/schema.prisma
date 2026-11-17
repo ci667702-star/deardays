@@ -1,0 +1,120 @@
+// DearDays 데이터베이스 스키마 (MySQL)
+// 테이블 이름은 snake_case 복수형으로 매핑한다.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(191)
+  password     String   @db.VarChar(255)
+  nickname     String   @db.VarChar(30)
+  profileImage String?  @db.VarChar(255)
+  introduction String?  @db.VarChar(300)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships DiaryRoomMember[]
+  diaries     Diary[]
+  comments    Comment[]
+  likes       Like[]
+
+  @@map("users")
+}
+
+model DiaryRoom {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(40)
+  inviteCode String   @unique @db.VarChar(16)
+  createdAt  DateTime @default(now())
+
+  members DiaryRoomMember[]
+  diaries Diary[]
+
+  @@map("diary_rooms")
+}
+
+model DiaryRoomMember {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  diaryRoomId Int
+  joinedAt    DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  diaryRoom DiaryRoom @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
+
+  // 한 사용자는 같은 공간에 한 번만 참여할 수 있다.
+  @@unique([userId, diaryRoomId])
+  @@index([diaryRoomId])
+  @@map("diary_room_members")
+}
+
+model Diary {
+  id          Int      @id @default(autoincrement())
+  diaryRoomId Int
+  authorId    Int
+  title       String   @db.VarChar(100)
+  content     String   @db.Text
+  diaryDate   DateTime @db.Date
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  diaryRoom DiaryRoom    @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
+  author    User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  images    DiaryImage[]
+  comments  Comment[]
+  likes     Like[]
+
+  @@index([diaryRoomId, diaryDate])
+  @@index([authorId])
+  @@map("diaries")
+}
+
+model DiaryImage {
+  id        Int      @id @default(autoincrement())
+  diaryId   Int
+  imageUrl  String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  diary Diary @relation(fields: [diaryId], references: [id], onDelete: Cascade)
+
+  @@index([diaryId])
+  @@map("diary_images")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  diaryId   Int
+  userId    Int
+  content   String   @db.VarChar(500)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  diary Diary @relation(fields: [diaryId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([diaryId, createdAt])
+  @@index([userId])
+  @@map("comments")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  diaryId   Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  diary Diary @relation(fields: [diaryId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 같은 사용자가 같은 일기에 두 번 공감할 수 없다.
+  @@unique([diaryId, userId])
+  @@index([userId])
+  @@map("likes")
+}

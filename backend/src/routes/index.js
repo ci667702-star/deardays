@@ -1,0 +1,22 @@
+import { Router } from 'express';
+import { prisma } from '../config/prisma.js';
+import authRoutes from './auth.routes.js';
+import roomRoutes from './room.routes.js';
+import diaryRoutes from './diary.routes.js';
+import commentRoutes from './comment.routes.js';
+import userRoutes from './user.routes.js';
+
+const router = Router();
+
+router.get('/health', async (_req, res) => {
+  await prisma.$queryRaw`SELECT 1`;
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+router.use('/auth', authRoutes);
+router.use('/rooms', roomRoutes);
+router.use('/diaries', diaryRoutes);
+router.use('/comments', commentRoutes);
+router.use('/users', userRoutes);
+
+export default router;

@@ -1,0 +1,15 @@
+{
+  "name": "deardays",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DearDays - 친구와 둘이서 쓰는 교환 일기 (루트에서 쓰는 편의 스크립트)",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "db:migrate": "npm run prisma:deploy --prefix backend",
+    "db:seed": "npm run db:seed --prefix backend",
+    "dev:api": "npm run dev --prefix backend",
+    "dev:web": "npm run dev --prefix frontend",
+    "build:web": "npm run build --prefix frontend",
+    "test:api": "npm run test:api --prefix backend"
+  }
+}
