@@ -109,7 +109,9 @@ DATABASE_URL="mysql://root:1234@localhost:3306/deardays"
 npm run db:migrate
 ```
 
-`deardays` 데이터베이스가 없으면 새로 만들고, 테이블 10개(users, diary_rooms, diary_room_members, diaries, diary_images, comments, likes, todos, notifications, letters)를 생성합니다.
+`deardays` 데이터베이스가 없으면 새로 만들고, 테이블 12개(users, diary_rooms, diary_room_members, diaries, diary_images, comments, likes, stamps, daily_topics, todos, notifications, letters)를 생성합니다.
+
+> 깜빡해도 괜찮습니다. 7단계의 `npm run dev` 가 서버를 켜기 전에 이 명령을 먼저 실행해, 없는 테이블을 만들어 줍니다.
 `All migrations have been successfully applied.` 가 나오면 성공입니다.
 
 ### 6. (선택) 체험용 데이터 넣기
@@ -133,7 +135,7 @@ npm run db:seed
 npm run dev
 ```
 
-API 서버와 화면 서버가 한 터미널에서 같이 켜집니다. 아래 줄들이 보이면 준비 완료입니다.
+API 서버를 켜기 전에 DB 테이블을 최신 상태로 맞추고(이미 있으면 건너뜀, 데이터는 지우지 않음), API 서버와 화면 서버를 한 터미널에서 같이 켭니다. 아래 줄들이 보이면 준비 완료입니다.
 
 ```
 [api] [DearDays] API 서버가 http://localhost:4000 에서 실행 중입니다.
@@ -151,14 +153,10 @@ API 서버와 화면 서버가 한 터미널에서 같이 켜집니다. 아래 �
 npm run dev
 ```
 
-코드를 새로 받아 왔다면(`git pull`) 패키지와 테이블이 바뀌었을 수 있으니 한 번씩 더 실행합니다.
+코드를 새로 받아 왔다면(`git pull`) 패키지가 바뀌었을 수 있으니 한 번 더 설치합니다. 새로 생긴 테이블은 `npm run dev` 가 켜질 때 알아서 만듭니다.
 
 ```bash
 npm install
-```
-
-```bash
-npm run db:migrate
 ```
 
 ### 두 사람으로 써 보기
@@ -194,6 +192,8 @@ npm run db:migrate
 | `YOUR_MYSQL_PASSWORD 가 그대로 있어요` | 4단계: `backend/.env` 의 비밀번호 자리를 실제 비밀번호로 바꾸고 다시 실행 |
 | `P1000: Authentication failed` | 비밀번호가 틀렸거나, 특수문자를 바꿔 쓰지 않았습니다 (4단계 참고) |
 | `P1001: Can't reach database server` | MySQL이 꺼져 있습니다. 관리자 PowerShell에서 `net start MySQL80` |
+| `The table ... does not exist` (가입·로그인이 안 됨) | DB에 테이블이 없습니다. `npm run db:migrate` 를 실행하세요. `npm run dev` 로 켜면 자동으로 실행됩니다 |
+| `DB 테이블을 최신 상태로 맞추지 못했어요` | `npm run dev` 가 켜지기 전 테이블 만들기에 실패했습니다. 바로 위에 나온 Prisma 오류(P1000, P1001 등)를 이 표에서 찾아 고치세요 |
 | `환경변수 ... 이(가) 비어 있습니다` | `backend/.env` 가 없습니다. `npm run setup:env` 실행 |
 | `4000번 포트를 이미 다른 프로그램이 쓰고 있어요` | 이미 켜 둔 서버가 있습니다. 그 터미널에서 `Ctrl + C`. 어떤 프로그램인지 모르면 PowerShell에서 `Get-NetTCPConnection -LocalPort 4000` 으로 확인 |
 | `npm install` 중 `EPERM ... query_engine-windows.dll.node` | API 서버가 켜져 있어서 파일이 잠겼습니다. 서버를 끄고(`Ctrl + C`) 다시 `npm install` |
@@ -834,6 +834,8 @@ deardays/
 │   │   └── seed.js              # 체험용 계정·일기·오늘의 주제
 │   ├── scripts/
 │   │   ├── create-env.js        # npm run setup:env
+│   │   ├── migrate.js           # npm run dev 전에 DB 테이블을 최신으로 (predev)
+│   │   ├── docker-start.js      # Docker: 테이블 맞추고 서버 실행
 │   │   └── smoke-test.js        # API 통합 테스트 (두 사용자 시나리오 전체)
 │   ├── src/
 │   │   ├── config/              # 환경변수, Prisma 클라이언트, 서비스 규칙 상수
