@@ -3,6 +3,7 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import multer from 'multer';
+import sharp from 'sharp';
 import { env } from '../config/env.js';
 import { ALLOWED_IMAGE_TYPES, MAX_DIARY_IMAGES } from '../config/constants.js';
 import { HttpError } from '../utils/HttpError.js';
@@ -75,4 +76,46 @@ export async function verifyImageSignatures(req, _res, next) {
     }
   }
   next();
+}
+
+// 윈도우에서 처리한 원본을 바로 지울 수 있도록 sharp 의 파일 캐시를 끈다.
+sharp.cache(false);
+
+const IMAGE_PRESETS = {
+  // 일기 사진: 긴 변 1600px 이하로 (작은 사진은 키우지 않음)
+  diary: (pipeline) => pipeline.resize(1600, 1600, { fit: 'inside', withoutEnlargement: true }),
+  // 프로필 사진: 320x320 정사각형으로 잘라냄
+  profile: (pipeline) => pipeline.resize(320, 320, { fit: 'cover', position: 'attention' }),
+};
+
+/**
+ * 업로드한 사진 최적화.
+ * - 촬영 방향(EXIF)대로 돌린 뒤 위치(GPS)를 포함한 메타데이터를 모두 지운다 (개인정보 보호)
+ * - 크기를 줄이고 WebP 로 다시 저장해 용량을 크게 줄인다
+ * - 움직이는 GIF 는 그대로 둔다
+ * 처리한 파일로 req.files 의 경로를 바꿔 두므로, 이후 단계에서 실패해도 오류 처리기가 지운다.
+ */
+export function optimizeImages(preset) {
+  const apply = IMAGE_PRESETS[preset];
+  return async (req, _res, next) => {
+    for (const file of collectRequestFiles(req)) {
+      if (path.extname(file.filename).toLowerCase() === '.gif') continue;
+
+      const target = file.path.replace(/\.[^.]+$/, '.webp');
+      const output = target === file.path ? `${file.path}.tmp` : target;
+      try {
+        await apply(sharp(file.path, { failOn: 'error' }).rotate()).webp({ quality: 82 }).toFile(output);
+      } catch {
+        throw HttpError.badRequest('사진을 처리하지 못했어요. 다른 사진으로 다시 시도해 주세요.', 'IMAGE_PROCESS_FAILED');
+      }
+      await fsp.unlink(file.path).catch(() => {});
+      if (output !== target) await fsp.rename(output, target);
+
+      file.path = target;
+      file.filename = path.basename(target);
+      file.mimetype = 'image/webp';
+      file.size = (await fsp.stat(target)).size;
+    }
+    next();
+  };
 }

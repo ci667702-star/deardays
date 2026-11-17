@@ -158,6 +158,11 @@ async function main() {
   check('사진 2장과 일기 작성 201', r.status === 201 && r.data.diary.images.length === 2, JSON.stringify(r.data));
   const diary1 = r.data.diary;
   check('업로드 파일이 디스크에 저장됨', diary1.images.every((img) => uploadExists(img.imageUrl)));
+  check(
+    '사진 최적화: PNG 는 WebP 로, 움직일 수 있는 GIF 는 그대로',
+    diary1.images[0].imageUrl.endsWith('.webp') && diary1.images[1].imageUrl.endsWith('.gif'),
+    diary1.images.map((img) => img.imageUrl).join(', '),
+  );
 
   r = await call('GET', diary1.images[0].imageUrl);
   check('업로드 이미지 정적 제공 200', r.status === 200);

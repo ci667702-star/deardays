@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router';
 import Logo from '../components/layout/Logo.jsx';
 
@@ -10,7 +11,9 @@ export default function AuthLayout() {
         <p className="font-small text-[12px]">둘이서 주고받는 교환 일기</p>
       </div>
       <div className="w-full max-w-[460px]">
-        <Outlet />
+        <Suspense fallback={<div className="progress mx-auto w-48" aria-label="불러오는 중"><span /></div>}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   );

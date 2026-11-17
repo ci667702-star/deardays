@@ -19,7 +19,7 @@ export default function Avatar({ user, size = 40, className }) {
       aria-hidden="true"
     >
       {showImage ? (
-        <img src={src} alt="" className="h-full w-full object-cover" onError={() => setFailedSrc(src)} />
+        <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" onError={() => setFailedSrc(src)} />
       ) : (
         <span className="leading-none text-title" style={{ fontSize: Math.round(size * 0.42) }}>
           {initial}

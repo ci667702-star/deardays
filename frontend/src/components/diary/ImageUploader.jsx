@@ -43,7 +43,7 @@ export default function ImageUploader({ existing = [], newItems = [], onAddFiles
         <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
           {existing.map((image) => (
             <li key={`e-${image.id}`} className="relative aspect-square bg-light shadow-[var(--bevel-thin-in)]">
-              <img src={assetUrl(image.imageUrl)} alt="첨부한 사진" className="h-full w-full object-cover p-[2px]" />
+              <img src={assetUrl(image.imageUrl)} alt="첨부한 사진" loading="lazy" decoding="async" className="h-full w-full object-cover p-[2px]" />
               <button
                 type="button"
                 className="win-title-btn absolute right-1 top-1"
@@ -56,7 +56,7 @@ export default function ImageUploader({ existing = [], newItems = [], onAddFiles
           ))}
           {newItems.map((item) => (
             <li key={item.key} className="relative aspect-square bg-light shadow-[var(--bevel-thin-in)]">
-              <img src={item.preview} alt={`새 사진 ${item.file.name}`} className="h-full w-full object-cover p-[2px]" />
+              <img src={item.preview} alt={`새 사진 ${item.file.name}`} decoding="async" className="h-full w-full object-cover p-[2px]" />
               <span className="font-small absolute bottom-1 left-1 bg-pink-soft px-1 text-[11px]">새 사진</span>
               <button
                 type="button"

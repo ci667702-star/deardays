@@ -1,23 +1,37 @@
+import { Suspense } from 'react';
 import { Route, Routes } from 'react-router';
+import BootScreen from './components/layout/BootScreen.jsx';
 import { ProtectedRoute, PublicOnlyRoute } from './components/layout/RouteGuards.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 import { RoomProvider } from './context/RoomContext.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
 import DesktopLayout from './layouts/DesktopLayout.jsx';
-import CalendarPage from './pages/CalendarPage.jsx';
-import DashboardPage from './pages/DashboardPage.jsx';
-import DiaryDetailPage from './pages/DiaryDetailPage.jsx';
-import DiaryEditorPage from './pages/DiaryEditorPage.jsx';
-import LettersPage from './pages/LettersPage.jsx';
-import LoginPage from './pages/LoginPage.jsx';
-import MyPage from './pages/MyPage.jsx';
-import NotFoundPage from './pages/NotFoundPage.jsx';
-import RegisterPage from './pages/RegisterPage.jsx';
-import RoomPage from './pages/RoomPage.jsx';
-import SearchPage from './pages/SearchPage.jsx';
-import TodoPage from './pages/TodoPage.jsx';
+import { Pages } from './pages/lazyPages.js';
+
+const {
+  CalendarPage,
+  DashboardPage,
+  DiaryDetailPage,
+  DiaryEditorPage,
+  LettersPage,
+  LoginPage,
+  MyPage,
+  NotFoundPage,
+  RegisterPage,
+  RoomPage,
+  SearchPage,
+  TodoPage,
+} = Pages;
 
 export default function App() {
+  return (
+    <Suspense fallback={<BootScreen />}>
+      <AppRoutes />
+    </Suspense>
+  );
+}
+
+function AppRoutes() {
   return (
     <Routes>
       <Route element={<PublicOnlyRoute />}>
