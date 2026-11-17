@@ -1,26 +1,48 @@
 # DearDays
 
-친구와 둘이서 쓰는 교환 일기. 옛 윈도우 창 스타일을 파스텔로 다시 칠한 웹 앱입니다.
+친구와 둘이서 쓰는 교환 일기입니다. 옛 윈도우 창 모양을 그대로 살린 웹 앱이에요.
 
-공유 공간을 만들고 초대 코드로 친구를 부르면, 두 사람만 볼 수 있는 일기장이 열립니다. 일기에는 사진을 붙일 수 있고, 서로의 일기에 하트 공감과 댓글을 남길 수 있습니다. 달력에서는 누가 어느 날 일기를 썼는지 하트로 보여 줍니다.
+공유 공간을 만들고 초대 코드로 친구를 부르면 두 사람만 볼 수 있는 일기장이 열립니다. 일기에 사진을 붙이고, 서로의 일기에 하트 공감과 댓글을 남길 수 있습니다. 달력에서는 누가 어느 날 일기를 썼는지 한눈에 보입니다.
+
+**쓸 수 있는 곳**
+
+- **웹 브라우저**: 컴퓨터, 태블릿, 휴대폰 화면 크기에 맞춰 바뀝니다(반응형).
+- **휴대폰 홈 화면**: 브라우저 메뉴의 "홈 화면에 추가"로 앱처럼 띄울 수 있습니다.
+- **Windows 데스크톱 앱**: 설치 파일(.exe)로 깔고 새 소식이 오면 윈도우 알림을 받습니다.
+
+## 목차
+
+1. [기능 한눈에 보기](#기능-한눈에-보기)
+2. [내 컴퓨터에서 실행하기 (개발용)](#내-컴퓨터에서-실행하기-개발용)
+3. [서버에 배포하기 (Docker)](#서버에-배포하기-docker)
+4. [데스크톱 앱 (Windows)](#데스크톱-앱-windows)
+5. [휴대폰에서 쓰기](#휴대폰에서-쓰기)
+6. [성능 최적화](#성능-최적화)
+7. [기술 스택](#기술-스택) · [폴더 구조](#폴더-구조) · [API 목록](#api-목록) · [보안과 규칙](#보안과-규칙) · [테스트](#테스트) · [디자인 노트](#디자인-노트)
+
+---
+
+## 기능 한눈에 보기
 
 | 화면 | 하는 일 |
 | --- | --- |
 | 로그인 · 회원가입 | 이메일 가입, 이메일 중복 확인, 로그인 상태 유지 선택 |
-| 홈 (바탕 화면) | 오늘 날짜와 오늘의 한마디, 나와 친구 프로필, 최근 일기 5편, 달력 미리보기 |
+| 홈 (바탕 화면) | 오늘 날짜와 오늘의 한마디, 나와 친구 프로필, 최근 일기 5편, 달력 미리보기, 할 일 빠르게 추가·체크 |
 | 우리 일기장 | 두 사람 프로필, 초대 코드 복사·재발급, 일기 목록(최신순/과거순, 더 보기), 공간 이름 변경, 공간 나가기, 다른 공간 만들기/참여 |
 | 일기 쓰기·수정 | 제목, 날짜, 기분(기쁨·설렘·평온·우울·화남)과 날씨 도트 아이콘, 줄 노트 본문, 사진 최대 6장(끌어다 놓기 지원), 업로드 진행률, 작성 중 이탈 확인, **자동 임시 저장**(다시 열면 "이어서 쓸까요?") |
 | 일기 보기 | 작성자·날짜·기분·날씨, 본문, 사진 크게 보기, 하트 공감/취소, 댓글 작성·수정·삭제 (작성자 본인만) |
 | 새 소식 | 작업 표시줄의 종에 안 읽은 개수, 새 소식이 오면 말풍선. 친구의 새 일기·댓글·공감, 맡긴 할 일, 친구 참여, 편지 보냄·도착·읽음. 누르면 해당 화면으로, 일기를 열면 그 알림은 자동으로 읽음 |
 | 편지함 (타임캡슐) | 친구나 미래의 나에게 편지를 봉인해 보내기. 여는 날 전에는 받는 사람도 제목·내용을 볼 수 없고(D-day 표시), 그날이 되면 도착 알림. 친구가 열면 보낸 사람에게 알림. 열기 전 '보내기 취소' |
 | 찾기 | 옛 윈도우 '찾기' 창. 제목·내용 낱말, 쓴 사람, 날짜 범위로 일기 찾기, 찾은 낱말 강조 |
-| 할 일 | 두 사람이 함께 보는 할 일 목록. 기한(선택)과 맡을 사람(함께/나/친구), 누구든 체크, 누가 끝냈는지 기록, 기한 지남·오늘·내일 강조, 남은 일/끝낸 일/전체 탭, 진행 막대. 홈 화면에서 빠르게 추가·체크 |
+| 할 일 | 두 사람이 함께 보는 할 일 목록. 기한(선택)과 맡을 사람(함께/나/친구), 누구든 체크, 누가 끝냈는지 기록, 기한 지남·오늘·내일 강조, 남은 일/끝낸 일/전체 탭, 진행 막대 |
 | 달력 | 월 이동, 오늘 강조, 내가 쓴 날(분홍)과 친구가 쓴 날(라벤더). 기분을 골랐으면 그 표정의 얼굴로, 아니면 하트로 표시. 날짜별 일기, 그 날짜로 일기 쓰기 |
 | 내 정보 | 프로필 사진 변경/기본 이미지로, 닉네임·자기소개 수정, 이메일 확인, 작성 통계, 참여 공간 목록, 화면 색, **비밀번호 바꾸기**(다른 기기는 로그아웃), **회원 탈퇴**, 로그아웃 |
 
 ---
 
-## 실행하기
+## 내 컴퓨터에서 실행하기 (개발용)
+
+코드를 고치거나 내 컴퓨터에서 먼저 써 보고 싶을 때의 방법입니다. **서버에 올려서 친구와 같이 쓰려면** [서버에 배포하기 (Docker)](#서버에-배포하기-docker)로 가세요.
 
 처음 한 번은 아래 1~7단계를 순서대로 따라 하면 됩니다. 명령어는 **PowerShell, Git Bash, macOS 터미널** 어디서나 같습니다.
 
@@ -116,9 +138,7 @@ API 서버와 화면 서버가 한 터미널에서 같이 켜집니다. 아래 �
 [web]   ➜  Local:   http://localhost:5173/
 ```
 
-브라우저에서 **http://localhost:5173** 을 엽니다.
-
-끌 때는 터미널에서 `Ctrl + C` 를 누르세요.
+브라우저에서 **http://localhost:5173** 을 엽니다. 끌 때는 터미널에서 `Ctrl + C` 를 누르세요.
 
 ### 다음부터 실행할 때
 
@@ -148,51 +168,6 @@ npm run db:migrate
 
 > 같은 와이파이의 휴대폰으로 접속해 보고 싶다면 `frontend/vite.config.js` 의 `server` 에 `host: true` 를 추가하고 `npm run dev` 를 다시 실행하세요. 터미널에 나오는 `Network: http://192.168.x.x:5173/` 주소를 휴대폰에서 열면 됩니다. (Windows 방화벽이 물어보면 '허용')
 
-### Docker로 서버에 올리기 (학교 서버 등)
-
-서버에 Docker(Compose 포함)만 있으면 됩니다. Node나 MySQL을 따로 설치하지 않아도 됩니다.
-
-```bash
-git clone https://github.com/ci667702-star/deardays.git
-```
-
-```bash
-cd deardays
-```
-
-```bash
-cp .env.example .env
-```
-
-`.env` 를 열어 `DB_ROOT_PASSWORD`, `DB_PASSWORD`, `JWT_SECRET` 을 채웁니다. 값은 서버에서 `openssl rand -hex 24`(비밀번호), `openssl rand -hex 48`(JWT) 로 만들면 편합니다. 80번 포트를 이미 쓰고 있다면 `WEB_PORT` 를 `8080` 처럼 바꾸세요.
-
-```bash
-docker compose up -d --build
-```
-
-처음에는 이미지를 받고 빌드하느라 몇 분 걸립니다. `docker compose ps` 에서 세 개가 모두 `Up` 이면 `http://서버주소:WEB_PORT` 로 접속하세요.
-
-구성은 세 컨테이너입니다. 바깥으로 열리는 포트는 `web` 하나뿐입니다.
-
-| 컨테이너 | 하는 일 |
-| --- | --- |
-| `web` | nginx. 화면 파일을 주고, `/api` 와 `/uploads` 요청을 `api` 로 넘김 |
-| `api` | Node API 서버. 켜질 때 DB 마이그레이션을 자동으로 적용 |
-| `db` | MySQL 8.4. 데이터는 `db-data` 볼륨, 사진은 `uploads` 볼륨에 저장 |
-
-| 하고 싶은 일 | 명령어 |
-| --- | --- |
-| 상태 보기 | `docker compose ps` |
-| 로그 보기 | `docker compose logs -f api` |
-| 코드 업데이트 후 다시 배포 | `git pull` 후 `docker compose up -d --build` (마이그레이션 자동) |
-| 끄기 (데이터 유지) | `docker compose down` |
-| 데이터까지 모두 삭제 (되돌릴 수 없음) | `docker compose down -v` |
-| DB 백업 | `docker compose exec db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump -u root deardays' > backup.sql` |
-| 사진 백업 | `docker compose cp api:/data/uploads ./uploads-backup` |
-| 체험 데이터 넣기 (선택) | `docker compose exec api npm run db:seed` |
-
-> HTTPS가 필요하면 학교 서버 앞단의 웹 서버(또는 Caddy 같은 프록시)에서 인증서를 붙이고 `WEB_PORT` 로 넘겨 주세요.
-
 ### 명령어 모음
 
 모두 `deardays` 폴더(맨 위)에서 실행합니다.
@@ -214,7 +189,7 @@ docker compose up -d --build
 | 증상 | 해결 방법 |
 | --- | --- |
 | `YOUR_MYSQL_PASSWORD 가 그대로 있어요` | 4단계: `backend/.env` 의 비밀번호 자리를 실제 비밀번호로 바꾸고 다시 실행 |
-| `P1000: Authentication failed` | 비밀번호가 틀렸거나, 특수문자를 바꿔 쓰지 않았습니다 (4단계 표 참고) |
+| `P1000: Authentication failed` | 비밀번호가 틀렸거나, 특수문자를 바꿔 쓰지 않았습니다 (4단계 참고) |
 | `P1001: Can't reach database server` | MySQL이 꺼져 있습니다. 관리자 PowerShell에서 `net start MySQL80` |
 | `환경변수 ... 이(가) 비어 있습니다` | `backend/.env` 가 없습니다. `npm run setup:env` 실행 |
 | `4000번 포트를 이미 다른 프로그램이 쓰고 있어요` | 이미 켜 둔 서버가 있습니다. 그 터미널에서 `Ctrl + C`. 어떤 프로그램인지 모르면 PowerShell에서 `Get-NetTCPConnection -LocalPort 4000` 으로 확인 |
@@ -251,13 +226,412 @@ DATABASE_URL="mysql://deardays:여기에-비밀번호@localhost:3306/deardays"
 
 </details>
 
+---
+
+## 서버에 배포하기 (Docker)
+
+학교 서버처럼 항상 켜져 있는 컴퓨터에 올려서 친구와 같이 쓰는 방법입니다. 서버에는 **Docker만 있으면 됩니다.** Node.js나 MySQL은 따로 설치하지 않아도 Docker가 알아서 띄웁니다.
+
+### 전체 구조
+
+`docker compose up` 한 번으로 컨테이너 세 개가 뜹니다. 바깥(인터넷·학교망)으로 열리는 포트는 `web` 하나뿐이고, `api` 와 `db` 는 Docker 내부망에서만 서로 이야기합니다.
+
+```
+ 브라우저 / 휴대폰 / 데스크톱 앱
+            │  http://서버주소:WEB_PORT
+            ▼
+ ┌──────────────────────── 서버 (Docker) ────────────────────────┐
+ │  web  (nginx)                                                 │
+ │   ├─ /            → 화면 파일 (React 빌드 결과)               │
+ │   ├─ /api/...     ─┐                                          │
+ │   └─ /uploads/... ─┴→ api  (Node.js, 4000번)                  │
+ │                         ├─ 사진 저장 → [uploads 볼륨]          │
+ │                         └─ DB 접속  → db (MySQL 8.4)          │
+ │                                        └─ 데이터 → [db-data 볼륨] │
+ └───────────────────────────────────────────────────────────────┘
+```
+
+- **볼륨**: 컨테이너를 지우고 다시 만들어도 남는 저장 공간입니다. 일기 데이터(`db-data`)와 사진(`uploads`)이 여기에 있으므로, 업데이트나 재시작을 해도 사라지지 않습니다.
+- **자동 마이그레이션**: `api` 가 켜질 때마다 `prisma migrate deploy` 를 먼저 실행해 DB 테이블을 최신 상태로 맞춥니다. 직접 할 일이 없습니다.
+- **켜지는 순서**: `db` 가 정상 응답할 때까지 `api` 가 기다리고, `api` 가 정상이 되면 `web` 이 뜹니다(헬스체크). 서버가 재부팅되면 셋 다 자동으로 다시 켜집니다(`restart: unless-stopped`).
+
+### 1단계. 서버 준비
+
+| 항목 | 최소 | 권장 |
+| --- | --- | --- |
+| 운영체제 | Docker가 돌아가는 Linux (Ubuntu 22.04/24.04 등) | Ubuntu 24.04 |
+| CPU / 메모리 | 1코어 / 1GB | 2코어 / 2GB |
+| 디스크 | 5GB (이미지 약 1.5GB + 데이터) | 사진이 쌓이므로 20GB 이상 |
+| 소프트웨어 | Docker Engine 24 이상 + Compose v2 | 최신 Docker |
+
+**Docker 설치 확인**
+
+```bash
+docker --version
+```
+
+```bash
+docker compose version
+```
+
+`Docker Compose version v2.x` 처럼 나오면 됩니다. `docker-compose`(하이픈)만 있는 옛 버전이라면 아래처럼 새로 설치하세요.
+
+**Docker 설치 (Ubuntu, 관리자 권한 필요)**
+
+```bash
+curl -fsSL https://get.docker.com | sudo sh
+```
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+두 번째 명령은 `sudo` 없이 `docker` 를 쓰게 해 줍니다. **로그아웃했다가 다시 접속**해야 적용됩니다. 학교 서버라 관리자 권한이 없다면 서버 담당 선생님께 "Docker와 Docker Compose 설치, 그리고 제 계정을 docker 그룹에 추가"를 부탁하세요.
+
+> Windows나 macOS 컴퓨터를 서버로 쓸 때는 [Docker Desktop](https://www.docker.com/products/docker-desktop/)을 설치하면 아래 명령을 그대로 쓸 수 있습니다.
+
+### 2단계. 코드 받기
+
+```bash
+git clone https://github.com/ci667702-star/deardays.git
+```
+
+```bash
+cd deardays
+```
+
+> 비공개 저장소이므로 서버에서 받을 때는 GitHub 로그인이 필요합니다. 비밀번호 대신 [Personal Access Token](https://github.com/settings/tokens)을 입력하세요.
+
+### 3단계. `.env` 파일 만들기
+
+`deardays` 폴더(맨 위, `docker-compose.yml` 이 있는 곳)에서 예시 파일을 복사합니다.
+
+```bash
+cp .env.example .env
+```
+
+`nano .env` (또는 `vi .env`)로 열어 값을 채웁니다. 각 값이 하는 일은 이렇습니다.
+
+| 변수 | 필수 | 기본값 | 설명 |
+| --- | --- | --- | --- |
+| `RDB_DATABASE` | | `deardays` | MySQL 데이터베이스 이름 |
+| `RDB_USERNAME` | | `deardays` | 앱이 DB에 접속할 때 쓰는 계정 이름. **`root` 는 쓸 수 없습니다** (MySQL이 거부) |
+| `RDB_PASSWORD` | ✅ | | 위 계정의 비밀번호. 특수문자도 됩니다 (`$` `#` 공백이 있으면 값을 `'작은따옴표'` 로 감싸기) |
+| `RDB_ROOT_PASSWORD` | ✅ | | MySQL 관리자(root) 비밀번호. 백업할 때 씁니다 |
+| `JWT_SECRET` | ✅ | | 로그인 토큰 서명 키. **32자 이상** 무작위 문자열 |
+| `WEB_PORT` | | `80` | 브라우저로 접속할 포트. 80을 이미 쓰고 있으면 `8080` 등 |
+| `PUBLIC_URL` | | `http://localhost` | 사람들이 접속하는 주소 (예: `http://10.20.30.40:8080`) |
+| `AUTH_RATE_LIMIT` | | `30` | 15분 동안 한 IP에서 허용할 로그인 실패·회원가입 횟수 |
+| `TRUST_PROXY` | | `1` | 앞에 있는 프록시 수. 그대로 두고, [HTTPS 프록시](#9단계-선택-https-붙이기)를 하나 더 두면 `2` |
+
+**비밀번호와 키 만들기**: 직접 지어도 되지만, 아래 명령으로 무작위 값을 만들면 안전합니다. 나온 값을 복사해 `.env` 에 붙여 넣으세요. (세 값은 서로 다르게)
+
+```bash
+openssl rand -hex 24
+```
+
+```bash
+openssl rand -hex 48
+```
+
+첫 번째는 `RDB_PASSWORD`, `RDB_ROOT_PASSWORD` 용(48자), 두 번째는 `JWT_SECRET` 용(96자)입니다. `openssl` 이 없는 Windows PowerShell에서는 이렇게 만듭니다.
+
+```powershell
+-join (1..2 | ForEach-Object { [guid]::NewGuid().ToString('N') })
+```
+
+다 채운 `.env` 는 이런 모양입니다. (값은 예시이니 그대로 쓰지 마세요)
+
+```env
+RDB_DATABASE=deardays
+RDB_USERNAME=deardays
+RDB_PASSWORD=3f9a1c...(영문·숫자 48자)
+RDB_ROOT_PASSWORD=8b27e0...(영문·숫자 48자)
+JWT_SECRET=c41d9e...(96자)
+WEB_PORT=8080
+PUBLIC_URL=http://10.20.30.40:8080
+AUTH_RATE_LIMIT=30
+TRUST_PROXY=1
+```
+
+> ⚠️ `.env` 에는 비밀번호가 들어 있으니 **git에 올리지 마세요** (`.gitignore` 에 이미 들어 있습니다). 다른 사람과 공유하지 말고, 서버에만 두세요.
+>
+> ⚠️ `RDB_*` 값은 **처음 실행할 때 한 번만** MySQL에 적용됩니다. 첫 실행 뒤에 `.env` 의 DB 비밀번호를 바꾸면 `api` 가 DB에 접속하지 못합니다. 바꿔야 한다면 [배포 문제 해결](#배포-문제-해결)을 보세요.
+
+### 4단계. 실행
+
+```bash
+docker compose up -d --build
+```
+
+- `--build`: `backend/Dockerfile`, `frontend/Dockerfile` 로 이미지를 만듭니다.
+- `-d`: 백그라운드로 실행합니다. 터미널을 닫아도 계속 돌아갑니다.
+
+처음에는 이미지를 받고 빌드하느라 **3~10분** 걸립니다. 다음부터는 바뀐 부분만 빌드해서 빠릅니다.
+
+### 5단계. 잘 떴는지 확인
+
+```bash
+docker compose ps
+```
+
+세 컨테이너가 모두 `Up` 이고 `db`, `api` 옆에 `(healthy)` 가 보이면 성공입니다.
+
+```
+NAME              SERVICE   STATUS                    PORTS
+deardays-api-1    api       Up 1 minute (healthy)     4000/tcp
+deardays-db-1     db        Up 2 minutes (healthy)    3306/tcp, 33060/tcp
+deardays-web-1    web       Up 1 minute               0.0.0.0:8080->80/tcp
+```
+
+서버 안에서 API까지 연결되는지 확인합니다. (`8080` 은 내 `WEB_PORT` 로)
+
+```bash
+curl http://localhost:8080/api/health
+```
+
+`{"status":"ok","time":"..."}` 가 나오면 화면(nginx) → API → DB가 모두 이어진 것입니다. (DB에 닿지 않으면 `status` 가 `ok` 가 아니라 오류로 응답합니다)
+
+`api` 가 계속 `(health: starting)` 이거나 `Restarting` 이면 로그를 봅니다.
+
+```bash
+docker compose logs --tail=100 api
+```
+
+### 6단계. 접속하고 시작하기
+
+1. 브라우저에서 `http://서버주소:WEB_PORT` 를 엽니다. (예: `http://10.20.30.40:8080`, 포트가 80이면 생략 가능)
+2. 회원가입 → **새 공간 만들기** → 초대 코드를 친구에게 보냅니다.
+3. 친구도 같은 주소로 가입하고 **초대 코드로 참여**하면 끝입니다.
+
+**접속이 안 되면 방화벽을 확인하세요.** 서버의 방화벽(ufw)이 켜져 있다면 포트를 열어야 합니다.
+
+```bash
+sudo ufw allow 8080/tcp
+```
+
+학교망 밖(집)에서 접속하려면 학교 네트워크에서 그 포트가 바깥으로 열려 있어야 합니다. 이 부분은 서버 담당자에게 문의하세요.
+
+### 7단계. 업데이트하기
+
+GitHub에 새 코드를 올린 뒤, 서버에서 받아서 다시 빌드합니다. **데이터와 사진은 그대로 남고**, DB 테이블 변경도 자동으로 적용됩니다.
+
+```bash
+git pull
+```
+
+```bash
+docker compose up -d --build
+```
+
+예전 이미지가 디스크를 차지하므로 가끔 정리해 주세요.
+
+```bash
+docker image prune -f
+```
+
+### 8단계. 백업과 복원
+
+일기(DB)와 사진(uploads)은 따로 백업합니다. **정기적으로** 해 두고, 백업 파일은 서버 밖(내 컴퓨터, 클라우드)에도 복사해 두세요.
+
+**DB 백업** → `backup-날짜.sql` 파일이 생깁니다.
+
+```bash
+docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump --single-transaction -u root "$MYSQL_DATABASE"' > backup-$(date +%F).sql
+```
+
+**사진 백업** → `uploads-backup` 폴더에 복사됩니다.
+
+```bash
+docker compose cp api:/data/uploads ./uploads-backup
+```
+
+**DB 복원** (현재 DB 내용을 백업 파일 내용으로 덮어씁니다)
+
+```bash
+docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root "$MYSQL_DATABASE"' < backup-2026-01-01.sql
+```
+
+**사진 복원** (복사한 뒤 파일 주인을 앱 계정으로 바꿔 줘야 새 사진을 올릴 수 있습니다)
+
+```bash
+docker compose cp ./uploads-backup/. api:/data/uploads/
+```
+
+```bash
+docker compose exec -u root api chown -R node:node /data/uploads
+```
+
+**매일 자동 백업 (선택)**: `deardays` 폴더 안에 `backups` 폴더를 만들고 `crontab -e` 에 아래 한 줄을 추가하면 매일 새벽 4시에 DB를 백업합니다. `/home/나/deardays` 는 실제 경로로 바꾸세요. (crontab 안에서는 `%` 앞에 `\` 를 붙여야 합니다)
+
+```
+0 4 * * * cd /home/나/deardays && docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump --single-transaction -u root "$MYSQL_DATABASE"' > backups/db-$(date +\%F).sql
+```
+
+### 9단계. (선택) HTTPS 붙이기
+
+`http://` 로도 잘 동작합니다. 다만 휴대폰에서 **앱처럼 설치**하거나, 학교 밖 인터넷으로 공개할 때는 HTTPS를 권합니다. 도메인(예: `deardays.example.kr`)이 서버를 가리키고 있어야 인증서를 받을 수 있습니다.
+
+**방법 A. 학교에 이미 웹 서버(nginx 등)가 있을 때**: 담당자에게 아래 설정을 부탁하세요. 사진 업로드 때문에 요청 크기 제한을 꼭 늘려야 합니다.
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8080;          # DearDays 의 WEB_PORT
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    client_max_body_size 40m;                  # 일기 한 편에 사진 6장 × 5MB
+}
+```
+
+**방법 B. Caddy로 직접 붙일 때**: [Caddy](https://caddyserver.com/docs/install)를 설치하고 `/etc/caddy/Caddyfile` 에 아래처럼 적으면 인증서를 자동으로 받아 갱신합니다.
+
+```
+deardays.example.kr {
+    reverse_proxy 127.0.0.1:8080
+}
+```
+
+어느 방법이든 프록시를 하나 더 두었으니 `.env` 를 이렇게 바꾸고 다시 실행합니다.
+
+```env
+# 8080 을 서버 안에서만 열어, 프록시를 거치지 않는 접속을 막는다
+WEB_PORT=127.0.0.1:8080
+PUBLIC_URL=https://deardays.example.kr
+# 프록시가 2개 (HTTPS 프록시 → nginx). 로그인 시도 제한이 사용자 IP를 제대로 알아본다
+TRUST_PROXY=2
+```
+
+```bash
+docker compose up -d
+```
+
+### `docker-compose.yml` 자세히 보기
+
+```yaml
+services:
+  db:                                   # MySQL 8.4
+    image: mysql:8.4
+    environment:                        # 처음 실행할 때 DB·계정을 만든다 (.env 의 RDB_* 값)
+      MYSQL_ROOT_PASSWORD: ${RDB_ROOT_PASSWORD:?...}   # :? → 비어 있으면 실행을 멈추고 안내
+      MYSQL_DATABASE: ${RDB_DATABASE:-deardays}        # :- → 비어 있으면 기본값
+      MYSQL_USER: ${RDB_USERNAME:-deardays}
+      MYSQL_PASSWORD: ${RDB_PASSWORD:?...}
+    volumes:
+      - db-data:/var/lib/mysql          # DB 파일은 볼륨에 → 컨테이너를 지워도 남음
+    healthcheck: mysqladmin ping        # 응답해야 healthy
+
+  api:                                  # Node.js API 서버 (backend/Dockerfile 로 빌드)
+    build: ./backend
+    depends_on:
+      db: { condition: service_healthy }   # DB가 준비된 뒤에 시작
+    environment:
+      DB_HOST: db                       # 'db' = 위 서비스 이름 (Docker 내부 주소)
+      DB_NAME, DB_USER, DB_PASSWORD     # .env 의 RDB_* 값. 시작할 때 DATABASE_URL 로 합침
+      JWT_SECRET, JWT_EXPIRES_IN(7d), CLIENT_ORIGIN(=PUBLIC_URL),
+      AUTH_RATE_LIMIT, TRUST_PROXY, MAX_IMAGE_SIZE_MB(5), TZ(Asia/Seoul)
+    volumes:
+      - uploads:/data/uploads           # 올린 사진
+    healthcheck: GET /api/health        # 서버와 DB 연결이 정상이어야 healthy
+
+  web:                                  # nginx (frontend/Dockerfile 로 빌드)
+    build: ./frontend
+    depends_on:
+      api: { condition: service_healthy }
+    ports:
+      - "${WEB_PORT:-80}:80"            # 바깥으로 열리는 유일한 포트
+
+volumes:
+  db-data:                              # 일기·계정 등 모든 DB 데이터
+  uploads:                              # 일기 사진, 프로필 사진
+```
+
+- `TZ: Asia/Seoul`: 타임캡슐 편지의 "여는 날"을 한국 시간으로 판단합니다.
+- `MAX_IMAGE_SIZE_MB: 5`: 사진 한 장 최대 크기입니다. 늘리면 `frontend/nginx.conf` 의 `client_max_body_size`(지금 40m)도 같이 늘리세요.
+
+### Dockerfile 자세히 보기
+
+**`backend/Dockerfile` (api)**
+
+1. `node:24-bookworm-slim` 위에 Prisma가 쓰는 OpenSSL을 설치합니다.
+2. `package.json`, `package-lock.json`, `prisma/` 를 먼저 복사해 `npm ci` 를 실행합니다. 코드만 바뀌면 이 단계는 캐시를 써서 빌드가 빠릅니다. (사진 처리 라이브러리 sharp도 이때 Linux용으로 설치됩니다)
+3. `src/`, `scripts/` 를 복사하고, 사진 폴더 `/data/uploads` 를 만들어 `node` 사용자에게 줍니다. 서버는 root가 아닌 `node` 사용자로 돌아갑니다.
+4. 시작할 때 `scripts/docker-start.js` 가 순서대로 실행합니다.
+   - `DB_*` 값으로 DB 접속 주소를 만듭니다. 비밀번호의 특수문자는 자동으로 인코딩합니다.
+   - `prisma migrate deploy` 로 테이블을 최신 상태로 맞춥니다.
+   - API 서버를 켭니다.
+
+**`frontend/Dockerfile` (web)**
+
+1. **빌드 단계**: Node 이미지에서 `npm ci` → `npm run build` 로 화면 파일(`dist/`)을 만듭니다.
+2. **실행 단계**: 가벼운 `nginx:1.27-alpine` 에 `dist/` 와 `nginx.conf` 만 복사합니다. Node.js는 최종 이미지에 들어가지 않습니다.
+
+**`frontend/nginx.conf`**
+
+- `/api/`, `/uploads/` 요청은 `api` 컨테이너로 넘깁니다. 화면과 API가 같은 주소라 CORS 설정이 필요 없습니다.
+- `/assets/` (이름에 해시가 붙은 빌드 파일)는 1년 동안 캐시하고, `index.html` 은 매번 새로 확인합니다. 그래서 업데이트하면 바로 새 화면이 보입니다.
+- 그 밖의 주소는 `index.html` 로 보내 새로 고침해도 404가 나지 않습니다.
+- gzip 압축, 요청 크기 제한 40MB.
+
+### 운영 명령어 모음
+
+모두 `docker-compose.yml` 이 있는 `deardays` 폴더에서 실행합니다.
+
+| 하고 싶은 일 | 명령어 |
+| --- | --- |
+| 상태 보기 | `docker compose ps` |
+| 로그 보기 (실시간, `Ctrl + C` 로 빠져나오기) | `docker compose logs -f api` |
+| 최근 로그 100줄 | `docker compose logs --tail=100` |
+| 다시 시작 | `docker compose restart` |
+| 코드 업데이트 후 다시 배포 | `git pull` 후 `docker compose up -d --build` |
+| 끄기 (데이터 유지) | `docker compose down` |
+| 다시 켜기 | `docker compose up -d` |
+| MySQL 콘솔 열기 | `docker compose exec db sh -c 'mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"'` |
+| 디스크 사용량 | `docker system df` |
+| 체험 데이터 넣기 (테스트 서버에서만) | `docker compose exec api npm run db:seed` |
+| ⚠️ 데이터까지 모두 삭제 (되돌릴 수 없음) | `docker compose down -v` |
+
+### 배포 문제 해결
+
+| 증상 | 원인과 해결 |
+| --- | --- |
+| `required variable RDB_PASSWORD is missing` 처럼 `.env 에 ... 를 설정해 주세요` | `.env` 가 없거나 값이 비었습니다. 3단계를 다시 확인하세요. `.env` 는 `docker-compose.yml` 과 같은 폴더에 있어야 합니다 |
+| `db` 가 계속 `Restarting`, 로그(`docker compose logs db`)에 `MYSQL_USER="root" ... cannot be used for the root user` | `.env` 의 `RDB_USERNAME` 이 `root` 입니다. `deardays` 처럼 다른 이름으로 바꾸고 `docker compose up -d`. (root 비밀번호는 `RDB_ROOT_PASSWORD` 로 따로 정합니다) |
+| `Bind for 0.0.0.0:80 failed: port is already allocated` | 80번 포트를 다른 프로그램이 쓰고 있습니다. `.env` 의 `WEB_PORT=8080` 으로 바꾸고 `docker compose up -d` |
+| `api` 가 계속 재시작되고 로그에 `P1000: Authentication failed` | 첫 실행 뒤 `.env` 의 `RDB_PASSWORD` 를 바꿨습니다. 원래 값으로 되돌리거나, 아래 "DB 비밀번호 바꾸기"를 따라 하세요 |
+| `api` 로그에 `JWT_SECRET을 32자 이상` | `JWT_SECRET` 이 너무 짧습니다. `openssl rand -hex 48` 로 다시 만드세요 |
+| 사진을 올리면 "413 Request Entity Too Large" | 앞단 프록시(학교 nginx 등)의 업로드 크기 제한입니다. `client_max_body_size 40m;` 을 추가하세요 |
+| 사진 올리기가 "권한" 오류로 실패 | 사진 복원 후 파일 주인이 바뀌었습니다. `docker compose exec -u root api chown -R node:node /data/uploads` |
+| 브라우저에서 접속이 안 됨 (서버 안 `curl` 은 됨) | 방화벽 또는 학교망 포트 차단입니다. 6단계의 `ufw` 명령과 서버 담당자 문의 |
+| 빌드 중 `npm ci` 에서 네트워크 오류 | 서버가 인터넷(npm, Docker Hub)에 닿지 않습니다. 프록시 설정이 필요한지 담당자에게 문의 |
+| 편지가 하루 늦게/일찍 도착 | `TZ: Asia/Seoul` 이 빠졌는지 `docker-compose.yml` 을 확인 |
+
+<details>
+<summary>DB 비밀번호 바꾸기 (첫 실행 이후)</summary>
+
+MySQL 안의 비밀번호를 먼저 바꾸고, 그다음 `.env` 를 바꿉니다. `새비밀번호` 자리에 영문·숫자로 된 새 값을 넣으세요.
+
+```bash
+docker compose exec db sh -c 'mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "ALTER USER \"$MYSQL_USER\"@\"%\" IDENTIFIED BY \"새비밀번호\";"'
+```
+
+`.env` 의 `RDB_PASSWORD` 를 같은 값으로 바꾼 뒤 다시 실행합니다.
+
+```bash
+docker compose up -d
+```
+
+데이터가 필요 없는 테스트 서버라면 `docker compose down -v` 로 모두 지우고 새 값으로 처음부터 시작해도 됩니다.
+
+</details>
+
 <details>
 <summary>Docker 없이 직접 배포할 때</summary>
 
-서버에 Docker가 있다면 위의 "Docker로 서버에 올리기"가 가장 간단합니다. Docker를 쓸 수 없을 때만 참고하세요.
+서버에 Docker가 있다면 위의 방법이 가장 간단합니다. Docker를 쓸 수 없을 때만 참고하세요.
 
-- `npm run build:web` 으로 만든 `frontend/dist` 를 정적 호스팅에 올리고, 빌드 전에 `frontend/.env` 의 `VITE_API_URL` 에 API 서버 주소를 적습니다.
-- API 서버는 `backend` 폴더에서 `npm start` 로 실행하고, `.env` 에 `NODE_ENV=production`, 실제 `CLIENT_ORIGIN`(화면 주소), 32자 이상 `JWT_SECRET` 을 설정합니다.
+- `npm run build:web` 으로 만든 `frontend/dist` 를 정적 호스팅(nginx 등)에 올립니다. API를 다른 주소에 둘 때는 빌드 전에 `frontend/.env` 의 `VITE_API_URL` 에 API 주소를 적습니다.
+- API 서버는 `backend` 폴더에서 `npm start` 로 실행하고, `backend/.env` 에 `NODE_ENV=production`, 실제 `CLIENT_ORIGIN`(화면 주소), 32자 이상 `JWT_SECRET` 을 설정합니다. 꺼져도 다시 켜지도록 pm2나 systemd로 실행하세요.
 - 서버에서는 `npm run db:migrate` 로 테이블을 만들고, 시드는 넣지 않습니다.
 - `backend/uploads` 폴더는 사용자가 올린 사진이 쌓이는 곳이므로 백업 대상에 넣으세요.
 
@@ -265,21 +639,148 @@ DATABASE_URL="mysql://deardays:여기에-비밀번호@localhost:3306/deardays"
 
 ---
 
+## 데스크톱 앱 (Windows)
+
+### 검토 결과
+
+데스크톱 앱으로 만들 수 있고, 만들어 두었습니다(`desktop/` 폴더). 방식은 이렇습니다.
+
+- [Electron](https://www.electronjs.org/)으로 만든 **창 프로그램이 배포한 DearDays 서버 주소를 엽니다.** 일기 데이터는 서버에 있어서 친구와 그대로 공유됩니다.
+- 화면은 서버에서 받아 오므로 **서버만 업데이트하면 앱도 자동으로 최신**입니다. 앱을 다시 설치할 일이 거의 없습니다.
+- 웹에는 없는 기능이 더해집니다.
+  - 창이 뒤에 있을 때 친구의 새 일기·댓글이 오면 **윈도우 알림**이 뜨고 작업 표시줄 아이콘이 깜빡입니다.
+  - 안 읽은 새 소식이 있으면 작업 표시줄 아이콘에 빨간 점이 붙습니다.
+  - 바탕 화면·시작 메뉴 바로 가기, 한국어 메뉴(파일 / 보기 / 도움말), 확대·축소, 전체 화면을 씁니다.
+  - 앱을 두 번 실행하면 이미 열린 창으로 돌아갑니다.
+- 앱 창은 설정한 서버 주소만 엽니다. 다른 사이트 링크는 기본 브라우저로 열고, 카메라·위치 같은 권한은 모두 거부합니다(알림만 허용).
+
+> 오프라인(인터넷 없이) 일기 쓰기는 지원하지 않습니다. 서버에 닿지 않으면 "서버에 연결할 수 없어요" 화면과 **다시 시도** 버튼이 나옵니다.
+
+### 설치 파일 만들기
+
+Windows 컴퓨터에서 Node.js 20 이상이 있으면 됩니다. 처음에는 Electron(약 100MB)을 내려받느라 몇 분 걸립니다.
+
+```bash
+cd desktop
+```
+
+```bash
+npm install
+```
+
+```bash
+npm run dist
+```
+
+`desktop/dist/` 에 두 파일이 생깁니다.
+
+| 파일 | 쓰는 법 |
+| --- | --- |
+| `DearDays-Setup-1.0.0.exe` | 설치 프로그램. 설치 폴더를 고를 수 있고, 바탕 화면·시작 메뉴 바로 가기를 만듭니다. 제어판에서 제거할 수 있습니다 |
+| `DearDays-1.0.0-portable.exe` | 설치 없이 바로 실행하는 휴대용 파일. USB에 넣어 다녀도 됩니다 |
+
+친구에게는 둘 중 하나를 보내 주면 됩니다.
+
+### 처음 실행하기
+
+1. 처음 실행하면 **서버 주소 입력** 창이 나옵니다. 배포한 주소(예: `http://10.20.30.40:8080`)를 입력하고 **연결 확인**을 누릅니다.
+2. "연결됐어요!"가 나오면 **연결하기**를 누릅니다. 주소가 저장되어 다음부터는 바로 로그인 화면이 열립니다.
+3. 서버 주소를 바꾸려면 시작 메뉴의 **서버 주소 바꾸기...** 또는 창 메뉴의 **파일 → 서버 주소 바꾸기...** 를 누르세요. (메뉴 줄은 `Alt` 키를 누르면 보입니다)
+
+> **"Windows의 PC 보호" 파란 창이 뜨면**: 코드 서명 인증서(유료)로 서명하지 않은 앱이라 처음 실행할 때 나오는 경고입니다. **추가 정보 → 실행**을 누르면 됩니다.
+
+### 서버 주소를 미리 넣어 두기
+
+친구가 주소를 입력하지 않아도 되게, 빌드하기 전에 `desktop/package.json` 의 `defaultServer` 에 서버 주소를 적어 두세요.
+
+```json
+"deardays": {
+  "defaultServer": "http://10.20.30.40:8080"
+}
+```
+
+그다음 `npm run dist` 로 만든 설치 파일은 첫 실행부터 그 서버를 엽니다.
+
+### 그 밖의 명령
+
+| 명령어 (`desktop` 폴더에서) | 하는 일 |
+| --- | --- |
+| `npm start` | 빌드 없이 바로 실행 (개발용) |
+| `npm run dist` | Windows 설치 파일 + 휴대용 exe 만들기 |
+| `npm run dist:mac` | macOS용 `.dmg` (Mac에서만 빌드 가능) |
+| `npm run dist:linux` | Linux용 `.AppImage` (Linux에서 빌드) |
+| `npm run icons` | 앱·웹 아이콘 PNG 다시 만들기 |
+
+- 앱 설정(서버 주소)은 `%APPDATA%\DearDays\config.json` 에 저장됩니다. 로그인 정보도 이 폴더에 있습니다.
+- 개발 중에는 `DEARDAYS_SERVER=http://localhost:5173 npm start` 처럼 이번 실행에만 다른 서버를 열 수 있습니다(저장하지 않음).
+
+---
+
+## 휴대폰에서 쓰기
+
+### 반응형 화면
+
+화면 너비에 맞춰 배치가 바뀝니다. 320px(작은 휴대폰)부터 큰 모니터까지 가로 스크롤 없이 보이도록 11개 화면을 확인했습니다.
+
+| 너비 | 바뀌는 것 |
+| --- | --- |
+| 휴대폰 (~767px) | 모든 창을 한 줄로 쌓음. 작업 표시줄 버튼은 아이콘만. 입력칸 글자를 16px로 키워 아이폰에서 확대되지 않게 함. 찾기 화면의 날짜 칸을 위아래로 |
+| 태블릿 (768~1023px) | 홈 화면의 작은 창들(우리 둘, 할 일 등)이 두 칸으로 나란히 |
+| 컴퓨터 (1024px~) | 작업 표시줄 버튼에 글자 표시, 홈 화면은 왼쪽 일기 + 오른쪽 작은 창 두 단 배치. 1280px 이상이면 작업 표시줄에 공간 이름도 표시 |
+
+- 터치 화면에서는 버튼과 체크박스를 손가락으로 누르기 좋게 크게 만듭니다.
+- 아이폰의 홈 바·노치 영역(safe area)을 피해서 작업 표시줄과 알림을 띄웁니다.
+
+### 홈 화면에 추가 (앱처럼 쓰기)
+
+- **아이폰 (Safari)**: 공유 버튼 → **홈 화면에 추가**
+- **안드로이드 (Chrome)**: 메뉴(⋮) → **홈 화면에 추가** 또는 **앱 설치**
+
+DearDays 아이콘이 생기고, 누르면 주소창 없이 전체 화면으로 열립니다. 안드로이드에서 "앱 설치"로 제대로 설치되려면 서버가 **HTTPS** 여야 합니다([9단계](#9단계-선택-https-붙이기)).
+
+---
+
+## 성능 최적화
+
+| 항목 | 전 | 후 |
+| --- | --- | --- |
+| 첫 화면 JavaScript | 파일 하나 477KB | 라이브러리(React 261KB, Axios 59KB)와 앱 공통(51KB)으로 나누고, 화면별 코드(1~13KB)는 그 화면을 열 때 불러옴 |
+| CSS | 162KB | 98KB (안 쓰는 글꼴 굵기 제거) |
+| 일기 사진 | 올린 그대로 (예: 휴대폰 사진 4000×3000) | 긴 변 1600px 이하 WebP로 변환. 작은 사진은 키우지 않음 |
+| 프로필 사진 | 올린 그대로 | 320×320 WebP, 사진에서 가장 눈에 띄는 부분을 중심으로 자르기 |
+| 데스크톱 앱 설치 파일 | 121MB | 113MB (한국어·영어 외 언어 파일 제외) |
+
+- **사진 위치 정보 제거**: 휴대폰 사진에 들어 있는 GPS·촬영 정보(EXIF)를 저장 전에 지웁니다. 사진이 옆으로 누워 있으면 방향도 바로잡습니다. GIF는 움직임을 지키기 위해 그대로 둡니다.
+- **나중에 필요한 화면은 한가할 때 미리 받기**: 첫 화면이 뜬 뒤 브라우저가 쉬는 시간에 다른 화면 코드를 받아 두어, 메뉴를 눌렀을 때 기다림이 없습니다.
+- **이미지 지연 로딩**: 화면 밖의 사진은 스크롤해서 보일 때 불러옵니다.
+- **캐시**: 빌드 파일은 이름에 해시가 붙어 1년 캐시, `index.html` 은 매번 확인 → 다시 방문할 때 빠르고, 업데이트도 바로 반영됩니다.
+- **gzip 압축**: nginx가 JS·CSS·JSON을 압축해서 보냅니다.
+
+---
+
 ## 기술 스택
 
-- **Frontend**: React 19, Vite 7, React Router 7, Axios, Tailwind CSS 4, Lucide React
-- **Backend**: Node.js (20 이상), Express 5, JWT, bcrypt, Multer, zod(입력 검증), helmet, express-rate-limit
-- **Database**: MySQL 8, Prisma ORM 6
-- **글꼴**: [Galmuri](https://github.com/quiple/galmuri) (시스템 UI 픽셀 글꼴, OFL), Gowun Batang (사람이 쓴 글, OFL)
+| 구분 | 사용한 것 |
+| --- | --- |
+| 화면 (프런트엔드) | React 19, Vite 7, React Router 7, Axios, Tailwind CSS 4, Lucide React |
+| 서버 (백엔드) | Node.js 20 이상, Express 5, JWT, bcrypt, Multer, sharp(사진 변환), zod(입력 검증), helmet, express-rate-limit |
+| 데이터베이스 | MySQL 8, Prisma ORM 6 |
+| 데스크톱 앱 | Electron 45, electron-builder (NSIS 설치 파일, 휴대용 exe) |
+| 배포 | Docker, Docker Compose, nginx |
+| 글꼴 | [Galmuri](https://github.com/quiple/galmuri) (메뉴·버튼용 픽셀 글꼴, OFL), Gowun Batang (사람이 쓴 글, OFL) |
 
 ## 폴더 구조
 
 ```
 deardays/
 ├── package.json                 # 한 번에 설치·실행하는 편의 스크립트
+├── docker-compose.yml           # 서버 배포: web + api + db
+├── .env.example                 # Docker 배포용 환경변수 예시 → .env 로 복사
 ├── backend/
+│   ├── Dockerfile               # api 이미지
 │   ├── prisma/
-│   │   ├── schema.prisma        # DB 모델 (User, DiaryRoom, DiaryRoomMember, Diary, DiaryImage, Comment, Like, Todo)
+│   │   ├── schema.prisma        # DB 모델 (User, DiaryRoom, DiaryRoomMember, Diary, DiaryImage,
+│   │   │                        #          Comment, Like, Todo, Notification, Letter)
 │   │   ├── migrations/          # 마이그레이션 SQL
 │   │   └── seed.js              # 체험용 계정·일기
 │   ├── scripts/
@@ -288,33 +789,45 @@ deardays/
 │   ├── src/
 │   │   ├── config/              # 환경변수, Prisma 클라이언트, 서비스 규칙 상수
 │   │   ├── controllers/         # 요청 → 서비스 호출 → 응답
-│   │   ├── middlewares/         # JWT 인증, 입력 검증, 업로드, 에러 처리, 요청 제한
+│   │   ├── middlewares/         # JWT 인증, 입력 검증, 업로드·사진 변환, 에러 처리, 요청 제한
 │   │   ├── routes/              # REST 라우트
 │   │   ├── services/            # 비즈니스 로직과 권한 검사
 │   │   ├── utils/               # 날짜, 초대 코드, 직렬화, 파일 등
 │   │   ├── validators/          # zod 입력 스키마
 │   │   ├── app.js               # Express 앱 구성
 │   │   └── server.js            # 서버 실행 + 시작 시 DB 연결 확인
-│   ├── uploads/                 # 업로드 이미지 (diaries/, profiles/)
-│   └── .env.example
+│   ├── uploads/                 # 업로드 이미지 (diaries/, profiles/) - 개발용
+│   └── .env.example             # 개발용 환경변수 예시
 ├── frontend/
+│   ├── Dockerfile               # web 이미지 (빌드 → nginx)
+│   ├── nginx.conf               # 화면 제공 + /api, /uploads 를 api 로 전달
+│   ├── public/                  # 파비콘, 앱 아이콘, manifest.webmanifest (홈 화면에 추가)
 │   ├── src/
 │   │   ├── components/          # ui(창·버튼·대화상자 등), diary, room, todo, calendar, layout
-│   │   ├── context/             # 로그인, 공유 공간, 알림 상태
+│   │   ├── context/             # 로그인, 공유 공간, 새 소식, 화면 색, 토스트
 │   │   ├── hooks/               # useFetch, useCalendarDays 등
 │   │   ├── layouts/             # 바탕 화면(작업 표시줄) / 로그인 화면
-│   │   ├── pages/               # 화면별 페이지
+│   │   ├── pages/               # 화면별 페이지 (lazyPages.js 로 필요할 때 불러옴)
 │   │   ├── services/            # API 호출 (axios)
 │   │   ├── utils/               # 날짜, 도트 아이콘, 저장소 등
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   └── .env.example
+├── desktop/                     # Windows 데스크톱 앱 (Electron)
+│   ├── src/
+│   │   ├── main.js              # 창, 메뉴, 알림, 서버 연결 확인
+│   │   ├── preload.js           # 웹 화면에 알림·배지 기능만 열어 줌
+│   │   ├── config.js            # 서버 주소 저장
+│   │   └── pages/               # 서버 주소 입력, 연결할 수 없음 화면
+│   ├── scripts/make-icons.cjs   # 아이콘 PNG 생성
+│   ├── build/                   # 앱 아이콘, 알림 배지
+│   └── package.json             # 빌드 설정 (defaultServer 포함)
 └── README.md
 ```
 
-## API
+## API 목록
 
-모든 응답은 JSON입니다. 실패 시 `{ "message": "사용자에게 보여 줄 문구", "code": "ERROR_CODE" }` 형태로 응답합니다.
+모든 응답은 JSON입니다. 실패하면 `{ "message": "사용자에게 보여 줄 문구", "code": "ERROR_CODE" }` 형태로 응답합니다.
 `인증` 표시가 있는 API는 `Authorization: Bearer <토큰>` 헤더가 필요합니다.
 
 | 메서드 | 경로 | 설명 | 인증 |
@@ -357,9 +870,9 @@ deardays/
 | GET | `/api/letters/:id` | 편지 열기. 받는 사람이 여는 날 전에 열면 403 `LETTER_SEALED`, 처음 열면 보낸 사람에게 알림 | 인증 |
 | DELETE | `/api/letters/:id` | 보낸 사람은 열리기 전 '보내기 취소', 받는 사람은 열어 본 편지 삭제 | 인증 |
 | GET | `/api/users/me` | 내 정보 + 통계 + 참여 공간 | 인증 |
+| PUT | `/api/users/me` | 닉네임·자기소개 수정 | 인증 |
 | PUT | `/api/users/me/password` | 비밀번호 바꾸기 `{ currentPassword, newPassword }` → 새 토큰. 예전 토큰은 모두 무효 | 인증 |
 | DELETE | `/api/users/me` | 회원 탈퇴 `{ password }` | 인증 |
-| PUT | `/api/users/me` | 닉네임·자기소개 수정 | 인증 |
 | POST | `/api/users/me/profile-image` | 프로필 사진 업로드 (multipart: `image`) | 인증 |
 | DELETE | `/api/users/me/profile-image` | 기본 프로필로 | 인증 |
 | GET | `/api/health` | 서버·DB 상태 | |
@@ -377,16 +890,17 @@ deardays/
 - 일기 임시 저장은 이 기기의 브라우저에만 남고(사진 제외), 직접 로그아웃하면 지워집니다.
 - 한 공간은 최대 2명입니다. 두 사람이 동시에 같은 코드로 참여해도 DB 행 잠금(`SELECT ... FOR UPDATE`)으로 한 명만 들어갑니다.
 - 같은 일기에 같은 사람이 두 번 공감할 수 없도록 `(diaryId, userId)` 복합 unique 제약을 둡니다.
-- 업로드는 확장자(.jpg .jpeg .png .gif .webp)와 MIME 타입을 함께 검사하고, 저장 후 파일 앞부분의 시그니처로 실제 이미지인지 한 번 더 확인합니다. 파일 이름은 추측할 수 없는 UUID로 바꿉니다. 실패한 요청에서 저장된 파일은 지웁니다.
+- 업로드는 확장자(.jpg .jpeg .png .gif .webp)와 MIME 타입을 함께 검사하고, 저장 후 파일 앞부분의 시그니처로 실제 이미지인지 한 번 더 확인합니다. 그다음 사진을 다시 그려(WebP 변환) 위치 정보 같은 메타데이터를 지웁니다. 파일 이름은 추측할 수 없는 UUID로 바꾸고, 실패한 요청에서 저장된 파일은 지웁니다.
 - 로그인(실패 시도만)·회원가입·이메일 확인에 IP당 요청 제한을 둡니다.
 - 비밀 값은 `.env` 로 관리하며 git에 올리지 않습니다.
+- 데스크톱 앱은 웹 화면에 알림·배지 기능만 열어 주고(Node.js 접근 차단, sandbox), 서버 주소 저장 같은 기능은 앱 안의 설정 화면에서만 부를 수 있습니다.
 
 ### 공간 나가기 규칙
 
 - 두 사람 중 한 명이 나가면 공간과 일기는 남은 사람에게 그대로 남고, 예전 초대 코드는 무효가 되며 새 코드가 발급됩니다. 나간 사람이 맡았던 할 일은 '함께' 하는 일로 바뀝니다.
 - 마지막 사람이 나가면 공간과 모든 일기·사진·댓글·할 일이 삭제됩니다. (화면에서 한 번 더 확인합니다.)
 
-> 업로드한 사진은 `/uploads/...` 주소로 제공됩니다. 주소가 추측 불가능한 UUID라 링크를 아는 사람만 열 수 있지만, 로그인 검사는 하지 않습니다. 더 엄격하게 하려면 서명된 URL 방식으로 바꾸는 것을 권합니다.
+> 업로드한 사진은 `/uploads/...` 주소로 제공됩니다. 주소가 추측할 수 없는 UUID라 링크를 아는 사람만 열 수 있지만, 로그인 검사는 하지 않습니다. 더 엄격하게 하려면 서명된 URL 방식으로 바꾸는 것을 권합니다.
 
 ## 테스트
 
@@ -396,7 +910,19 @@ API 서버를 켠 상태(`npm run dev` 또는 `npm run dev:api`)에서 다른 �
 npm run test:api
 ```
 
-세 명의 사용자로 가입·로그인, 공간 생성/참여(정원 초과, 동시 참여 경쟁 포함), 사진 업로드 검증(가짜 이미지·허용되지 않는 확장자·장수 초과), 일기 CRUD와 권한, 정렬·날짜 필터·페이지네이션·달력, 공감 중복 방지, 댓글 권한, 할 일(추가·정렬·체크·수정/삭제 권한·맡을 사람 검증), 기분·날씨, 검색(`%`·`_` 글자 그대로 찾기 포함), 새 소식 알림(종류별 생성·읽음 처리·남의 알림 차단), 타임캡슐 편지(봉인·열기·삭제 권한), 비밀번호 변경(예전 토큰 무효), 회원 탈퇴(혼자/함께 쓰던 공간), 마이페이지, 공간 나가기와 파일 정리까지 152개 항목을 확인합니다. 테스트 계정은 실행할 때마다 새로 만들어집니다.
+세 명의 사용자로 아래 내용을 153개 항목에 걸쳐 확인합니다. 테스트 계정은 실행할 때마다 새로 만들어집니다.
+
+- 가입·로그인, 마이페이지.
+- 공간 생성/참여: 정원 초과, 동시 참여 경쟁 포함.
+- 사진 업로드: 가짜 이미지, 허용되지 않는 확장자, 장수 초과 검증, WebP 변환과 GIF 유지.
+- 일기 CRUD와 권한, 정렬·날짜 필터·페이지네이션·달력, 기분·날씨.
+- 공감 중복 방지, 댓글 권한.
+- 할 일: 추가, 정렬, 체크, 수정·삭제 권한, 맡을 사람 검증.
+- 검색: `%`·`_` 를 글자 그대로 찾기 포함.
+- 새 소식 알림: 종류별 생성, 읽음 처리, 남의 알림 차단.
+- 타임캡슐 편지: 봉인, 열기, 삭제 권한.
+- 비밀번호 변경(예전 토큰 무효)과 회원 탈퇴(혼자/함께 쓰던 공간).
+- 공간 나가기와 파일 정리.
 
 ## 디자인 노트
 

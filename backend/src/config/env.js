@@ -8,6 +8,14 @@ export const BACKEND_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.
 // 어느 폴더에서 실행하든 항상 backend/.env 를 읽는다. (이미 설정된 환경변수가 우선)
 dotenv.config({ path: path.join(BACKEND_ROOT, '.env'), quiet: true });
 
+// Docker: DB_HOST·DB_USER·DB_PASSWORD·DB_NAME 으로 접속 주소를 만든다.
+// 비밀번호에 @ : / # % 같은 특수문자가 있어도 되도록 URL 인코딩한다. (DATABASE_URL 을 직접 주면 그 값을 쓴다)
+if (!process.env.DATABASE_URL && process.env.DB_HOST) {
+  const { DB_HOST, DB_PORT = '3306', DB_USER = '', DB_PASSWORD = '', DB_NAME = '' } = process.env;
+  const enc = encodeURIComponent;
+  process.env.DATABASE_URL = `mysql://${enc(DB_USER)}:${enc(DB_PASSWORD)}@${DB_HOST}:${DB_PORT}/${enc(DB_NAME)}`;
+}
+
 const REQUIRED = ['DATABASE_URL', 'JWT_SECRET'];
 const missing = REQUIRED.filter((key) => !process.env[key]);
 if (missing.length > 0) {
@@ -33,4 +41,7 @@ export const env = {
   uploadDir: path.resolve(BACKEND_ROOT, process.env.UPLOAD_DIR ?? 'uploads'),
   maxImageSizeMb: Number(process.env.MAX_IMAGE_SIZE_MB ?? 5),
   authRateLimit: Number(process.env.AUTH_RATE_LIMIT ?? 30),
+  // 앞에 있는 프록시 수 (Docker 의 nginx 하나면 1, 그 앞에 HTTPS 프록시를 하나 더 두면 2)
+  // 요청 제한이 사용자 IP 를 제대로 알아보는 데 쓰인다.
+  trustProxy: Math.max(0, Number.parseInt(process.env.TRUST_PROXY ?? '1', 10) || 0),
 };

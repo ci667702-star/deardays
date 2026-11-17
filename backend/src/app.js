@@ -9,7 +9,7 @@ export function createApp() {
   const app = express();
 
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', env.trustProxy);
 
   // 업로드 이미지는 프론트엔드(다른 포트)에서도 <img>로 불러올 수 있어야 한다.
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));

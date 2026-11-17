@@ -30,5 +30,6 @@ USER node
 
 EXPOSE 4000
 
-# DB 마이그레이션을 적용한 뒤 서버 실행 (exec 로 node 가 종료 신호를 직접 받게 함)
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && exec node src/server.js"]
+# DB 접속 주소를 만들고(비밀번호 URL 인코딩) 마이그레이션을 적용한 뒤 서버 실행.
+# node 가 직접 PID 1 이 되어 docker stop 의 종료 신호(SIGTERM)를 받는다.
+CMD ["node", "scripts/docker-start.js"]

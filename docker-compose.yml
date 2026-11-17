@@ -34,12 +34,18 @@ services:
       db:
         condition: service_healthy
     environment:
-      # db 서비스와 같은 계정·DB 이름을 써야 한다 (RDB_PASSWORD 는 URL 에 들어가므로 영문·숫자만)
-      DATABASE_URL: mysql://${RDB_USERNAME:-deardays}:${RDB_PASSWORD}@db:3306/${RDB_DATABASE:-deardays}
+      # db 서비스와 같은 계정·DB 이름. 시작할 때 이 값들로 DATABASE_URL 을 만든다
+      # (비밀번호의 특수문자는 자동으로 URL 인코딩)
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${RDB_DATABASE:-deardays}
+      DB_USER: ${RDB_USERNAME:-deardays}
+      DB_PASSWORD: ${RDB_PASSWORD:?.env 에 RDB_PASSWORD 를 설정해 주세요}
       JWT_SECRET: ${JWT_SECRET:?.env 에 JWT_SECRET 을 설정해 주세요 (32자 이상)}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CLIENT_ORIGIN: ${PUBLIC_URL:-http://localhost}
       AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-30}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
       MAX_IMAGE_SIZE_MB: 5
       TZ: Asia/Seoul
     volumes:
