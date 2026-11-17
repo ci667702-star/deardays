@@ -1,9 +1,12 @@
-import 'dotenv/config';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import dotenv from 'dotenv';
 
 // backend/ 폴더의 절대 경로 (src/config 기준 두 단계 위)
 export const BACKEND_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+// 어느 폴더에서 실행하든 항상 backend/.env 를 읽는다. (이미 설정된 환경변수가 우선)
+dotenv.config({ path: path.join(BACKEND_ROOT, '.env'), quiet: true });
 
 const REQUIRED = ['DATABASE_URL', 'JWT_SECRET'];
 const missing = REQUIRED.filter((key) => !process.env[key]);

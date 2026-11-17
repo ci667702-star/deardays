@@ -6,6 +6,7 @@
 //   haru@deardays.test  / diary1234  (닉네임: 하루)
 //   byeol@deardays.test / diary1234  (닉네임: 별이)
 
+import '../src/config/env.js'; // backend/.env 의 DATABASE_URL 불러오기
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 import { BCRYPT_ROUNDS } from '../src/config/constants.js';
