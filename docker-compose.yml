@@ -13,10 +13,10 @@ services:
     image: mysql:8.4
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?.env 에 DB_ROOT_PASSWORD 를 설정해 주세요}
-      MYSQL_DATABASE: deardays
-      MYSQL_USER: deardays
-      MYSQL_PASSWORD: ${DB_PASSWORD:?.env 에 DB_PASSWORD 를 설정해 주세요}
+      MYSQL_ROOT_PASSWORD: ${RDB_ROOT_PASSWORD:?.env 에 RDB_ROOT_PASSWORD 를 설정해 주세요}
+      MYSQL_DATABASE: ${RDB_DATABASE:-deardays}
+      MYSQL_USER: ${RDB_USERNAME:-deardays}
+      MYSQL_PASSWORD: ${RDB_PASSWORD:?.env 에 RDB_PASSWORD 를 설정해 주세요}
     volumes:
       - db-data:/var/lib/mysql
     healthcheck:
@@ -34,7 +34,8 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: mysql://deardays:${DB_PASSWORD}@db:3306/deardays
+      # db 서비스와 같은 계정·DB 이름을 써야 한다 (RDB_PASSWORD 는 URL 에 들어가므로 영문·숫자만)
+      DATABASE_URL: mysql://${RDB_USERNAME:-deardays}:${RDB_PASSWORD}@db:3306/${RDB_DATABASE:-deardays}
       JWT_SECRET: ${JWT_SECRET:?.env 에 JWT_SECRET 을 설정해 주세요 (32자 이상)}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CLIENT_ORIGIN: ${PUBLIC_URL:-http://localhost}
