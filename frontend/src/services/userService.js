@@ -23,4 +23,14 @@ export const userService = {
     const { data } = await api.delete('/users/me/profile-image');
     return data.user;
   },
+
+  /** @returns {Promise<string>} 새 로그인 토큰 (다른 기기의 토큰은 무효가 됨) */
+  async changePassword({ currentPassword, newPassword }) {
+    const { data } = await api.put('/users/me/password', { currentPassword, newPassword });
+    return data.token;
+  },
+
+  async deleteAccount(password) {
+    await api.delete('/users/me', { data: { password } });
+  },
 };

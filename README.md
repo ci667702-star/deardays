@@ -9,11 +9,14 @@
 | 로그인 · 회원가입 | 이메일 가입, 이메일 중복 확인, 로그인 상태 유지 선택 |
 | 홈 (바탕 화면) | 오늘 날짜와 오늘의 한마디, 나와 친구 프로필, 최근 일기 5편, 달력 미리보기 |
 | 우리 일기장 | 두 사람 프로필, 초대 코드 복사·재발급, 일기 목록(최신순/과거순, 더 보기), 공간 이름 변경, 공간 나가기, 다른 공간 만들기/참여 |
-| 일기 쓰기·수정 | 제목, 날짜, 줄 노트 본문, 사진 최대 6장(끌어다 놓기 지원), 업로드 진행률, 작성 중 이탈 확인 |
-| 일기 보기 | 작성자·날짜, 본문, 사진 크게 보기, 하트 공감/취소, 댓글 작성·수정·삭제 (작성자 본인만) |
+| 일기 쓰기·수정 | 제목, 날짜, 기분(기쁨·설렘·평온·우울·화남)과 날씨 도트 아이콘, 줄 노트 본문, 사진 최대 6장(끌어다 놓기 지원), 업로드 진행률, 작성 중 이탈 확인, **자동 임시 저장**(다시 열면 "이어서 쓸까요?") |
+| 일기 보기 | 작성자·날짜·기분·날씨, 본문, 사진 크게 보기, 하트 공감/취소, 댓글 작성·수정·삭제 (작성자 본인만) |
+| 새 소식 | 작업 표시줄의 종에 안 읽은 개수, 새 소식이 오면 말풍선. 친구의 새 일기·댓글·공감, 맡긴 할 일, 친구 참여, 편지 보냄·도착·읽음. 누르면 해당 화면으로, 일기를 열면 그 알림은 자동으로 읽음 |
+| 편지함 (타임캡슐) | 친구나 미래의 나에게 편지를 봉인해 보내기. 여는 날 전에는 받는 사람도 제목·내용을 볼 수 없고(D-day 표시), 그날이 되면 도착 알림. 친구가 열면 보낸 사람에게 알림. 열기 전 '보내기 취소' |
+| 찾기 | 옛 윈도우 '찾기' 창. 제목·내용 낱말, 쓴 사람, 날짜 범위로 일기 찾기, 찾은 낱말 강조 |
 | 할 일 | 두 사람이 함께 보는 할 일 목록. 기한(선택)과 맡을 사람(함께/나/친구), 누구든 체크, 누가 끝냈는지 기록, 기한 지남·오늘·내일 강조, 남은 일/끝낸 일/전체 탭, 진행 막대. 홈 화면에서 빠르게 추가·체크 |
-| 달력 | 월 이동, 오늘 강조, 내가 쓴 날(분홍 하트)과 친구가 쓴 날(라벤더 하트), 날짜별 일기, 그 날짜로 일기 쓰기 |
-| 내 정보 | 프로필 사진 변경/기본 이미지로, 닉네임·자기소개 수정, 이메일 확인, 작성 통계, 참여 공간 목록, 로그아웃 |
+| 달력 | 월 이동, 오늘 강조, 내가 쓴 날(분홍)과 친구가 쓴 날(라벤더). 기분을 골랐으면 그 표정의 얼굴로, 아니면 하트로 표시. 날짜별 일기, 그 날짜로 일기 쓰기 |
+| 내 정보 | 프로필 사진 변경/기본 이미지로, 닉네임·자기소개 수정, 이메일 확인, 작성 통계, 참여 공간 목록, 화면 색, **비밀번호 바꾸기**(다른 기기는 로그아웃), **회원 탈퇴**, 로그아웃 |
 
 ---
 
@@ -81,7 +84,7 @@ DATABASE_URL="mysql://root:1234@localhost:3306/deardays"
 npm run db:migrate
 ```
 
-`deardays` 데이터베이스가 없으면 새로 만들고, 테이블 8개(users, diary_rooms, diary_room_members, diaries, diary_images, comments, likes, todos)를 생성합니다.
+`deardays` 데이터베이스가 없으면 새로 만들고, 테이블 10개(users, diary_rooms, diary_room_members, diaries, diary_images, comments, likes, todos, notifications, letters)를 생성합니다.
 `All migrations have been successfully applied.` 가 나오면 성공입니다.
 
 ### 6. (선택) 체험용 데이터 넣기
@@ -327,11 +330,12 @@ deardays/
 | PATCH | `/api/rooms/:roomId` | 공간 이름 변경 `{ name }` | 인증 |
 | POST | `/api/rooms/:roomId/invite-code` | 초대 코드 재발급 | 인증 |
 | DELETE | `/api/rooms/:roomId/members/me` | 공간 나가기 → `{ roomDeleted }` | 인증 |
-| POST | `/api/diaries` | 일기 작성 (multipart: `roomId, title, content, diaryDate, images[]`) | 인증 |
+| POST | `/api/diaries` | 일기 작성 (multipart: `roomId, title, content, diaryDate, mood?, weather?, images[]`) | 인증 |
 | GET | `/api/diaries?roomId=&sort=latest\|oldest&date=&month=&page=&limit=` | 일기 목록 | 인증 |
+| GET | `/api/diaries?roomId=&q=&authorId=&from=&to=` | 일기 찾기 (제목·내용 낱말, 쓴 사람, 날짜 범위. `%` `_` 도 글자 그대로) | 인증 |
 | GET | `/api/diaries/calendar?roomId=&month=YYYY-MM` | 달력용 날짜별 일기 요약 | 인증 |
 | GET | `/api/diaries/:id` | 일기 상세 | 인증 |
-| PUT | `/api/diaries/:id` | 일기 수정 (multipart: `title, content, diaryDate, removeImageIds(JSON 배열), images[]`), 작성자만 | 인증 |
+| PUT | `/api/diaries/:id` | 일기 수정 (multipart: `title, content, diaryDate, mood?, weather?, removeImageIds(JSON 배열), images[]`), 작성자만 | 인증 |
 | DELETE | `/api/diaries/:id` | 일기 삭제 (사진 파일도 삭제), 작성자만 | 인증 |
 | POST | `/api/diaries/:id/comments` | 댓글 작성 `{ content }` | 인증 |
 | GET | `/api/diaries/:id/comments` | 댓글 목록 | 인증 |
@@ -344,7 +348,17 @@ deardays/
 | PUT | `/api/todos/:id` | 내용·기한·맡은 사람 수정, 추가한 사람만 | 인증 |
 | PATCH | `/api/todos/:id/status` | 완료 표시/취소 `{ isDone }`, 공간의 두 사람 모두 가능 | 인증 |
 | DELETE | `/api/todos/:id` | 할 일 삭제, 추가한 사람만 | 인증 |
+| GET | `/api/notifications` | 새 소식 목록(최근 50개) + 안 읽은 개수 | 인증 |
+| GET | `/api/notifications/unread-count` | 안 읽은 개수 (작업 표시줄이 주기적으로 확인) | 인증 |
+| PATCH | `/api/notifications/:id/read` | 알림 하나 읽음 | 인증 |
+| POST | `/api/notifications/read-all` | 모두 읽음 | 인증 |
+| GET | `/api/letters?roomId=` | 받은 편지(봉인된 편지는 제목·내용 숨김) + 보낸 편지 | 인증 |
+| POST | `/api/letters` | 편지 보내기 `{ roomId, recipientId, title, content, openAt }` (받는 사람: 공간 멤버 또는 나, 여는 날: 오늘~10년) | 인증 |
+| GET | `/api/letters/:id` | 편지 열기. 받는 사람이 여는 날 전에 열면 403 `LETTER_SEALED`, 처음 열면 보낸 사람에게 알림 | 인증 |
+| DELETE | `/api/letters/:id` | 보낸 사람은 열리기 전 '보내기 취소', 받는 사람은 열어 본 편지 삭제 | 인증 |
 | GET | `/api/users/me` | 내 정보 + 통계 + 참여 공간 | 인증 |
+| PUT | `/api/users/me/password` | 비밀번호 바꾸기 `{ currentPassword, newPassword }` → 새 토큰. 예전 토큰은 모두 무효 | 인증 |
+| DELETE | `/api/users/me` | 회원 탈퇴 `{ password }` | 인증 |
 | PUT | `/api/users/me` | 닉네임·자기소개 수정 | 인증 |
 | POST | `/api/users/me/profile-image` | 프로필 사진 업로드 (multipart: `image`) | 인증 |
 | DELETE | `/api/users/me/profile-image` | 기본 프로필로 | 인증 |
@@ -357,6 +371,10 @@ deardays/
 - 공유 공간·일기·댓글·공감은 **그 공간의 멤버만** 접근할 수 있습니다. 멤버가 아니면 존재 여부도 숨기고 404로 응답합니다.
 - 일기와 댓글의 수정·삭제는 작성자 본인만 할 수 있습니다(403).
 - 할 일은 공간의 두 사람 모두 추가하고 체크할 수 있고, 내용 수정과 삭제는 추가한 사람만 할 수 있습니다. 맡을 사람은 그 공간의 멤버만 지정할 수 있습니다.
+- 타임캡슐 편지는 서버가 여는 날을 판단합니다(서버 시간대 기준, Docker는 `Asia/Seoul`). 여는 날 전에는 받는 사람에게 제목·내용을 보내지 않습니다.
+- 비밀번호를 바꾸면 그 전에 발급된 로그인 토큰은 모두 무효가 되고(다른 기기 로그아웃), 비밀번호를 확인하는 요청(변경·탈퇴)은 로그인처럼 틀린 시도 횟수를 제한합니다.
+- 회원 탈퇴 시 내가 쓴 일기·사진 파일·댓글·공감·할 일·편지·알림을 지웁니다. 혼자 쓰던 공간은 공간째 지우고, 친구가 있는 공간은 친구에게 남기며 내가 맡았던 할 일은 '함께'로 바뀝니다.
+- 일기 임시 저장은 이 기기의 브라우저에만 남고(사진 제외), 직접 로그아웃하면 지워집니다.
 - 한 공간은 최대 2명입니다. 두 사람이 동시에 같은 코드로 참여해도 DB 행 잠금(`SELECT ... FOR UPDATE`)으로 한 명만 들어갑니다.
 - 같은 일기에 같은 사람이 두 번 공감할 수 없도록 `(diaryId, userId)` 복합 unique 제약을 둡니다.
 - 업로드는 확장자(.jpg .jpeg .png .gif .webp)와 MIME 타입을 함께 검사하고, 저장 후 파일 앞부분의 시그니처로 실제 이미지인지 한 번 더 확인합니다. 파일 이름은 추측할 수 없는 UUID로 바꿉니다. 실패한 요청에서 저장된 파일은 지웁니다.
@@ -378,7 +396,7 @@ API 서버를 켠 상태(`npm run dev` 또는 `npm run dev:api`)에서 다른 �
 npm run test:api
 ```
 
-세 명의 사용자로 가입·로그인, 공간 생성/참여(정원 초과, 동시 참여 경쟁 포함), 사진 업로드 검증(가짜 이미지·허용되지 않는 확장자·장수 초과), 일기 CRUD와 권한, 정렬·날짜 필터·페이지네이션·달력, 공감 중복 방지, 댓글 권한, 할 일(추가·정렬·체크·수정/삭제 권한·맡을 사람 검증), 마이페이지, 공간 나가기와 파일 정리까지 92개 항목을 확인합니다. 테스트 계정은 실행할 때마다 새로 만들어집니다.
+세 명의 사용자로 가입·로그인, 공간 생성/참여(정원 초과, 동시 참여 경쟁 포함), 사진 업로드 검증(가짜 이미지·허용되지 않는 확장자·장수 초과), 일기 CRUD와 권한, 정렬·날짜 필터·페이지네이션·달력, 공감 중복 방지, 댓글 권한, 할 일(추가·정렬·체크·수정/삭제 권한·맡을 사람 검증), 기분·날씨, 검색(`%`·`_` 글자 그대로 찾기 포함), 새 소식 알림(종류별 생성·읽음 처리·남의 알림 차단), 타임캡슐 편지(봉인·열기·삭제 권한), 비밀번호 변경(예전 토큰 무효), 회원 탈퇴(혼자/함께 쓰던 공간), 마이페이지, 공간 나가기와 파일 정리까지 152개 항목을 확인합니다. 테스트 계정은 실행할 때마다 새로 만들어집니다.
 
 ## 디자인 노트
 

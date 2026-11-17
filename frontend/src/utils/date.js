@@ -107,3 +107,16 @@ export function buildMonthGrid(year, monthIndex) {
 }
 
 export { WEEKDAYS };
+
+/** 오늘(또는 from)부터 value 까지 남은 날 수. 지난 날짜면 음수 */
+export function daysUntil(value, from = todayString()) {
+  const a = parseDateString(from);
+  const b = parseDateString(value);
+  return Math.round((Date.UTC(b.year, b.monthIndex, b.day) - Date.UTC(a.year, a.monthIndex, a.day)) / 86400000);
+}
+
+/** 'YYYY-MM-DD' 에 days 일을 더한 날짜 */
+export function addDays(value, days) {
+  const { year, monthIndex, day } = parseDateString(value);
+  return new Date(Date.UTC(year, monthIndex, day + days)).toISOString().slice(0, 10);
+}

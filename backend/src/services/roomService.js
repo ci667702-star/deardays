@@ -5,6 +5,7 @@ import { HttpError } from '../utils/HttpError.js';
 import { generateInviteCode } from '../utils/inviteCode.js';
 import { removeUploadUrls } from '../utils/files.js';
 import { toRoom } from '../utils/serializers.js';
+import { notify } from './notificationService.js';
 
 const roomInclude = {
   members: { include: { user: true }, orderBy: { joinedAt: 'asc' } },
@@ -68,6 +69,8 @@ export async function joinRoom(userId, { inviteCode }) {
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
   );
+  // 먼저 있던 친구에게 '들어왔어요' 알림
+  await notify({ roomId: room.id, actorId: userId, type: 'MEMBER_JOINED' });
   return toRoom(room);
 }
 

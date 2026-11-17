@@ -46,6 +46,8 @@ export function toDiary(diary, viewerId) {
     title: diary.title,
     content: diary.content,
     diaryDate: fromDbDate(diary.diaryDate),
+    mood: diary.mood ?? null,
+    weather: diary.weather ?? null,
     createdAt: diary.createdAt,
     updatedAt: diary.updatedAt,
     author: toPublicUser(diary.author),
@@ -71,6 +73,46 @@ export function toTodo(todo, viewerId) {
     assignee: toPublicUser(todo.assignee),
     completedBy: toPublicUser(todo.completedBy),
     isMine: todo.creatorId === viewerId,
+  };
+}
+
+export function toNotification(notification) {
+  return {
+    id: notification.id,
+    type: notification.type,
+    isRead: notification.isRead,
+    createdAt: notification.createdAt,
+    preview: notification.preview ?? null,
+    actor: toPublicUser(notification.actor),
+    room: notification.diaryRoom ? { id: notification.diaryRoom.id, name: notification.diaryRoom.name } : null,
+    diary: notification.diary ? { id: notification.diary.id, title: notification.diary.title } : null,
+    letter: notification.letter
+      ? { id: notification.letter.id, openAt: fromDbDate(notification.letter.openAt) }
+      : null,
+  };
+}
+
+/**
+ * 편지: 받는 사람에게는 여는 날 전까지 제목·내용을 숨긴다(sealed).
+ * 보낸 사람은 친구에게 보낸 편지를 언제든 볼 수 있다. (나에게 보낸 편지는 받는 사람 규칙을 따른다)
+ */
+export function toLetter(letter, viewerId, todayDb) {
+  const openable = letter.openAt.getTime() <= todayDb.getTime();
+  const sealed = letter.recipientId === viewerId && !openable;
+  return {
+    id: letter.id,
+    roomId: letter.diaryRoomId,
+    title: sealed ? null : letter.title,
+    content: sealed ? null : letter.content,
+    openAt: fromDbDate(letter.openAt),
+    openable,
+    sealed,
+    openedAt: letter.openedAt,
+    createdAt: letter.createdAt,
+    sender: toPublicUser(letter.sender),
+    recipient: toPublicUser(letter.recipient),
+    isSender: letter.senderId === viewerId,
+    isRecipient: letter.recipientId === viewerId,
   };
 }
 

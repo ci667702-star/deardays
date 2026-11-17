@@ -13,7 +13,7 @@ export default function DesktopLayout() {
         <nav aria-label="바탕 화면 바로 가기" className="hidden shrink-0 flex-col gap-3 lg:flex">
           {NAV_ITEMS.filter((item) => item.desktopLabel).map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end} className="desk-icon">
-              <PixelIcon name={item.icon} size={40} />
+              <PixelIcon name={item.icon} size={40} palette={item.palette} />
               <span className="desk-icon-label">{item.desktopLabel}</span>
             </NavLink>
           ))}

@@ -34,3 +34,19 @@ export function monthRange(value) {
     end: new Date(Date.UTC(year, month, 1)),
   };
 }
+
+/**
+ * 서버 시간대 기준 오늘 'YYYY-MM-DD'.
+ * 편지가 열리는 날 판단에 쓰므로 서버 TZ 를 사용자와 같게 맞춘다 (docker-compose 는 Asia/Seoul).
+ */
+export function localTodayString(now = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+/** 'YYYY-MM-DD' 에 years 년을 더한 날짜 문자열 */
+export function addYears(value, years) {
+  const [y, m, d] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(y + years, m - 1, d));
+  return date.toISOString().slice(0, 10);
+}

@@ -15,6 +15,16 @@ export async function uploadProfileImage(req, res) {
   res.json({ user });
 }
 
+export async function changePassword(req, res) {
+  const result = await userService.changePassword(req.user.id, req.valid.body);
+  res.json(result); // { token }
+}
+
+export async function deleteAccount(req, res) {
+  await userService.deleteAccount(req.user.id, req.valid.body);
+  res.status(204).end();
+}
+
 export async function deleteProfileImage(req, res) {
   const user = await userService.removeProfileImage(req.user.id);
   res.json({ user });

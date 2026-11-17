@@ -28,6 +28,11 @@ export const tokenStorage = {
       sessionStorage.removeItem(TOKEN_KEY);
     });
   },
+  /** 비밀번호를 바꿔 받은 새 토큰을, 지금 쓰고 있는 저장소(유지/탭 한정)에 그대로 바꿔 넣는다 */
+  replace(token) {
+    const remember = safe(() => localStorage.getItem(TOKEN_KEY) !== null, true);
+    this.set(token, remember);
+  },
 };
 
 export const prefs = {

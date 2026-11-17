@@ -3,20 +3,24 @@ import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { Save } from 'lucide-react';
 import ImageUploader from '../components/diary/ImageUploader.jsx';
 import { checkImageFiles } from '../components/diary/imageRules.js';
+import { MoodWeatherPicker } from '../components/diary/MoodWeather.jsx';
 import RoomGate from '../components/room/RoomGate.jsx';
 import Button, { ButtonLink } from '../components/ui/Button.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
+import Dialog from '../components/ui/Dialog.jsx';
 import { ErrorMessage, Loading } from '../components/ui/Feedback.jsx';
 import PixelIcon from '../components/ui/PixelIcon.jsx';
 import TextField from '../components/ui/TextField.jsx';
 import Window from '../components/ui/Window.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useRooms } from '../context/RoomContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js';
 import { useFetch } from '../hooks/useFetch.js';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges.js';
 import { diaryService } from '../services/diaryService.js';
-import { isValidDateString, todayString } from '../utils/date.js';
+import { formatDateTime, isValidDateString, todayString } from '../utils/date.js';
+import { drafts } from '../utils/drafts.js';
 import { getErrorMessage, getErrorStatus } from '../utils/errors.js';
 
 const TITLE_MAX = 100;
@@ -72,14 +76,39 @@ function DiaryEditor({ original }) {
   const navigate = useNavigate();
   const toast = useToast();
   const { currentRoom } = useRooms();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
 
   const initial = useMemo(() => {
-    if (original) return { title: original.title, content: original.content, diaryDate: original.diaryDate };
+    if (original) {
+      return {
+        title: original.title,
+        content: original.content,
+        diaryDate: original.diaryDate,
+        mood: original.mood ?? null,
+        weather: original.weather ?? null,
+      };
+    }
     const fromQuery = searchParams.get('date');
-    return { title: '', content: '', diaryDate: isValidDateString(fromQuery) ? fromQuery : todayString() };
+    return {
+      title: '',
+      content: '',
+      diaryDate: isValidDateString(fromQuery) ? fromQuery : todayString(),
+      mood: null,
+      weather: null,
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [original]);
+
+  // 임시 저장 위치: 새 일기는 공간별, 수정은 일기별
+  const draftScope = isEdit ? `edit:${original.id}` : `new:${currentRoom.id}`;
+  const [restorable, setRestorable] = useState(() => {
+    const saved = drafts.load(user.id, draftScope);
+    if (!saved) return null;
+    const differs = ['title', 'content', 'diaryDate', 'mood', 'weather'].some((key) => (saved[key] ?? null) !== (initial[key] ?? null));
+    return differs ? saved : null;
+  });
+  const [draftSavedAt, setDraftSavedAt] = useState(null);
 
   const [form, setForm] = useState(initial);
   const [errors, setErrors] = useState({});
@@ -93,13 +122,48 @@ function DiaryEditor({ original }) {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const titleRef = useRef(null);
 
-  const dirty =
+  const textChanged =
     form.title !== initial.title ||
     form.content !== initial.content ||
     form.diaryDate !== initial.diaryDate ||
-    removedIds.length > 0 ||
-    newItems.length > 0;
+    form.mood !== initial.mood ||
+    form.weather !== initial.weather;
+  const dirty = textChanged || removedIds.length > 0 || newItems.length > 0;
   useUnsavedChanges(dirty && !saving);
+
+  // 쓰는 동안 0.8초마다 임시 저장 (사진은 저장되지 않음). 복원 여부를 묻는 동안에는 덮어쓰지 않는다.
+  useEffect(() => {
+    if (restorable || saving) return undefined;
+    const timer = setTimeout(() => {
+      if (textChanged) {
+        drafts.save(user.id, draftScope, form);
+        setDraftSavedAt(new Date());
+      } else {
+        drafts.remove(user.id, draftScope);
+        setDraftSavedAt(null);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, textChanged, restorable, saving]);
+
+  const restoreDraft = () => {
+    const { title, content, diaryDate, mood, weather } = restorable;
+    setForm({
+      title: title ?? '',
+      content: content ?? '',
+      diaryDate: isValidDateString(diaryDate) ? diaryDate : initial.diaryDate,
+      mood: mood ?? null,
+      weather: weather ?? null,
+    });
+    setRestorable(null);
+    toast.info('임시 저장한 내용을 불러왔어요.');
+  };
+
+  const discardDraft = () => {
+    drafts.remove(user.id, draftScope);
+    setRestorable(null);
+  };
 
   // 미리보기용 object URL 정리
   const newItemsRef = useRef(newItems);
@@ -165,6 +229,8 @@ function DiaryEditor({ original }) {
       title: form.title.trim(),
       content: form.content,
       diaryDate: form.diaryDate,
+      mood: form.mood,
+      weather: form.weather,
       newImages: newItems.map((item) => item.file),
     };
     const onUploadProgress = (e) => {
@@ -175,6 +241,7 @@ function DiaryEditor({ original }) {
       const saved = isEdit
         ? await diaryService.update(original.id, { ...payload, removeImageIds: removedIds }, { onUploadProgress })
         : await diaryService.create({ ...payload, roomId: currentRoom.id }, { onUploadProgress });
+      drafts.remove(user.id, draftScope);
       toast.success(isEdit ? '일기를 고쳐 저장했어요.' : '일기를 저장했어요. 친구에게도 보여요!');
       navigate(`/diaries/${saved.id}`, { replace: true });
     } catch (error) {
@@ -208,6 +275,7 @@ function DiaryEditor({ original }) {
         statusBar={
           <>
             <span className="flex-1">{roomName ? `'${roomName}'에 저장돼요` : '수정 중'}</span>
+            {draftSavedAt && <span className="hidden sm:block">임시 저장됨 {clockFormat.format(draftSavedAt)}</span>}
             <span>{form.content.length.toLocaleString()}자</span>
             <span>사진 {existing.length + newItems.length}장</span>
           </>
@@ -227,6 +295,12 @@ function DiaryEditor({ original }) {
             />
             <TextField label="날짜" type="date" value={form.diaryDate} onChange={update('diaryDate')} error={errors.diaryDate} max="2100-12-31" min="1900-01-01" />
           </div>
+
+          <MoodWeatherPicker
+            mood={form.mood}
+            weather={form.weather}
+            onChange={({ mood, weather }) => setForm((prev) => ({ ...prev, mood, weather }))}
+          />
 
           <div>
             <label htmlFor="diary-content" className="label">
@@ -297,10 +371,42 @@ function DiaryEditor({ original }) {
         danger
         onConfirm={() => {
           setConfirmLeave(false);
+          drafts.remove(user.id, draftScope);
           leave();
         }}
         onCancel={() => setConfirmLeave(false)}
       />
+
+      <Dialog
+        open={Boolean(restorable)}
+        title="임시 저장된 일기"
+        icon={<PixelIcon name="letter" size={14} />}
+        onClose={discardDraft}
+        width={430}
+        footer={
+          <>
+            <Button variant="default" onClick={restoreDraft} autoFocus>
+              이어 쓰기
+            </Button>
+            <Button onClick={discardDraft}>새로 쓰기</Button>
+          </>
+        }
+      >
+        {restorable && (
+          <div className="flex items-start gap-4">
+            <PixelIcon name="bulb" size={32} className="mt-1" />
+            <div className="min-w-0">
+              <p>저장하지 않은 일기가 있어요. 이어서 쓸까요?</p>
+              <p className="ink mt-2 truncate text-[15px]">{restorable.title?.trim() || '제목 없음'}</p>
+              <p className="hint">
+                {formatDateTime(restorable.savedAt)}에 임시 저장. 사진은 임시 저장되지 않아요.
+              </p>
+            </div>
+          </div>
+        )}
+      </Dialog>
     </>
   );
 }
+
+const clockFormat = new Intl.DateTimeFormat('ko-KR', { hour: 'numeric', minute: '2-digit' });

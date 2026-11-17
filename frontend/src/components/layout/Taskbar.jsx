@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 import { useClock } from '../../hooks/useClock.js';
 import PixelIcon from '../ui/PixelIcon.jsx';
 import { NAV_ITEMS } from './navItems.js';
+import NotificationTray from './NotificationTray.jsx';
 import StartMenu from './StartMenu.jsx';
 
 const clockFormat = new Intl.DateTimeFormat('ko-KR', { hour: 'numeric', minute: '2-digit' });
@@ -63,7 +64,8 @@ export default function Taskbar() {
           ))}
         </div>
 
-        <div className="tray shrink-0">
+        <div className="tray shrink-0 !gap-2 !px-1.5 sm:!gap-[10px] sm:!px-2.5">
+          <NotificationTray />
           {currentRoom && (
             <span className="hidden max-w-[160px] items-center gap-1.5 md:flex" title={`지금 보고 있는 공간: ${currentRoom.name}`}>
               <PixelIcon name="heartSmall" size={12} />

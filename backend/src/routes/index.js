@@ -6,6 +6,8 @@ import diaryRoutes from './diary.routes.js';
 import commentRoutes from './comment.routes.js';
 import userRoutes from './user.routes.js';
 import todoRoutes from './todo.routes.js';
+import notificationRoutes from './notification.routes.js';
+import letterRoutes from './letter.routes.js';
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.use('/diaries', diaryRoutes);
 router.use('/comments', commentRoutes);
 router.use('/users', userRoutes);
 router.use('/todos', todoRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/letters', letterRoutes);
 
 export default router;

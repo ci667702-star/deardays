@@ -2,6 +2,7 @@ import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/HttpError.js';
 import { toComment } from '../utils/serializers.js';
 import { findDiaryForMember } from './diaryService.js';
+import { notify } from './notificationService.js';
 
 const COMMENT_NOT_FOUND = () => HttpError.notFound('댓글을 찾을 수 없어요. 삭제되었을 수도 있어요.', 'COMMENT_NOT_FOUND');
 
@@ -16,11 +17,12 @@ export async function listComments(userId, diaryId) {
 }
 
 export async function createComment(userId, diaryId, { content }) {
-  await findDiaryForMember(diaryId, userId);
+  const diary = await findDiaryForMember(diaryId, userId);
   const comment = await prisma.comment.create({
     data: { diaryId, userId, content },
     include: { user: true },
   });
+  await notify({ roomId: diary.diaryRoomId, actorId: userId, type: 'COMMENT_CREATED', diaryId, preview: content });
   return toComment(comment, userId);
 }
 

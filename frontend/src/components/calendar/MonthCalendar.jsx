@@ -2,9 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { WEEKDAYS, buildMonthGrid, parseDateString, todayString } from '../../utils/date.js';
 import { cx } from '../../utils/cx.js';
+import { FACE_MINE, FACE_THEIRS, moodOf } from '../../utils/moods.js';
 import PixelIcon from '../ui/PixelIcon.jsx';
 
 const LAVENDER_HEART = { p: '#a593dc', P: '#7a68bd' };
+
+/** 그날 일기 표시: 기분을 골랐으면 작성자 색 얼굴, 아니면 작성자 색 하트 */
+function DayMarker({ entry, mine = false, size }) {
+  const mood = moodOf(entry.mood);
+  if (mood) return <PixelIcon name={mood.icon} size={size} palette={mine ? FACE_MINE : FACE_THEIRS} />;
+  return <PixelIcon name="heartSmall" size={size - 1} palette={mine ? undefined : LAVENDER_HEART} />;
+}
 
 function addDays(value, amount) {
   const { year, monthIndex, day } = parseDateString(value);
@@ -119,8 +127,8 @@ export default function MonthCalendar({
         <div ref={gridRef} role="group" aria-label={`${year}년 ${monthIndex + 1}월 달력`} className="grid grid-cols-7">
           {cells.map((cell) => {
             const entries = days.get(cell.value) ?? [];
-            const mine = entries.some((d) => d.authorId === meId);
-            const theirs = entries.some((d) => d.authorId !== meId);
+            const mine = entries.find((d) => d.authorId === meId);
+            const theirs = entries.find((d) => d.authorId !== meId);
             const isToday = cell.value === today;
             const isSelected = cell.value === selectedDate;
             const label = `${parseDateString(cell.value).monthIndex + 1}월 ${cell.day}일${isToday ? ', 오늘' : ''}${
@@ -160,8 +168,8 @@ export default function MonthCalendar({
                 </span>
                 {(mine || theirs) && (
                   <span className="flex items-center gap-0.5" aria-hidden="true">
-                    {mine && <PixelIcon name="heartSmall" size={compact ? 9 : 12} />}
-                    {theirs && <PixelIcon name="heartSmall" size={compact ? 9 : 12} palette={LAVENDER_HEART} />}
+                    {mine && <DayMarker entry={mine} mine size={compact ? 10 : 13} />}
+                    {theirs && <DayMarker entry={theirs} size={compact ? 10 : 13} />}
                   </span>
                 )}
                 {!compact && entries.length > 0 && (
@@ -181,6 +189,9 @@ export default function MonthCalendar({
         </span>
         <span className="inline-flex items-center gap-1">
           <PixelIcon name="heartSmall" size={10} palette={LAVENDER_HEART} /> 친구가 쓴 날
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <PixelIcon name="moodHappy" size={11} palette={FACE_MINE} /> 표정은 그날 기분
         </span>
         {!compact && (
           <span className="inline-flex items-center gap-1">

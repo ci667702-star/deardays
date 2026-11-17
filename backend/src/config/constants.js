@@ -23,3 +23,13 @@ export const ALLOWED_IMAGE_TYPES = {
 };
 
 export const BCRYPT_ROUNDS = 12;
+
+/** 일기 기분·날씨 값 (화면의 도트 아이콘과 짝) */
+export const MOODS = ['happy', 'excited', 'calm', 'sad', 'angry'];
+export const WEATHERS = ['sunny', 'cloudy', 'rainy', 'snowy', 'windy'];
+
+/** 타임캡슐 편지는 최대 몇 년 뒤까지 보낼 수 있는지 */
+export const LETTER_MAX_YEARS = 10;
+
+/** 새 소식 목록에 한 번에 보여 줄 최대 개수 */
+export const NOTIFICATION_LIST_LIMIT = 50;

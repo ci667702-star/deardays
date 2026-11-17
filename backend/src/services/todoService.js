@@ -3,6 +3,7 @@ import { MAX_TODOS_PER_ROOM } from '../config/constants.js';
 import { HttpError } from '../utils/HttpError.js';
 import { toDbDate } from '../utils/date.js';
 import { toTodo } from '../utils/serializers.js';
+import { notify } from './notificationService.js';
 import { assertRoomMember } from './roomService.js';
 
 const todoInclude = { creator: true, assignee: true, completedBy: true };
@@ -25,7 +26,7 @@ async function assertAssigneeInRoom(roomId, assigneeId) {
 async function findTodoForMember(todoId, userId) {
   const todo = await prisma.todo.findUnique({
     where: { id: todoId },
-    select: { id: true, diaryRoomId: true, creatorId: true, isDone: true },
+    select: { id: true, diaryRoomId: true, creatorId: true, assigneeId: true, isDone: true },
   });
   if (!todo) throw TODO_NOT_FOUND();
 
@@ -85,7 +86,15 @@ export async function createTodo(userId, { roomId, content, dueDate, assigneeId 
     },
     include: todoInclude,
   });
+  await notifyAssignee({ roomId, actorId: userId, assigneeId, content });
   return toTodo(todo, userId);
+}
+
+/** 친구에게 할 일을 맡기면 그 친구에게 알린다 */
+async function notifyAssignee({ roomId, actorId, assigneeId, content }) {
+  if (assigneeId && assigneeId !== actorId) {
+    await notify({ roomId, actorId, type: 'TODO_ASSIGNED', recipientIds: [assigneeId], preview: content });
+  }
 }
 
 export async function updateTodo(userId, todoId, { content, dueDate, assigneeId }) {
@@ -100,6 +109,9 @@ export async function updateTodo(userId, todoId, { content, dueDate, assigneeId 
     data: { content, dueDate: dueDate ? toDbDate(dueDate) : null, assigneeId },
     include: todoInclude,
   });
+  if (assigneeId !== todo.assigneeId) {
+    await notifyAssignee({ roomId: todo.diaryRoomId, actorId: userId, assigneeId, content });
+  }
   return toTodo(updated, userId);
 }
 

@@ -1,5 +1,19 @@
 import { z } from 'zod';
-import { nicknameSchema } from './auth.validators.js';
+import { nicknameSchema, passwordSchema } from './auth.validators.js';
+
+const currentPasswordSchema = z
+  .string({ error: '지금 비밀번호를 입력해 주세요.' })
+  .min(1, '지금 비밀번호를 입력해 주세요.')
+  .max(64);
+
+export const changePasswordSchema = z.object({
+  currentPassword: currentPasswordSchema,
+  newPassword: passwordSchema,
+});
+
+export const deleteAccountSchema = z.object({
+  password: currentPasswordSchema,
+});
 
 export const updateProfileSchema = z
   .object({

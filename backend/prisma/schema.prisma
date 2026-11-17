@@ -11,22 +11,28 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique @db.VarChar(191)
-  password     String   @db.VarChar(255)
-  nickname     String   @db.VarChar(30)
-  profileImage String?  @db.VarChar(255)
-  introduction String?  @db.VarChar(300)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                Int       @id @default(autoincrement())
+  email             String    @unique @db.VarChar(191)
+  password          String    @db.VarChar(255)
+  nickname          String    @db.VarChar(30)
+  profileImage      String?   @db.VarChar(255)
+  introduction      String?   @db.VarChar(300)
+  // 비밀번호를 바꾸면 이 시각 이전에 발급된 로그인 토큰은 모두 무효
+  passwordChangedAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  memberships    DiaryRoomMember[]
-  diaries        Diary[]
-  comments       Comment[]
-  likes          Like[]
-  todosCreated   Todo[]            @relation("TodoCreator")
-  todosAssigned  Todo[]            @relation("TodoAssignee")
-  todosCompleted Todo[]            @relation("TodoCompleter")
+  memberships         DiaryRoomMember[]
+  diaries             Diary[]
+  comments            Comment[]
+  likes               Like[]
+  todosCreated        Todo[]            @relation("TodoCreator")
+  todosAssigned       Todo[]            @relation("TodoAssignee")
+  todosCompleted      Todo[]            @relation("TodoCompleter")
+  notifications       Notification[]    @relation("NotificationRecipient")
+  notificationsCaused Notification[]    @relation("NotificationActor")
+  lettersSent         Letter[]          @relation("LetterSender")
+  lettersReceived     Letter[]          @relation("LetterRecipient")
 
   @@map("users")
 }
@@ -37,9 +43,11 @@ model DiaryRoom {
   inviteCode String   @unique @db.VarChar(16)
   createdAt  DateTime @default(now())
 
-  members DiaryRoomMember[]
-  diaries Diary[]
-  todos   Todo[]
+  members       DiaryRoomMember[]
+  diaries       Diary[]
+  todos         Todo[]
+  notifications Notification[]
+  letters       Letter[]
 
   @@map("diary_rooms")
 }
@@ -66,14 +74,18 @@ model Diary {
   title       String   @db.VarChar(100)
   content     String   @db.Text
   diaryDate   DateTime @db.Date
+  // 기분(happy/excited/calm/sad/angry)과 날씨(sunny/cloudy/rainy/snowy/windy), 선택
+  mood        String?  @db.VarChar(16)
+  weather     String?  @db.VarChar(16)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  diaryRoom DiaryRoom    @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
-  author    User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  images    DiaryImage[]
-  comments  Comment[]
-  likes     Like[]
+  diaryRoom     DiaryRoom      @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  images        DiaryImage[]
+  comments      Comment[]
+  likes         Like[]
+  notifications Notification[]
 
   @@index([diaryRoomId, diaryDate])
   @@index([authorId])
@@ -148,4 +160,59 @@ model Todo {
   @@index([assigneeId])
   @@index([completedById])
   @@map("todos")
+}
+
+// 새 소식 알림. 받는 사람(recipient)마다 한 줄씩 만든다.
+// type: DIARY_CREATED, COMMENT_CREATED, LIKE_CREATED, TODO_ASSIGNED, MEMBER_JOINED,
+//       LETTER_SENT, LETTER_ARRIVED, LETTER_OPENED
+model Notification {
+  id          Int      @id @default(autoincrement())
+  recipientId Int
+  actorId     Int?
+  diaryRoomId Int
+  type        String   @db.VarChar(32)
+  diaryId     Int?
+  letterId    Int?
+  // 알림을 만들 때의 짧은 내용 (일기 제목, 댓글 앞부분 등)
+  preview     String?  @db.VarChar(120)
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  recipient User      @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User?     @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  diaryRoom DiaryRoom @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
+  diary     Diary?    @relation(fields: [diaryId], references: [id], onDelete: Cascade)
+  letter    Letter?   @relation(fields: [letterId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, isRead, createdAt])
+  @@index([actorId])
+  @@index([diaryRoomId])
+  @@index([diaryId])
+  @@index([letterId])
+  @@map("notifications")
+}
+
+// 타임캡슐 편지: openAt 날짜가 되기 전에는 받는 사람이 내용을 볼 수 없다.
+model Letter {
+  id              Int       @id @default(autoincrement())
+  diaryRoomId     Int
+  senderId        Int
+  // 받는 사람은 공간의 멤버 (나 자신에게 보내는 것도 가능)
+  recipientId     Int
+  title           String    @db.VarChar(60)
+  content         String    @db.Text
+  openAt          DateTime  @db.Date
+  openedAt        DateTime?
+  arrivalNotified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  diaryRoom     DiaryRoom      @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
+  sender        User           @relation("LetterSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient     User           @relation("LetterRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@index([diaryRoomId])
+  @@index([senderId])
+  @@index([recipientId, openAt])
+  @@map("letters")
 }

@@ -1,11 +1,14 @@
 import { api } from './api.js';
 
-function toFormData({ roomId, title, content, diaryDate, newImages = [], removeImageIds }) {
+function toFormData({ roomId, title, content, diaryDate, mood, weather, newImages = [], removeImageIds }) {
   const form = new FormData();
   if (roomId !== undefined) form.append('roomId', String(roomId));
   form.append('title', title);
   form.append('content', content);
   form.append('diaryDate', diaryDate);
+  // 비워 보내면 서버가 '없음'으로 저장
+  form.append('mood', mood ?? '');
+  form.append('weather', weather ?? '');
   if (removeImageIds) form.append('removeImageIds', JSON.stringify(removeImageIds));
   newImages.forEach((file) => form.append('images', file));
   return form;
@@ -13,8 +16,10 @@ function toFormData({ roomId, title, content, diaryDate, newImages = [], removeI
 
 export const diaryService = {
   /** @returns {Promise<{items, page, limit, total, hasMore}>} */
-  async list({ roomId, sort = 'latest', date, month, page = 1, limit = 10 }) {
-    const { data } = await api.get('/diaries', { params: { roomId, sort, date, month, page, limit } });
+  async list({ roomId, sort = 'latest', date, month, page = 1, limit = 10, q, authorId, from, to }) {
+    const { data } = await api.get('/diaries', {
+      params: { roomId, sort, date, month, page, limit, q: q || undefined, authorId: authorId || undefined, from: from || undefined, to: to || undefined },
+    });
     return data;
   },
 

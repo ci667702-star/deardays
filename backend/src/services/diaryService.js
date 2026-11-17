@@ -4,6 +4,7 @@ import { HttpError } from '../utils/HttpError.js';
 import { fromDbDate, monthRange, toDbDate } from '../utils/date.js';
 import { filePathToUploadUrl, removeUploadUrls } from '../utils/files.js';
 import { toDiary } from '../utils/serializers.js';
+import { markReadFor, notify } from './notificationService.js';
 import { assertRoomMember } from './roomService.js';
 
 const diaryInclude = (viewerId) => ({
@@ -39,7 +40,7 @@ function filesToImageCreates(files) {
   return files.map((file) => ({ imageUrl: filePathToUploadUrl(file.path) }));
 }
 
-export async function createDiary(userId, { roomId, title, content, diaryDate }, files = []) {
+export async function createDiary(userId, { roomId, title, content, diaryDate, mood, weather }, files = []) {
   await assertRoomMember(roomId, userId);
 
   const diary = await prisma.diary.create({
@@ -49,14 +50,18 @@ export async function createDiary(userId, { roomId, title, content, diaryDate },
       title,
       content,
       diaryDate: toDbDate(diaryDate),
+      mood,
+      weather,
       images: { create: filesToImageCreates(files) },
     },
     include: diaryInclude(userId),
   });
+
+  await notify({ roomId, actorId: userId, type: 'DIARY_CREATED', diaryId: diary.id, preview: title });
   return toDiary(diary, userId);
 }
 
-export async function listDiaries(userId, { roomId, sort, date, month, authorId, page, limit }) {
+export async function listDiaries(userId, { roomId, sort, date, month, authorId, q, from, to, page, limit }) {
   await assertRoomMember(roomId, userId);
 
   const where = { diaryRoomId: roomId };
@@ -65,8 +70,19 @@ export async function listDiaries(userId, { roomId, sort, date, month, authorId,
   } else if (month) {
     const { start, end } = monthRange(month);
     where.diaryDate = { gte: start, lt: end };
+  } else if (from || to) {
+    where.diaryDate = {
+      ...(from ? { gte: toDbDate(from) } : {}),
+      ...(to ? { lte: toDbDate(to) } : {}),
+    };
   }
   if (authorId) where.authorId = authorId;
+  // 제목이나 내용에 낱말이 들어간 일기 (대소문자 구분 없음: utf8mb4_unicode_ci)
+  // MySQL LIKE 의 와일드카드(%, _)와 이스케이프 문자(\)는 글자 그대로 찾도록 이스케이프한다.
+  if (q) {
+    const literal = q.replace(/[\\%_]/g, (char) => `\\${char}`);
+    where.OR = [{ title: { contains: literal } }, { content: { contains: literal } }];
+  }
 
   const direction = sort === 'oldest' ? 'asc' : 'desc';
   const [total, diaries] = await prisma.$transaction([
@@ -97,7 +113,7 @@ export async function getCalendar(userId, { roomId, month }) {
 
   const diaries = await prisma.diary.findMany({
     where: { diaryRoomId: roomId, diaryDate: { gte: start, lt: end } },
-    select: { id: true, title: true, diaryDate: true, authorId: true },
+    select: { id: true, title: true, diaryDate: true, authorId: true, mood: true },
     orderBy: [{ diaryDate: 'asc' }, { createdAt: 'asc' }],
   });
 
@@ -105,7 +121,7 @@ export async function getCalendar(userId, { roomId, month }) {
   for (const diary of diaries) {
     const key = fromDbDate(diary.diaryDate);
     if (!byDate.has(key)) byDate.set(key, []);
-    byDate.get(key).push({ id: diary.id, title: diary.title, authorId: diary.authorId });
+    byDate.get(key).push({ id: diary.id, title: diary.title, authorId: diary.authorId, mood: diary.mood ?? null });
   }
 
   return {
@@ -118,10 +134,12 @@ export async function getDiary(userId, diaryId) {
   await findDiaryForMember(diaryId, userId);
   const diary = await prisma.diary.findUnique({ where: { id: diaryId }, include: diaryInclude(userId) });
   if (!diary) throw DIARY_NOT_FOUND();
+  // 일기를 직접 열어 봤으니 이 일기에 관한 새 소식은 읽은 것으로
+  await markReadFor(userId, { diaryId });
   return toDiary(diary, userId);
 }
 
-export async function updateDiary(userId, diaryId, { title, content, diaryDate, removeImageIds }, files = []) {
+export async function updateDiary(userId, diaryId, { title, content, diaryDate, mood, weather, removeImageIds }, files = []) {
   const diary = await findDiaryForMember(diaryId, userId);
   if (diary.authorId !== userId) {
     throw HttpError.forbidden('내가 쓴 일기만 수정할 수 있어요.', 'NOT_AUTHOR');
@@ -147,6 +165,8 @@ export async function updateDiary(userId, diaryId, { title, content, diaryDate, 
         title,
         content,
         diaryDate: toDbDate(diaryDate),
+        mood,
+        weather,
         images: { create: filesToImageCreates(files) },
       },
       include: diaryInclude(userId),

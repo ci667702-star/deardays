@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { authService } from '../services/authService.js';
+import { drafts } from '../utils/drafts.js';
 import { tokenStorage } from '../utils/storage.js';
 import { useToast } from './ToastContext.jsx';
 
@@ -65,10 +66,17 @@ export function AuthProvider({ children }) {
     return me;
   }, []);
 
+  /** 직접 로그아웃할 때는 이 기기에 남은 임시 저장 일기도 지운다 (같이 쓰는 컴퓨터 대비) */
   const logout = useCallback(() => {
+    if (userRef.current) drafts.clearUser(userRef.current.id);
     tokenStorage.clear();
     setUser(null);
     setStatus('guest');
+  }, []);
+
+  /** 비밀번호 변경 후 받은 새 토큰으로 교체 (이 기기는 로그인 유지) */
+  const replaceToken = useCallback((token) => {
+    tokenStorage.replace(token);
   }, []);
 
   /** 프로필 수정 후 화면 곳곳의 내 정보를 갱신 */
@@ -77,8 +85,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, status, isAuthenticated: status === 'authenticated', login, register, logout, updateUser }),
-    [user, status, login, register, logout, updateUser],
+    () => ({ user, status, isAuthenticated: status === 'authenticated', login, register, logout, updateUser, replaceToken }),
+    [user, status, login, register, logout, updateUser, replaceToken],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

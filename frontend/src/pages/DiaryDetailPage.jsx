@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import CommentSection from '../components/diary/CommentSection.jsx';
 import LikeButton from '../components/diary/LikeButton.jsx';
+import { MoodWeatherBadge } from '../components/diary/MoodWeather.jsx';
 import PhotoGallery from '../components/diary/PhotoGallery.jsx';
 import Avatar from '../components/ui/Avatar.jsx';
 import { ButtonLink } from '../components/ui/Button.jsx';
@@ -116,6 +117,7 @@ function DiaryDetail({ diaryId }) {
         </header>
 
         <h1 className="ink mt-4 text-[24px] leading-snug">{diary.title}</h1>
+        <MoodWeatherBadge mood={diary.mood} weather={diary.weather} className="mt-2" />
 
         <div className="sunken mt-3 p-[2px]">
           <div className="paper min-h-[200px]">{diary.content}</div>

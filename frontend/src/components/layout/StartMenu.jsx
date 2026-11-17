@@ -51,7 +51,7 @@ export default function StartMenu({ open, onClose, onLogout, anchorRef, user }) 
         <p className="font-small truncate px-3 pb-2 pt-1 text-[12px] text-muted">{user?.nickname}님의 일기장</p>
         {NAV_ITEMS.map((item) => (
           <Link key={item.to} to={item.to} role="menuitem" className="start-item" onClick={onClose}>
-            <PixelIcon name={item.icon} size={24} />
+            <PixelIcon name={item.icon} size={24} palette={item.palette} />
             <span>{item.label}</span>
           </Link>
         ))}

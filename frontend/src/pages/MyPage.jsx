@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Camera, FolderOpen, LogOut, Save, Trash2 } from 'lucide-react';
+import AccountSettings from '../components/account/AccountSettings.jsx';
 import { ACCEPT_ATTR, checkImageFiles } from '../components/diary/imageRules.js';
 import Avatar from '../components/ui/Avatar.jsx';
 import Button from '../components/ui/Button.jsx';
@@ -262,6 +263,8 @@ export default function MyPage() {
                 </Button>
               </div>
             </GroupBox>
+
+            <AccountSettings />
 
             <div className="flex justify-end">
               <Button onClick={() => setConfirmLogout(true)} icon={<LogOut size={14} />}>

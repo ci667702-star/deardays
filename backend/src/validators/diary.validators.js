@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_DIARY_IMAGES } from '../config/constants.js';
+import { MAX_DIARY_IMAGES, MOODS, WEATHERS } from '../config/constants.js';
 import { isValidDateString, isValidMonthString } from '../utils/date.js';
 import { idSchema, requiredText } from './common.js';
 
@@ -12,10 +12,17 @@ const diaryDateSchema = z
     return year >= 1900 && year <= 2100;
   }, '날짜는 1900년부터 2100년 사이로 골라 주세요.');
 
+// 기분·날씨는 선택. 비우거나 보내지 않으면 없음(null)
+const emptyToNull = (value) => (value === '' || value === undefined ? null : value);
+const pickOne = (values, label) =>
+  z.preprocess(emptyToNull, z.union([z.null(), z.enum(values)], { error: `${label} 값이 올바르지 않아요.` }));
+
 const diaryFields = {
   title: requiredText('제목', 100),
   content: requiredText('내용', 20000),
   diaryDate: diaryDateSchema,
+  mood: pickOne(MOODS, '기분'),
+  weather: pickOne(WEATHERS, '날씨'),
 };
 
 export const createDiarySchema = z.object({
@@ -47,15 +54,32 @@ export const updateDiarySchema = z.object({
 const pageSchema = z.coerce.number().int().min(1).max(10000).default(1);
 const limitSchema = z.coerce.number().int().min(1).max(50).default(10);
 
-export const listDiaryQuerySchema = z.object({
-  roomId: idSchema('공유 공간'),
-  sort: z.enum(['latest', 'oldest'], { error: '정렬은 latest 또는 oldest 만 가능해요.' }).default('latest'),
-  date: z.string().refine(isValidDateString, '날짜 형식이 올바르지 않아요.').optional(),
-  month: z.string().refine(isValidMonthString, '월 형식이 올바르지 않아요. (예: 2026-11)').optional(),
-  authorId: idSchema('작성자').optional(),
-  page: pageSchema,
-  limit: limitSchema,
-});
+const optionalDate = (label) =>
+  z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().refine(isValidDateString, `${label} 날짜 형식이 올바르지 않아요.`).optional(),
+  );
+
+export const listDiaryQuerySchema = z
+  .object({
+    roomId: idSchema('공유 공간'),
+    sort: z.enum(['latest', 'oldest'], { error: '정렬은 latest 또는 oldest 만 가능해요.' }).default('latest'),
+    date: z.string().refine(isValidDateString, '날짜 형식이 올바르지 않아요.').optional(),
+    month: z.string().refine(isValidMonthString, '월 형식이 올바르지 않아요. (예: 2026-11)').optional(),
+    authorId: z.preprocess((value) => (value === '' ? undefined : value), idSchema('작성자').optional()),
+    // 검색: 제목·내용 낱말, 날짜 범위
+    q: z.preprocess(
+      (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+      z.string().trim().max(50, '찾을 낱말은 50자 이하로 써 주세요.').optional(),
+    ),
+    from: optionalDate('시작'),
+    to: optionalDate('끝'),
+    page: pageSchema,
+    limit: limitSchema,
+  })
+  .refine((query) => !query.from || !query.to || query.from <= query.to, {
+    message: '시작 날짜가 끝 날짜보다 늦어요.',
+  });
 
 export const calendarQuerySchema = z.object({
   roomId: idSchema('공유 공간'),

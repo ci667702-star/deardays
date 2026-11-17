@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { ArrowDownWideNarrow, ArrowUpNarrowWide, DoorOpen, FolderPlus, PenLine, Settings } from 'lucide-react';
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, DoorOpen, FolderPlus, PenLine, Search, Settings } from 'lucide-react';
 import DiaryList from '../components/diary/DiaryList.jsx';
 import InviteCodeBox from '../components/room/InviteCodeBox.jsx';
 import MemberPair from '../components/room/MemberPair.jsx';
@@ -129,6 +129,9 @@ function RoomView() {
           <>
             <Link to="/diaries/new" className="btn-tool">
               <PenLine size={14} /> 새 일기
+            </Link>
+            <Link to="/search" className="btn-tool">
+              <Search size={14} /> 찾기
             </Link>
             <span className="mx-1 h-6 w-[2px] shadow-[inset_1px_0_var(--color-shade),inset_-1px_0_var(--color-hilite)]" aria-hidden="true" />
             <div role="group" aria-label="정렬" className="flex">

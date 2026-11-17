@@ -3,6 +3,7 @@ import { Heart, ImageIcon, MessageSquare } from 'lucide-react';
 import { formatShortDate } from '../../utils/date.js';
 import Avatar from '../ui/Avatar.jsx';
 import PixelIcon from '../ui/PixelIcon.jsx';
+import { MoodWeatherBadge } from './MoodWeather.jsx';
 
 // 내 일기는 분홍 봉인, 친구 일기는 라벤더 봉인
 export const PARTNER_SEAL = { p: '#a593dc', P: '#7a68bd' };
@@ -31,8 +32,42 @@ function Counts({ diary }) {
   );
 }
 
-/** 탐색기 '자세히 보기' 같은 일기 목록. 넓은 화면에선 열, 좁은 화면에선 두 줄로. */
-export default function DiaryList({ diaries, showHeader = true }) {
+/** 찾은 낱말을 <mark> 로 강조한다 (대소문자 무시) */
+function Highlight({ text, word }) {
+  if (!word) return text;
+  const lower = text.toLowerCase();
+  const needle = word.toLowerCase();
+  const parts = [];
+  let from = 0;
+  let index = lower.indexOf(needle);
+  while (index !== -1) {
+    if (index > from) parts.push(text.slice(from, index));
+    parts.push(
+      <mark key={index} className="bg-cream px-0.5 text-ink shadow-[inset_0_-2px_var(--color-pink)]">
+        {text.slice(index, index + word.length)}
+      </mark>,
+    );
+    from = index + word.length;
+    index = lower.indexOf(needle, from);
+  }
+  if (from < text.length) parts.push(text.slice(from));
+  return parts;
+}
+
+/** 본문 미리보기: 찾는 낱말이 있으면 그 주변을 보여 준다 */
+function excerpt(content, word) {
+  const flat = content.replace(/\s+/g, ' ');
+  if (!word) return flat.slice(0, 80);
+  const at = flat.toLowerCase().indexOf(word.toLowerCase());
+  if (at <= 30) return flat.slice(0, 80);
+  return `…${flat.slice(at - 25, at + 55)}`;
+}
+
+/**
+ * 탐색기 '자세히 보기' 같은 일기 목록. 넓은 화면에선 열, 좁은 화면에선 두 줄로.
+ * highlight: 검색 결과에서 강조할 낱말
+ */
+export default function DiaryList({ diaries, showHeader = true, highlight = '' }) {
   return (
     <div className="sunken @container">
       {showHeader && (
@@ -56,8 +91,15 @@ export default function DiaryList({ diaries, showHeader = true }) {
             >
               <PixelIcon name="letter" size={24} palette={diary.isMine ? undefined : PARTNER_SEAL} />
               <span className="min-w-0">
-                <span className="block truncate">{diary.title}</span>
-                <span className="ink block truncate text-[13px] opacity-70">{diary.content.slice(0, 80)}</span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="truncate">
+                    <Highlight text={diary.title} word={highlight} />
+                  </span>
+                  <MoodWeatherBadge mood={diary.mood} weather={diary.weather} compact />
+                </span>
+                <span className="ink block truncate text-[13px] opacity-70">
+                  <Highlight text={excerpt(diary.content, highlight)} word={highlight} />
+                </span>
                 <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 @2xl:hidden">
                   <span className="list-meta inline-flex items-center gap-1.5">
                     <Avatar user={diary.author} size={16} />
