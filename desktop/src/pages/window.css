@@ -1,0 +1,157 @@
+/* 앱 안의 설정·연결 실패 화면용: 웹 화면과 같은 옛 윈도우(클래식) 모양 */
+:root {
+  --desk: #008080;
+  --face: #c0c0c0;
+  --hilite: #ffffff;
+  --light: #dfdfdf;
+  --shade: #808080;
+  --dark: #000000;
+  --title: #000080;
+  --title-end: #1084d0;
+  --bevel-out: inset -1px -1px var(--dark), inset 1px 1px var(--light), inset -2px -2px var(--shade), inset 2px 2px var(--hilite);
+  --bevel-raised: inset -1px -1px var(--dark), inset 1px 1px var(--hilite), inset -2px -2px var(--shade), inset 2px 2px var(--light);
+  --bevel-in: inset -1px -1px var(--hilite), inset 1px 1px var(--shade), inset -2px -2px var(--light), inset 2px 2px var(--dark);
+  --bevel-pressed: inset -1px -1px var(--hilite), inset 1px 1px var(--dark), inset -2px -2px var(--light), inset 2px 2px var(--shade);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--desk);
+  color: #000;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 14px;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.win {
+  width: min(460px, 100%);
+  padding: 3px;
+  background: var(--face);
+  box-shadow: var(--bevel-out);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  background: linear-gradient(90deg, var(--title), var(--title-end));
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.title img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.body {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+.body > img {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.content {
+  min-width: 0;
+  flex: 1;
+}
+
+p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.hint {
+  color: #3f3f3f;
+  font-size: 12px;
+}
+
+.hint.error {
+  color: #b0124a;
+}
+
+.hint.ok {
+  color: #1d6b47;
+}
+
+label {
+  display: block;
+  margin: 12px 0 4px;
+}
+
+.field {
+  display: block;
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 0;
+  background: #fff;
+  box-shadow: var(--bevel-in);
+  font: inherit;
+  outline: none;
+}
+
+.field:focus-visible {
+  outline: 1px solid var(--title);
+  outline-offset: 1px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn {
+  min-width: 88px;
+  min-height: 30px;
+  padding: 4px 14px;
+  border: 0;
+  background: var(--face);
+  box-shadow: var(--bevel-raised);
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn:active:not(:disabled) {
+  box-shadow: var(--bevel-pressed);
+}
+
+.btn.default {
+  box-shadow: 0 0 0 1px var(--dark), var(--bevel-raised);
+}
+
+.btn:disabled {
+  color: var(--shade);
+  cursor: default;
+}
+
+.btn:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -5px;
+}
+
+code {
+  word-break: break-all;
+}

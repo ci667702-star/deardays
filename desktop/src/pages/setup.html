@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'" />
+    <title>DearDays - 서버 연결</title>
+    <link rel="stylesheet" href="window.css" />
+  </head>
+  <body>
+    <main class="win" aria-labelledby="title">
+      <div class="title"><img src="../../build/icon.png" alt="" /><span id="title">DearDays - 서버 연결</span></div>
+      <form class="body" id="form" novalidate>
+        <img src="../../build/icon.png" alt="" />
+        <div class="content">
+          <p>DearDays 서버 주소를 입력해 주세요.</p>
+          <p class="hint">학교 서버 등에 올린 DearDays 주소예요. 예: <code>http://192.168.0.10:8080</code> 또는 <code>https://deardays.example.kr</code></p>
+          <label for="server">서버 주소</label>
+          <input id="server" class="field" placeholder="http://서버주소:포트" autocomplete="url" autofocus />
+          <p id="status" class="hint" role="status" aria-live="polite"></p>
+          <div class="buttons">
+            <button type="button" id="test" class="btn">연결 확인</button>
+            <button type="submit" id="save" class="btn default">연결하기</button>
+          </div>
+        </div>
+      </form>
+    </main>
+    <script src="setup.js"></script>
+  </body>
+</html>

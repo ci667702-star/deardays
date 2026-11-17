@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'" />
+    <title>DearDays - 연결할 수 없음</title>
+    <link rel="stylesheet" href="window.css" />
+  </head>
+  <body>
+    <main class="win" aria-labelledby="title">
+      <div class="title"><img src="../../build/icon.png" alt="" /><span id="title">DearDays - 연결할 수 없음</span></div>
+      <div class="body">
+        <img src="../../build/icon.png" alt="" />
+        <div class="content">
+          <p>DearDays 서버에 연결할 수 없어요.</p>
+          <p class="hint">인터넷(학교 네트워크) 연결과 서버가 켜져 있는지 확인한 뒤 다시 시도해 주세요.</p>
+          <p class="hint">서버: <code id="server"></code></p>
+          <p class="hint" id="reason"></p>
+          <div class="buttons">
+            <button type="button" id="settings" class="btn">서버 주소 바꾸기</button>
+            <button type="button" id="retry" class="btn default">다시 시도</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="offline.js"></script>
+  </body>
+</html>

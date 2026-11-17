@@ -8,6 +8,8 @@ import { useToast } from './ToastContext.jsx';
 
 const NotificationContext = createContext(null);
 const POLL_MS = 30000;
+/** DearDays 데스크톱 앱(Electron) 안에서 열렸을 때만 있는 기능 (desktop/src/preload.js) */
+const desktop = typeof window !== 'undefined' ? window.deardaysDesktop : undefined;
 
 /**
  * 새 소식: 안 읽은 개수를 30초마다(화면이 보일 때), 페이지를 옮길 때, 탭으로 돌아올 때 확인한다.
@@ -69,7 +71,12 @@ export function NotificationProvider({ children }) {
       } else if (count > previous) {
         const data = await loadList();
         const newest = data?.items.find((item) => !item.isRead);
-        if (newest) toast.info(describeNotification(newest, user.id).text);
+        if (newest) {
+          const info = describeNotification(newest, user.id);
+          toast.info(info.text);
+          // 데스크톱 앱이 뒤에 있으면 윈도우 알림으로도 알려 준다
+          if (desktop && (document.hidden || !document.hasFocus())) desktop.notify('DearDays 새 소식', [info.text, info.detail].filter(Boolean).join('\n'));
+        }
       }
     } catch {
       // 네트워크가 잠깐 끊긴 경우 등: 다음 확인 때 다시 시도
@@ -90,6 +97,12 @@ export function NotificationProvider({ children }) {
   }, [pathname]);
 
   useRefreshOnFocus(refreshCount, { minInterval: 5000 });
+
+  // 데스크톱 앱: 작업 표시줄 아이콘에 안 읽은 소식 표시 (로그아웃 등으로 화면이 사라지면 지움)
+  useEffect(() => {
+    desktop?.setUnread(unreadCount);
+  }, [unreadCount]);
+  useEffect(() => () => desktop?.setUnread(0), []);
 
   const markRead = useCallback(
     async (id) => {

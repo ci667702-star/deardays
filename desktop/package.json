@@ -1,0 +1,75 @@
+{
+  "name": "deardays-desktop",
+  "productName": "DearDays",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DearDays 데스크톱 앱 (옛 윈도우 스타일 교환 일기)",
+  "author": "DearDays",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "icons": "node scripts/make-icons.cjs",
+    "dist": "electron-builder --win nsis portable",
+    "dist:mac": "electron-builder --mac dmg",
+    "dist:linux": "electron-builder --linux AppImage"
+  },
+  "devDependencies": {
+    "electron": "^45.3.3",
+    "electron-builder": "^26.18.0"
+  },
+  "deardays": {
+    "defaultServer": ""
+  },
+  "build": {
+    "appId": "app.deardays.desktop",
+    "productName": "DearDays",
+    "copyright": "DearDays",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "electronLanguages": [
+      "ko",
+      "en-US"
+    ],
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "build/badge.png",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DearDays",
+      "artifactName": "DearDays-Setup-${version}.${ext}",
+      "installerLanguages": [
+        "ko_KR"
+      ],
+      "language": "1042"
+    },
+    "portable": {
+      "artifactName": "DearDays-${version}-portable.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.lifestyle",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility",
+      "icon": "build/icon.png"
+    }
+  }
+}

@@ -68,6 +68,20 @@ export default function StartMenu({ open, onClose, onLogout, anchorRef, user }) 
           <PixelIcon name="computer" size={24} />
           <span>화면 색 바꾸기...</span>
         </button>
+        {window.deardaysDesktop && (
+          <button
+            type="button"
+            role="menuitem"
+            className="start-item"
+            onClick={() => {
+              onClose();
+              window.deardaysDesktop.openServerSettings();
+            }}
+          >
+            <PixelIcon name="folder" size={24} />
+            <span>서버 주소 바꾸기...</span>
+          </button>
+        )}
         <button type="button" role="menuitem" className="start-item" onClick={onLogout}>
           <span className="grid w-6 place-items-center">
             <LogOut size={18} />
