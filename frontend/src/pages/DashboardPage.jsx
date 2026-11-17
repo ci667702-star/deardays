@@ -31,7 +31,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex items-center justify-between gap-3">
+      <header className="flex items-center justify-between gap-3 text-desk-text">
         <Logo size="sm" />
         <Link to="/me" className="flex items-center gap-2 px-1 text-[12px] no-underline hover:underline font-small">
           <span className="hidden sm:inline">{user.nickname}님</span>

@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { LogOut } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext.jsx';
 import PixelIcon from '../ui/PixelIcon.jsx';
 import { NAV_ITEMS } from './navItems.js';
 
 /** 시작 메뉴: 왼쪽 세로 띠 + 메뉴 항목. 위/아래 화살표로 이동, Esc·바깥 클릭으로 닫힘 */
 export default function StartMenu({ open, onClose, onLogout, anchorRef, user }) {
   const menuRef = useRef(null);
+  const { openDisplaySettings } = useTheme();
 
   useEffect(() => {
     if (!open) return undefined;
@@ -54,6 +56,18 @@ export default function StartMenu({ open, onClose, onLogout, anchorRef, user }) 
           </Link>
         ))}
         <hr className="etched mx-1 my-1" />
+        <button
+          type="button"
+          role="menuitem"
+          className="start-item"
+          onClick={() => {
+            onClose();
+            openDisplaySettings();
+          }}
+        >
+          <PixelIcon name="computer" size={24} />
+          <span>화면 색 바꾸기...</span>
+        </button>
         <button type="button" role="menuitem" className="start-item" onClick={onLogout}>
           <span className="grid w-6 place-items-center">
             <LogOut size={18} />

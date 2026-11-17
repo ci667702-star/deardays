@@ -12,6 +12,8 @@ import TextField from '../components/ui/TextField.jsx';
 import Window from '../components/ui/Window.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRooms } from '../context/RoomContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
+import { THEMES } from '../utils/theme.js';
 import { useToast } from '../context/ToastContext.jsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js';
 import { useFetch } from '../hooks/useFetch.js';
@@ -37,6 +39,7 @@ export default function MyPage() {
   useDocumentTitle('내 정보');
   const { user, updateUser, logout } = useAuth();
   const { selectRoom } = useRooms();
+  const { theme, openDisplaySettings } = useTheme();
   const toast = useToast();
   const navigate = useNavigate();
   const fileRef = useRef(null);
@@ -246,6 +249,18 @@ export default function MyPage() {
                   })}
                 </ul>
               )}
+            </GroupBox>
+
+            <GroupBox title="화면">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p>
+                  색 구성표: {THEMES.find((item) => item.id === theme)?.name}
+                  <span className="hint mt-0 block">이 기기에서만 적용돼요.</span>
+                </p>
+                <Button size="sm" onClick={openDisplaySettings} icon={<PixelIcon name="computer" size={14} />}>
+                  화면 색 바꾸기...
+                </Button>
+              </div>
             </GroupBox>
 
             <div className="flex justify-end">

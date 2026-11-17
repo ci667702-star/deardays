@@ -39,6 +39,7 @@ export default function Taskbar() {
           className="task-btn shrink-0 font-bold"
           aria-haspopup="menu"
           aria-expanded={menuOpen}
+          aria-label="시작 메뉴"
           onClick={() => setMenuOpen((open) => !open)}
         >
           <PixelIcon name="heart" size={20} />

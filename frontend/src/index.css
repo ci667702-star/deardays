@@ -1,53 +1,111 @@
 @import 'tailwindcss';
 
 /* ───────────────────────── 디자인 토큰 ─────────────────────────
-   옛 윈도우 창의 입체 테두리 구조를 그대로 쓰되, 회색 대신
-   라벤더·크림·연핑크로 다시 칠한 "파스텔 95" 팔레트.
+   옛 윈도우 창의 2px 입체 테두리(흰색·밝은 회색 / 회색·검정)를 그대로 쓴다.
+   테두리가 또렷하려면 창 바탕(face)이 흰 하이라이트보다 확실히 어두워야 하므로
+   색 구성표마다 face 밝기를 #c0c0c0 근처로 맞췄다.
+   - classic : 보내 준 화면과 같은 회색 창 + 청록 바탕 + 남색 제목 표시줄 (기본값)
+   - plum    : 자두색 바탕 + 분홍빛 창 + 자주→분홍 제목 표시줄
    시스템 글자는 픽셀 폰트(Galmuri), 사람이 쓴 글은 바탕체(Gowun Batang). */
 @theme {
   --font-ui: 'Galmuri14', 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   --font-small: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   --font-paper: 'Gowun Batang', 'Batang', 'AppleMyungjo', serif;
 
-  --color-desk: #8fc1b8;
-  --color-desk-dot: #85b8ae;
-  --color-face: #e6dfec;
+  /* 기본값 = classic (아래 [data-theme] 블록과 같은 값) */
+  --color-desk: #008080;
+  --color-desk-text: #ffffff;
+  --color-face: #c0c0c0;
   --color-hilite: #ffffff;
-  --color-light: #f4f0f7;
-  --color-shade: #9a90a7;
-  --color-dark: #2a2431;
-  --color-ink: #2a2431;
-  --color-muted: #6a6075;
-  --color-title: #3b2d6e;
-  --color-title-end: #c48ac0;
-  --color-select: #3b2d6e;
+  --color-light: #dfdfdf;
+  --color-shade: #808080;
+  --color-dark: #000000;
+  --color-ink: #000000;
+  --color-muted: #3f3f3f;
+  --color-title: #000080;
+  --color-title-end: #1084d0;
+  --color-select: #000080;
+  --color-focus: #000080;
+  --color-accent-face: #c0c0c0;
   --color-pink: #e9729f;
   --color-pink-deep: #c24f7e;
   --color-pink-soft: #fde4ee;
-  --color-lav: #cbbcec;
-  --color-lav-soft: #f1ecfb;
-  --color-cream: #fff6e2;
-  --color-paper: #fffdf6;
-  --color-rule: #e7ddf3;
-  --color-margin: #f4b6cc;
-  --color-ok: #2f7d5b;
-  --color-danger: #b0305a;
+  --color-lav: #b8b8e0;
+  --color-lav-soft: #e3e3f1;
+  --color-cream: #ffffe1;
+  --color-paper: #fffef8;
+  --color-rule: #d5dcef;
+  --color-margin: #f2a7c2;
+  --color-ok: #1d6b47;
+  --color-danger: #b0124a;
+}
+
+[data-theme='classic'] {
+  --color-desk: #008080;
+  --color-desk-text: #ffffff;
+  --color-face: #c0c0c0;
+  --color-hilite: #ffffff;
+  --color-light: #dfdfdf;
+  --color-shade: #808080;
+  --color-dark: #000000;
+  --color-ink: #000000;
+  --color-muted: #3f3f3f;
+  --color-title: #000080;
+  --color-title-end: #1084d0;
+  --color-select: #000080;
+  --color-focus: #000080;
+  --color-accent-face: #c0c0c0;
+  --color-lav: #b8b8e0;
+  --color-lav-soft: #e3e3f1;
+  --color-cream: #ffffe1;
+  --color-paper: #fffef8;
+  --color-rule: #d5dcef;
+  --color-margin: #f2a7c2;
+}
+
+[data-theme='plum'] {
+  --color-desk: #7d3f73;
+  --color-desk-text: #ffffff;
+  --color-face: #dbbbd6;
+  --color-hilite: #ffffff;
+  --color-light: #efdfec;
+  --color-shade: #94648c;
+  --color-dark: #2a0d26;
+  --color-ink: #2a0d26;
+  --color-muted: #573452;
+  --color-title: #5c1252;
+  --color-title-end: #d0579d;
+  --color-select: #5c1252;
+  --color-focus: #5c1252;
+  --color-accent-face: #f4c7dd;
+  --color-lav: #d7b3e3;
+  --color-lav-soft: #f6e6f2;
+  --color-cream: #fff3e2;
+  --color-paper: #fffaf8;
+  --color-rule: #efd9ea;
+  --color-margin: #f2a7c2;
 }
 
 :root {
   --taskbar-h: 44px;
   --line: 32px;
+}
 
-  /* 입체 테두리: 바깥(볼록) / 안쪽(오목) / 눌림 */
+/* 입체 테두리: 색 구성표가 바뀌는 요소마다 다시 계산되도록 [data-theme] 에도 선언한다.
+   out(창), raised(버튼), in(입력칸), pressed(눌린 버튼) */
+:root,
+[data-theme] {
   --bevel-out: inset -1px -1px var(--color-dark), inset 1px 1px var(--color-light),
     inset -2px -2px var(--color-shade), inset 2px 2px var(--color-hilite);
+  --bevel-raised: inset -1px -1px var(--color-dark), inset 1px 1px var(--color-hilite),
+    inset -2px -2px var(--color-shade), inset 2px 2px var(--color-light);
   --bevel-in: inset -1px -1px var(--color-hilite), inset 1px 1px var(--color-shade),
     inset -2px -2px var(--color-light), inset 2px 2px var(--color-dark);
   --bevel-pressed: inset -1px -1px var(--color-hilite), inset 1px 1px var(--color-dark),
     inset -2px -2px var(--color-light), inset 2px 2px var(--color-shade);
   --bevel-thin-in: inset -1px -1px var(--color-hilite), inset 1px 1px var(--color-shade);
   --bevel-thin-out: inset -1px -1px var(--color-shade), inset 1px 1px var(--color-hilite);
-  --drop: 4px 4px 0 rgb(42 36 49 / 0.16);
+  color: var(--color-ink);
 }
 
 /* ───────────────────────── 기본 ───────────────────────── */
@@ -63,8 +121,6 @@
     line-height: 1.6;
     color: var(--color-ink);
     background-color: var(--color-desk);
-    background-image: radial-gradient(var(--color-desk-dot) 1px, transparent 1px);
-    background-size: 4px 4px;
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -105,7 +161,7 @@
     min-width: 0;
     padding: 3px;
     background: var(--color-face);
-    box-shadow: var(--bevel-out), var(--drop);
+    box-shadow: var(--bevel-out);
   }
 
   .win--max {
@@ -136,7 +192,7 @@
   }
 
   .win-title--inactive {
-    background: linear-gradient(90deg, var(--color-shade), #d4cddc);
+    background: linear-gradient(90deg, var(--color-shade), color-mix(in srgb, var(--color-shade) 45%, var(--color-face)));
     color: var(--color-light);
   }
 
@@ -148,7 +204,7 @@
     flex: none;
     background: var(--color-face);
     color: var(--color-dark);
-    box-shadow: var(--bevel-out);
+    box-shadow: var(--bevel-raised);
   }
 
   .win-title-btn:active {
@@ -198,7 +254,7 @@
     min-width: 80px;
     padding: 4px 14px;
     background: var(--color-face);
-    box-shadow: var(--bevel-out);
+    box-shadow: var(--bevel-raised);
     white-space: nowrap;
     user-select: none;
     text-decoration: none;
@@ -221,7 +277,7 @@
   }
 
   .btn--default {
-    box-shadow: 0 0 0 1px var(--color-dark), var(--bevel-out);
+    box-shadow: 0 0 0 1px var(--color-dark), var(--bevel-raised);
   }
 
   .btn--default:active:not(:disabled) {
@@ -229,7 +285,7 @@
   }
 
   .btn--accent {
-    background: var(--color-pink-soft);
+    background: var(--color-accent-face);
   }
 
   .btn--danger {
@@ -293,7 +349,7 @@
   }
 
   .field:focus-visible {
-    outline: 2px solid var(--color-lav);
+    outline: 1px solid var(--color-focus);
     outline-offset: 1px;
   }
 
@@ -472,7 +528,7 @@
   }
 
   textarea.paper:focus-visible {
-    outline: 2px solid var(--color-lav);
+    outline: 1px solid var(--color-focus);
     outline-offset: -2px;
   }
 
@@ -609,7 +665,7 @@
     font-family: var(--font-small);
     font-size: 12px;
     line-height: 1.35;
-    color: var(--color-ink);
+    color: var(--color-desk-text);
   }
 
   .desk-icon > .desk-icon-label {
@@ -654,7 +710,7 @@
     min-width: 0;
     padding: 0 10px;
     background: var(--color-face);
-    box-shadow: var(--bevel-out);
+    box-shadow: var(--bevel-raised);
     text-decoration: none;
     white-space: nowrap;
     font-size: 15px;
@@ -696,7 +752,7 @@
     min-width: 230px;
     padding: 3px;
     background: var(--color-face);
-    box-shadow: var(--bevel-out), var(--drop);
+    box-shadow: var(--bevel-out);
   }
 
   .start-banner {
@@ -738,7 +794,7 @@
     background: #fffbe6;
     border: 1px solid var(--color-dark);
     border-radius: 8px;
-    box-shadow: var(--drop);
+    box-shadow: none;
   }
 
   .balloon::after {
@@ -787,7 +843,7 @@
   background-color: var(--color-face);
   background-repeat: no-repeat;
   background-position: center;
-  box-shadow: var(--bevel-out);
+  box-shadow: var(--bevel-raised);
 }
 
 ::-webkit-scrollbar-button:single-button:vertical:decrement {
