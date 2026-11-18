@@ -5,13 +5,14 @@ import { cx } from '../../utils/cx.js';
 import { FACE_MINE, FACE_THEIRS, moodOf } from '../../utils/moods.js';
 import PixelIcon from '../ui/PixelIcon.jsx';
 
-const LAVENDER_HEART = { p: '#a593dc', P: '#7a68bd' };
+// 친구가 쓴 날은 민트 하트
+const PARTNER_HEART = { p: '#8fdde4', P: '#3f9faa' };
 
 /** 그날 일기 표시: 기분을 골랐으면 작성자 색 얼굴, 아니면 작성자 색 하트 */
 function DayMarker({ entry, mine = false, size }) {
   const mood = moodOf(entry.mood);
   if (mood) return <PixelIcon name={mood.icon} size={size} palette={mine ? FACE_MINE : FACE_THEIRS} />;
-  return <PixelIcon name="heartSmall" size={size - 1} palette={mine ? undefined : LAVENDER_HEART} />;
+  return <PixelIcon name="heartSmall" size={size - 1} palette={mine ? undefined : PARTNER_HEART} />;
 }
 
 function addDays(value, amount) {
@@ -160,7 +161,7 @@ export default function MonthCalendar({
                   className={cx(
                     'grid place-items-center leading-none',
                     compact ? 'size-6 text-[12px] font-small' : 'size-7 text-[15px]',
-                    isToday && 'bg-select text-white',
+                    isToday && 'bg-select text-select-text',
                     !isToday && cell.weekday === 0 && cell.inMonth && 'text-pink-deep',
                   )}
                 >
@@ -188,7 +189,7 @@ export default function MonthCalendar({
           <PixelIcon name="heartSmall" size={10} /> 내가 쓴 날
         </span>
         <span className="inline-flex items-center gap-1">
-          <PixelIcon name="heartSmall" size={10} palette={LAVENDER_HEART} /> 친구가 쓴 날
+          <PixelIcon name="heartSmall" size={10} palette={PARTNER_HEART} /> 친구가 쓴 날
         </span>
         <span className="inline-flex items-center gap-1">
           <PixelIcon name="moodHappy" size={11} palette={FACE_MINE} /> 표정은 그날 기분

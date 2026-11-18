@@ -20,4 +20,4 @@ export const weatherOf = (id) => WEATHERS.find((weather) => weather.id === id) ?
 
 /** 달력에서 누가 쓴 일기인지 얼굴색으로 구분 (분홍 = 나, 라벤더 = 친구) */
 export const FACE_MINE = { f: '#f29ac0' };
-export const FACE_THEIRS = { f: '#b9a8e6' };
+export const FACE_THEIRS = { f: '#9fe6ec' };

@@ -20,7 +20,7 @@ function MonitorPreview({ themeId }) {
             <div className="win-title !min-h-0 !py-[1px] !text-[10px]">활성 창</div>
             <div className="p-[6px] text-[11px] leading-tight">
               <p>창 글자</p>
-              <p className="mt-1 inline-block bg-select px-1 text-white">선택한 글자</p>
+              <p className="mt-1 inline-block bg-select px-1 text-select-text">선택한 글자</p>
               <div className="mt-[6px] flex justify-end">
                 <span className="btn btn--sm !min-h-[20px] !px-3 !text-[10px]">확인</span>
               </div>

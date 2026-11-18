@@ -133,7 +133,7 @@ export default function MyPage() {
   const profile = me ?? user;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       <Window
         title="내 컴퓨터 - 속성"
         icon={<PixelIcon name="computer" size={14} />}

@@ -4,7 +4,7 @@ import { diaryService } from '../../services/diaryService.js';
 import { getErrorMessage } from '../../utils/errors.js';
 import PixelIcon from '../ui/PixelIcon.jsx';
 
-const EMPTY_HEART = { p: '#ffffff', P: '#d9d2e0', w: '#ffffff' };
+const EMPTY_HEART = { p: '#ffffff', P: '#e8dcdc', w: '#ffffff' };
 
 /** 하트 공감: 누르는 즉시 화면에 반영하고, 실패하면 되돌린다. */
 export default function LikeButton({ diaryId, liked, count, onChange }) {

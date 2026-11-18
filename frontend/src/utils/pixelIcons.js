@@ -4,12 +4,12 @@
 export const PALETTE = {
   k: '#2a2431', // 외곽선
   w: '#ffffff',
-  g: '#9a90a7',
-  G: '#d9d2e0',
+  g: '#a3918b',
+  G: '#e8dcdc',
   p: '#e9729f', // 핑크
   P: '#c24f7e',
-  l: '#cbbcec', // 라벤더
-  L: '#8d7cc4',
+  l: '#bdf3f6', // 민트
+  L: '#4fb3bf',
   y: '#f7dc7c', // 노랑
   Y: '#d4a53c',
   c: '#fff4d6', // 크림

@@ -5,8 +5,8 @@ import Avatar from '../ui/Avatar.jsx';
 import PixelIcon from '../ui/PixelIcon.jsx';
 import { MoodWeatherBadge } from './MoodWeather.jsx';
 
-// 내 일기는 분홍 봉인, 친구 일기는 라벤더 봉인
-export const PARTNER_SEAL = { p: '#a593dc', P: '#7a68bd' };
+// 내 일기는 분홍 봉인, 친구 일기는 민트 봉인
+export const PARTNER_SEAL = { p: '#8fdde4', P: '#3f9faa' };
 
 function Counts({ diary }) {
   return (

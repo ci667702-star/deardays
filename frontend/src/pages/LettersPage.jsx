@@ -23,7 +23,7 @@ import { cx } from '../utils/cx.js';
 import { getErrorMessage } from '../utils/errors.js';
 
 // 봉투 색: 봉인됨(회보라) / 도착해서 아직 안 읽음(분홍) / 읽음(크림)
-const SEALED = { c: '#cfc8dc', p: '#7a6f8a' };
+const SEALED = { c: '#e8dcd6', p: '#907162' };
 const ARRIVED = LETTERBOX_PALETTE;
 
 const TABS = ['received', 'sent', 'write'];

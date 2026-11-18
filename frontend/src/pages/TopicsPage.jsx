@@ -106,7 +106,7 @@ function Topics() {
   const firstLoad = history.loading && history.page === 0;
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+    <div className="mx-auto flex max-w-5xl flex-col gap-4">
       <Window
         title={`오늘의 주제 - ${formatDiaryDate(today, { withYear: false })}`}
         icon={<PixelIcon name="note" size={14} />}

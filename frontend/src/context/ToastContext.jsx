@@ -45,7 +45,7 @@ export function ToastProvider({ children }) {
       <div
         aria-live="polite"
         className="pointer-events-none fixed right-3 z-[80] flex w-[min(340px,calc(100vw-24px))] flex-col gap-4"
-        style={{ bottom: 'calc(var(--taskbar-h) + var(--safe-bottom) + 14px)' }}
+        style={{ top: 'calc(var(--taskbar-h) + var(--safe-top) + 14px)' }}
       >
         {toasts.map((toast) => (
           <div key={toast.id} role={toast.type === 'error' ? 'alert' : 'status'} className="balloon pointer-events-auto win-open">

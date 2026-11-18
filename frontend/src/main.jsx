@@ -2,7 +2,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import './fonts.css';
-import '@fontsource/gowun-batang/400.css';
+// 사람이 쓴 글(일기·댓글·제목)은 손글씨체 개구(Gaegu)
+import '@fontsource/gaegu/400.css';
+import '@fontsource/gaegu/700.css';
 import './index.css';
 import App from './App.jsx';
 import ErrorBoundary from './components/ui/ErrorBoundary.jsx';

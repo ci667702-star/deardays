@@ -78,7 +78,7 @@ function DiaryDetail({ diaryId }) {
   const edited = wasEdited(diary.createdAt, diary.updatedAt);
 
   return (
-    <article className="mx-auto max-w-3xl">
+    <article className="mx-auto max-w-5xl">
       <Window
         title={`${diary.title}.txt`}
         icon={<PixelIcon name="letter" size={14} />}

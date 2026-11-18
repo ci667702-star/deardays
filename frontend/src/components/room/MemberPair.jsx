@@ -50,7 +50,7 @@ export default function MemberPair({ members, meId, detailed = false, emptySeat 
         name="heart"
         size={detailed ? 32 : 24}
         className={cx('shrink-0 self-center', !partner && 'opacity-40')}
-        palette={partner ? undefined : { p: '#ffffff', P: '#d9d2e0' }}
+        palette={partner ? undefined : { p: '#ffffff', P: '#e8dcdc' }}
         title={partner ? '함께 쓰는 중' : '친구를 기다리는 중'}
       />
       {partner ? <MemberCard member={partner} detailed={detailed} /> : <EmptySeat detailed={detailed}>{emptySeat}</EmptySeat>}

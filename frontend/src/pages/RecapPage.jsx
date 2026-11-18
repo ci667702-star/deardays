@@ -25,8 +25,8 @@ const STEPS = [
   { id: 'finish', title: '마침' },
 ];
 
-// 막대: 강조 하나는 제목 표시줄 끝 색, 나머지는 회색 (테마를 따라 바뀜)
-const ACCENT = 'var(--color-title-end)';
+// 막대: 강조 하나는 진한 핑크, 나머지는 그림자 색 (테마를 따라 바뀜)
+const ACCENT = 'var(--color-pink-deep)';
 const QUIET = 'var(--color-shade)';
 
 const fmt = (n) => Number(n ?? 0).toLocaleString('ko-KR');
@@ -71,7 +71,7 @@ function Recap() {
   const last = step === STEPS.length - 1;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       <Window
         title={`우리의 ${year} - 결산 마법사`}
         icon={<PixelIcon name="trophy" size={14} />}

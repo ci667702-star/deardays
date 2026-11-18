@@ -82,7 +82,7 @@ export default function NotificationTray() {
           role="dialog"
           aria-label="새 소식"
           className="win win-open fixed right-1 z-[65] w-[min(380px,calc(100vw-8px))]"
-          style={{ bottom: 'calc(var(--taskbar-h) + var(--safe-bottom) + 2px)' }}
+          style={{ top: 'calc(var(--taskbar-h) + var(--safe-top) + 2px)' }}
         >
           <div className="win-title">
             <span className="flex items-center gap-1.5">

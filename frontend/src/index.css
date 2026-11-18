@@ -1,43 +1,74 @@
 @import 'tailwindcss';
 
 /* ───────────────────────── 디자인 토큰 ─────────────────────────
-   옛 윈도우 창의 2px 입체 테두리(흰색·밝은 회색 / 회색·검정)를 그대로 쓴다.
-   테두리가 또렷하려면 창 바탕(face)이 흰 하이라이트보다 확실히 어두워야 하므로
-   색 구성표마다 face 밝기를 #c0c0c0 근처로 맞췄다.
-   - classic : 보내 준 화면과 같은 회색 창 + 청록 바탕 + 남색 제목 표시줄 (기본값)
-   - plum    : 자두색 바탕 + 분홍빛 창 + 자주→분홍 제목 표시줄
-   시스템 글자는 픽셀 폰트(Galmuri), 사람이 쓴 글은 바탕체(Gowun Batang). */
+   옛 윈도우 창의 2px 입체 테두리(밝은 면 / 그림자 면)를 그대로 쓴다.
+   테두리가 또렷하려면 창 바탕(face)이 흰 하이라이트보다 확실히 어둡고, 그림자(shade)보다 확실히 밝아야 한다.
+   - strawberry : 딸기우유 핑크 바탕 + 초코 브라운 그림자 + 민트(친구)·바나나 크림(메모) (기본값)
+   - classic    : 옛 윈도우 그대로: 회색 창 + 청록 바탕 + 남색 제목 표시줄
+   제목 표시줄·선택 글자색은 테마마다 다르다 (title-text, select-text).
+   시스템 글자는 픽셀 폰트(Galmuri), 사람이 쓴 글은 손글씨체(Gaegu). */
 @theme {
   --font-ui: 'Galmuri14', 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   --font-small: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-  --font-paper: 'Gowun Batang', 'Batang', 'AppleMyungjo', serif;
+  --font-paper: 'Gaegu', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 
-  /* 기본값 = classic (아래 [data-theme] 블록과 같은 값) */
-  --color-desk: #008080;
-  --color-desk-text: #ffffff;
-  --color-face: #c0c0c0;
+  /* 기본값 = strawberry (아래 [data-theme='strawberry'] 블록과 같은 값) */
+  --color-desk: #ffa2b9;
+  --color-desk-text: #4a332b;
+  --color-face: #fdd5df;
   --color-hilite: #ffffff;
-  --color-light: #dfdfdf;
-  --color-shade: #808080;
-  --color-dark: #000000;
-  --color-ink: #000000;
-  --color-muted: #3f3f3f;
-  --color-title: #000080;
-  --color-title-end: #1084d0;
-  --color-select: #000080;
-  --color-focus: #000080;
-  --color-accent-face: #c0c0c0;
-  --color-pink: #e9729f;
-  --color-pink-deep: #c24f7e;
-  --color-pink-soft: #fde4ee;
-  --color-lav: #b8b8e0;
-  --color-lav-soft: #e3e3f1;
-  --color-cream: #ffffe1;
-  --color-paper: #fffef8;
-  --color-rule: #d5dcef;
-  --color-margin: #f2a7c2;
+  --color-light: #fae8ed;
+  --color-shade: #907162;
+  --color-dark: #4a332b;
+  --color-ink: #4a332b;
+  --color-muted: #6e5248;
+  --color-title: #ff7fa3;
+  --color-title-end: #ffc2d1;
+  --color-title-text: #4a332b;
+  --color-select: #ff7fa3;
+  --color-select-text: #4a332b;
+  --color-focus: #4a332b;
+  --color-accent-face: #ffa2b9;
+  --color-pink: #ff6f9a;
+  --color-pink-deep: #d94a7a;
+  --color-pink-soft: #ffd9ef;
+  --color-lav: #8fdde4;
+  --color-lav-soft: #d6fcff;
+  --color-cream: #f5f7cd;
+  --color-paper: #fffcfd;
+  --color-rule: #f9d6df;
+  --color-margin: #ffa2b9;
   --color-ok: #1d6b47;
   --color-danger: #b0124a;
+}
+
+/* 딸기우유: 보내 준 팔레트(FFA2B9 FFB2C5 FFC2D1 FDD5DF FAE8ED / D6FCFF FFD9EF F5F7CD 907162 FCACD1) */
+[data-theme='strawberry'] {
+  --color-desk: #ffa2b9;
+  --color-desk-text: #4a332b;
+  --color-face: #fdd5df;
+  --color-hilite: #ffffff;
+  --color-light: #fae8ed;
+  --color-shade: #907162;
+  --color-dark: #4a332b;
+  --color-ink: #4a332b;
+  --color-muted: #6e5248;
+  --color-title: #ff7fa3;
+  --color-title-end: #ffc2d1;
+  --color-title-text: #4a332b;
+  --color-select: #ff7fa3;
+  --color-select-text: #4a332b;
+  --color-focus: #4a332b;
+  --color-accent-face: #ffa2b9;
+  --color-pink: #ff6f9a;
+  --color-pink-deep: #d94a7a;
+  --color-pink-soft: #ffd9ef;
+  --color-lav: #8fdde4;
+  --color-lav-soft: #d6fcff;
+  --color-cream: #f5f7cd;
+  --color-paper: #fffcfd;
+  --color-rule: #f9d6df;
+  --color-margin: #ffa2b9;
 }
 
 [data-theme='classic'] {
@@ -52,45 +83,30 @@
   --color-muted: #3f3f3f;
   --color-title: #000080;
   --color-title-end: #1084d0;
+  --color-title-text: #ffffff;
   --color-select: #000080;
+  --color-select-text: #ffffff;
   --color-focus: #000080;
   --color-accent-face: #c0c0c0;
-  --color-lav: #b8b8e0;
-  --color-lav-soft: #e3e3f1;
+  --color-pink: #e9729f;
+  --color-pink-deep: #c24f7e;
+  --color-pink-soft: #fde4ee;
+  --color-lav: #9fd8dd;
+  --color-lav-soft: #e2f4f5;
   --color-cream: #ffffe1;
   --color-paper: #fffef8;
   --color-rule: #d5dcef;
   --color-margin: #f2a7c2;
 }
 
-[data-theme='plum'] {
-  --color-desk: #7d3f73;
-  --color-desk-text: #ffffff;
-  --color-face: #dbbbd6;
-  --color-hilite: #ffffff;
-  --color-light: #efdfec;
-  --color-shade: #94648c;
-  --color-dark: #2a0d26;
-  --color-ink: #2a0d26;
-  --color-muted: #573452;
-  --color-title: #5c1252;
-  --color-title-end: #d0579d;
-  --color-select: #5c1252;
-  --color-focus: #5c1252;
-  --color-accent-face: #f4c7dd;
-  --color-lav: #d7b3e3;
-  --color-lav-soft: #f6e6f2;
-  --color-cream: #fff3e2;
-  --color-paper: #fffaf8;
-  --color-rule: #efd9ea;
-  --color-margin: #f2a7c2;
-}
-
 :root {
   --taskbar-h: 44px;
-  /* 아이폰 등 화면 아래 홈 표시줄 영역 */
+  /* 아이폰 등 화면 위 상태 표시줄·아래 홈 표시줄 영역 */
+  --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --line: 32px;
+  /* 줄 노트의 줄을 글자 바로 아래에 긋는 위치 (손글씨체 21px 기준으로 잰 값) */
+  --rule-shift: 10px;
 }
 
 /* 입체 테두리: 색 구성표가 바뀌는 요소마다 다시 계산되도록 [data-theme] 에도 선언한다.
@@ -141,7 +157,7 @@
 
   ::selection {
     background: var(--color-select);
-    color: #fff;
+    color: var(--color-select-text);
   }
 
   :focus-visible {
@@ -168,7 +184,7 @@
 
   .win--max {
     position: fixed;
-    inset: 0 0 calc(var(--taskbar-h) + var(--safe-bottom)) 0;
+    inset: calc(var(--taskbar-h) + var(--safe-top)) 0 0 0;
     z-index: 40;
     overflow: auto;
     box-shadow: var(--bevel-out);
@@ -186,7 +202,7 @@
     min-height: 24px;
     padding: 2px 3px 2px 6px;
     background: linear-gradient(90deg, var(--color-title), var(--color-title-end));
-    color: #fff;
+    color: var(--color-title-text);
     font-family: var(--font-small);
     font-size: 12px;
     font-weight: 700;
@@ -214,7 +230,7 @@
   }
 
   .win-title-btn:focus-visible {
-    outline: 1px dotted #fff;
+    outline: 1px dotted var(--color-title-text);
     outline-offset: 1px;
   }
 
@@ -485,7 +501,7 @@
 
   .chip--today {
     background: var(--color-select);
-    color: #fff;
+    color: var(--color-select-text);
     box-shadow: none;
   }
 
@@ -511,9 +527,9 @@
         var(--color-rule) var(--line)
       );
     background-attachment: local;
-    background-position: 0 6px;
+    background-position: 0 var(--rule-shift);
     font-family: var(--font-paper);
-    font-size: 17px;
+    font-size: 21px;
     line-height: var(--line);
     padding: calc(var(--line) / 2) 20px var(--line) 54px;
     white-space: pre-wrap;
@@ -618,7 +634,7 @@
     outline: 1px dotted var(--color-dark);
     outline-offset: -2px;
     background: var(--color-select);
-    color: #fff;
+    color: var(--color-select-text);
   }
 
   .list-row:focus-visible .list-meta {
@@ -655,55 +671,18 @@
     animation: progress-walk 1.2s steps(8, end) infinite;
   }
 
-  /* 바탕화면 아이콘 */
-  .desk-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    width: 88px;
-    padding: 6px 2px;
-    text-align: center;
-    text-decoration: none;
-    font-family: var(--font-small);
-    font-size: 12px;
-    line-height: 1.35;
-    color: var(--color-desk-text);
-  }
-
-  .desk-icon > .desk-icon-label {
-    padding: 1px 4px;
-  }
-
-  .desk-icon:focus-visible {
-    outline: none;
-  }
-
-  .desk-icon:focus-visible > .desk-icon-label,
-  .desk-icon[aria-current='page'] > .desk-icon-label {
-    background: var(--color-select);
-    color: #fff;
-    outline: 1px dotted #fff;
-    outline-offset: -1px;
-  }
-
-  .desk-icon:hover > .desk-icon-label {
-    text-decoration: underline;
-  }
-
-  /* 작업 표시줄 */
+  /* 작업 표시줄: 화면 맨 위 */
   .taskbar {
     position: fixed;
-    inset: auto 0 0 0;
+    inset: 0 0 auto 0;
     z-index: 50;
     display: flex;
     align-items: center;
     gap: 4px;
-    height: calc(var(--taskbar-h) + var(--safe-bottom));
-    padding-bottom: calc(4px + var(--safe-bottom));
-    padding: 4px;
+    height: calc(var(--taskbar-h) + var(--safe-top));
+    padding: calc(4px + var(--safe-top)) 4px 4px;
     background: var(--color-face);
-    box-shadow: inset 0 1px var(--color-light), inset 0 2px var(--color-hilite), 0 -1px var(--color-face);
+    box-shadow: inset 0 -1px var(--color-dark), inset 0 -2px var(--color-shade), inset 0 1px var(--color-hilite);
   }
 
   .task-btn {
@@ -750,7 +729,7 @@
   .start-menu {
     position: fixed;
     left: 4px;
-    bottom: calc(var(--taskbar-h) + var(--safe-bottom) - 2px);
+    top: calc(var(--taskbar-h) + var(--safe-top) - 2px);
     z-index: 60;
     display: flex;
     min-width: 230px;
@@ -766,7 +745,7 @@
     width: 30px;
     padding: 10px 0;
     background: linear-gradient(0deg, var(--color-title), var(--color-title-end));
-    color: #fff;
+    color: var(--color-title-text);
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     font-size: 18px;
@@ -787,7 +766,7 @@
   .start-item:hover,
   .start-item:focus-visible {
     background: var(--color-select);
-    color: #fff;
+    color: var(--color-select-text);
     outline: none;
   }
 
@@ -805,11 +784,11 @@
     content: '';
     position: absolute;
     right: 28px;
-    bottom: -9px;
+    top: -9px;
     width: 14px;
     height: 9px;
     background: #fffbe6;
-    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    clip-path: polygon(100% 0, 0 100%, 100% 100%);
     border-right: 1px solid var(--color-dark);
   }
 
@@ -973,7 +952,7 @@
     background:
       radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--color-hilite) 45%, transparent) 0 18%, transparent 19%),
       linear-gradient(180deg, var(--color-title), var(--color-title-end));
-    color: #ffffff;
+    color: var(--color-title-text);
   }
 }
 
