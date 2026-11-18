@@ -1,74 +1,73 @@
 @import 'tailwindcss';
 
 /* ───────────────────────── 디자인 토큰 ─────────────────────────
-   옛 윈도우 창의 2px 입체 테두리(밝은 면 / 그림자 면)를 그대로 쓴다.
-   테두리가 또렷하려면 창 바탕(face)이 흰 하이라이트보다 확실히 어둡고, 그림자(shade)보다 확실히 밝아야 한다.
-   - strawberry : 딸기우유 핑크 바탕 + 초코 브라운 그림자 + 민트(친구)·바나나 크림(메모) (기본값)
-   - classic    : 옛 윈도우 그대로: 회색 창 + 청록 바탕 + 남색 제목 표시줄
-   제목 표시줄·선택 글자색은 테마마다 다르다 (title-text, select-text).
-   시스템 글자는 픽셀 폰트(Galmuri), 사람이 쓴 글은 손글씨체(Gaegu). */
+   옛 윈도우(Windows 95) 창을 그대로 따른다.
+   - 빛은 왼쪽 위에서: 창·버튼은 왼쪽 위가 흰색·밝은 색, 오른쪽 아래가 그림자·검정 테두리
+   - 제목 표시줄은 그라데이션 없이 한 가지 색 (95 는 단색, 98 부터 그라데이션)
+   - 바탕 화면은 무늬 없는 한 가지 색
+   - 글꼴은 하나: 굴림 비트맵을 닮은 픽셀 글꼴 Galmuri11
+   색 구성표
+   - rose    : 차분한 장미색 바탕 + 분홍빛 도는 회색 창 + 진한 장미색 제목 표시줄 (기본값)
+   - classic : 회색 창 + 청록 바탕 + 남색 제목 표시줄 (Windows 95 기본) */
 @theme {
-  --font-ui: 'Galmuri14', 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  --font-ui: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   --font-small: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-  --font-paper: 'Gaegu', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  --font-paper: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 
-  /* 기본값 = strawberry (아래 [data-theme='strawberry'] 블록과 같은 값) */
-  --color-desk: #ffa2b9;
-  --color-desk-text: #4a332b;
-  --color-face: #fdd5df;
+  /* 기본값 = rose (아래 [data-theme='rose'] 블록과 같은 값) */
+  --color-desk: #b98b93;
+  --color-desk-text: #2b1d20;
+  --color-face: #d7c9cc;
   --color-hilite: #ffffff;
-  --color-light: #fae8ed;
-  --color-shade: #907162;
-  --color-dark: #4a332b;
-  --color-ink: #4a332b;
-  --color-muted: #6e5248;
-  --color-title: #ff7fa3;
-  --color-title-end: #ffc2d1;
-  --color-title-text: #4a332b;
-  --color-select: #ff7fa3;
-  --color-select-text: #4a332b;
-  --color-focus: #4a332b;
-  --color-accent-face: #ffa2b9;
-  --color-pink: #ff6f9a;
-  --color-pink-deep: #d94a7a;
-  --color-pink-soft: #ffd9ef;
-  --color-lav: #8fdde4;
-  --color-lav-soft: #d6fcff;
-  --color-cream: #f5f7cd;
-  --color-paper: #fffcfd;
-  --color-rule: #f9d6df;
-  --color-margin: #ffa2b9;
+  --color-light: #ece4e6;
+  --color-shade: #8a7b7e;
+  --color-dark: #000000;
+  --color-ink: #000000;
+  --color-muted: #4b4547;
+  --color-title: #8e3b57;
+  --color-title-text: #ffffff;
+  --color-select: #8e3b57;
+  --color-select-text: #ffffff;
+  --color-focus: #000000;
+  --color-accent-face: #e7d2d7;
+  --color-pink: #d9577f;
+  --color-pink-deep: #a8325a;
+  --color-pink-soft: #f3dce2;
+  --color-lav: #9ed0d4;
+  --color-lav-soft: #e3f1f2;
+  --color-cream: #ffffe1;
+  --color-paper: #ffffff;
+  --color-rule: #e6dadd;
+  --color-margin: #e3a3b3;
   --color-ok: #1d6b47;
   --color-danger: #b0124a;
 }
 
-/* 딸기우유: 보내 준 팔레트(FFA2B9 FFB2C5 FFC2D1 FDD5DF FAE8ED / D6FCFF FFD9EF F5F7CD 907162 FCACD1) */
-[data-theme='strawberry'] {
-  --color-desk: #ffa2b9;
-  --color-desk-text: #4a332b;
-  --color-face: #fdd5df;
+[data-theme='rose'] {
+  --color-desk: #b98b93;
+  --color-desk-text: #2b1d20;
+  --color-face: #d7c9cc;
   --color-hilite: #ffffff;
-  --color-light: #fae8ed;
-  --color-shade: #907162;
-  --color-dark: #4a332b;
-  --color-ink: #4a332b;
-  --color-muted: #6e5248;
-  --color-title: #ff7fa3;
-  --color-title-end: #ffc2d1;
-  --color-title-text: #4a332b;
-  --color-select: #ff7fa3;
-  --color-select-text: #4a332b;
-  --color-focus: #4a332b;
-  --color-accent-face: #ffa2b9;
-  --color-pink: #ff6f9a;
-  --color-pink-deep: #d94a7a;
-  --color-pink-soft: #ffd9ef;
-  --color-lav: #8fdde4;
-  --color-lav-soft: #d6fcff;
-  --color-cream: #f5f7cd;
-  --color-paper: #fffcfd;
-  --color-rule: #f9d6df;
-  --color-margin: #ffa2b9;
+  --color-light: #ece4e6;
+  --color-shade: #8a7b7e;
+  --color-dark: #000000;
+  --color-ink: #000000;
+  --color-muted: #4b4547;
+  --color-title: #8e3b57;
+  --color-title-text: #ffffff;
+  --color-select: #8e3b57;
+  --color-select-text: #ffffff;
+  --color-focus: #000000;
+  --color-accent-face: #e7d2d7;
+  --color-pink: #d9577f;
+  --color-pink-deep: #a8325a;
+  --color-pink-soft: #f3dce2;
+  --color-lav: #9ed0d4;
+  --color-lav-soft: #e3f1f2;
+  --color-cream: #ffffe1;
+  --color-paper: #ffffff;
+  --color-rule: #e6dadd;
+  --color-margin: #e3a3b3;
 }
 
 [data-theme='classic'] {
@@ -82,7 +81,6 @@
   --color-ink: #000000;
   --color-muted: #3f3f3f;
   --color-title: #000080;
-  --color-title-end: #1084d0;
   --color-title-text: #ffffff;
   --color-select: #000080;
   --color-select-text: #ffffff;
@@ -105,8 +103,8 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --line: 32px;
-  /* 줄 노트의 줄을 글자 바로 아래에 긋는 위치 (손글씨체 21px 기준으로 잰 값) */
-  --rule-shift: 10px;
+  /* 줄 노트의 줄을 글자 바로 아래에 긋는 위치 (Galmuri11 16px 기준으로 잰 값) */
+  --rule-shift: 13px;
 }
 
 /* 입체 테두리: 색 구성표가 바뀌는 요소마다 다시 계산되도록 [data-theme] 에도 선언한다.
@@ -201,7 +199,7 @@
     gap: 8px;
     min-height: 24px;
     padding: 2px 3px 2px 6px;
-    background: linear-gradient(90deg, var(--color-title), var(--color-title-end));
+    background: var(--color-title);
     color: var(--color-title-text);
     font-family: var(--font-small);
     font-size: 12px;
@@ -210,7 +208,7 @@
   }
 
   .win-title--inactive {
-    background: linear-gradient(90deg, var(--color-shade), color-mix(in srgb, var(--color-shade) 45%, var(--color-face)));
+    background: var(--color-shade);
     color: var(--color-light);
   }
 
@@ -529,7 +527,7 @@
     background-attachment: local;
     background-position: 0 var(--rule-shift);
     font-family: var(--font-paper);
-    font-size: 21px;
+    font-size: 16px;
     line-height: var(--line);
     padding: calc(var(--line) / 2) 20px var(--line) 54px;
     white-space: pre-wrap;
@@ -744,7 +742,7 @@
     justify-content: center;
     width: 30px;
     padding: 10px 0;
-    background: linear-gradient(0deg, var(--color-title), var(--color-title-end));
+    background: var(--color-title);
     color: var(--color-title-text);
     writing-mode: vertical-rl;
     transform: rotate(180deg);
@@ -949,9 +947,7 @@
 
   /* 연말 결산 마법사 왼쪽 그림 띠 */
   .wizard-side {
-    background:
-      radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--color-hilite) 45%, transparent) 0 18%, transparent 19%),
-      linear-gradient(180deg, var(--color-title), var(--color-title-end));
+    background: var(--color-title);
     color: var(--color-title-text);
   }
 }

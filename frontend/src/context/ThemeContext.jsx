@@ -4,7 +4,7 @@ import { applyTheme, isTheme, readStoredTheme } from '../utils/theme.js';
 
 const ThemeContext = createContext(null);
 
-/** 색 구성표(딸기우유/클래식)와 '디스플레이 등록 정보' 대화상자 */
+/** 색 구성표(장미/클래식)와 '디스플레이 등록 정보' 대화상자 */
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(readStoredTheme);
   const [settingsOpen, setSettingsOpen] = useState(false);

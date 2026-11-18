@@ -1,14 +1,14 @@
-/* 앱 안의 설정·연결 실패 화면용: 웹 화면의 기본 테마(딸기우유)와 같은 색 */
+/* 앱 안의 설정·연결 실패 화면용: 웹 화면의 기본 테마(장미)와 같은 색 */
 :root {
-  --desk: #ffa2b9;
-  --face: #fdd5df;
+  --desk: #b98b93;
+  --face: #d7c9cc;
   --hilite: #ffffff;
-  --light: #fae8ed;
-  --shade: #907162;
-  --dark: #4a332b;
-  --title: #ff7fa3;
-  --title-end: #ffc2d1;
-  --ink: #4a332b;
+  --light: #ece4e6;
+  --shade: #8a7b7e;
+  --dark: #000000;
+  --title: #8e3b57;
+  --title-end: #8e3b57;
+  --ink: #000000;
   --bevel-out: inset -1px -1px var(--dark), inset 1px 1px var(--light), inset -2px -2px var(--shade), inset 2px 2px var(--hilite);
   --bevel-raised: inset -1px -1px var(--dark), inset 1px 1px var(--hilite), inset -2px -2px var(--shade), inset 2px 2px var(--light);
   --bevel-in: inset -1px -1px var(--hilite), inset 1px 1px var(--shade), inset -2px -2px var(--light), inset 2px 2px var(--dark);
@@ -47,8 +47,8 @@ body {
   align-items: center;
   gap: 6px;
   padding: 3px 6px;
-  background: linear-gradient(90deg, var(--title), var(--title-end));
-  color: var(--ink);
+  background: var(--title);
+  color: #ffffff;
   font-weight: 700;
   font-size: 12px;
 }
@@ -83,7 +83,7 @@ p {
 }
 
 .hint {
-  color: #6e5248;
+  color: #4b4547;
   font-size: 12px;
 }
 
