@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext.jsx';
+import { SCREENSAVER_MINUTES, previewScreensaver, readScreensaver, saveScreensaver } from '../../utils/screensaver.js';
 import { THEMES } from '../../utils/theme.js';
 import Button from '../ui/Button.jsx';
 import Dialog from '../ui/Dialog.jsx';
@@ -41,11 +42,22 @@ function MonitorPreview({ themeId }) {
 export default function DisplaySettingsDialog({ open, onClose }) {
   const { theme, setTheme } = useTheme();
   const [choice, setChoice] = useState(theme);
+  const [tab, setTab] = useState('appearance');
+  const [saver, setSaver] = useState(readScreensaver);
 
   useEffect(() => {
-    if (open) setChoice(theme);
+    if (open) {
+      setChoice(theme);
+      setSaver(readScreensaver());
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  const apply = () => {
+    setTheme(choice);
+    saveScreensaver(saver);
+  };
+  const saverChanged = JSON.stringify(saver) !== JSON.stringify(readScreensaver());
 
   const selected = THEMES.find((item) => item.id === choice) ?? THEMES[0];
 
@@ -61,20 +73,84 @@ export default function DisplaySettingsDialog({ open, onClose }) {
           <Button
             variant="default"
             onClick={() => {
-              setTheme(choice);
+              apply();
               onClose();
             }}
           >
             확인
           </Button>
           <Button onClick={onClose}>취소</Button>
-          <Button onClick={() => setTheme(choice)} disabled={choice === theme}>
+          <Button onClick={apply} disabled={choice === theme && !saverChanged}>
             적용
           </Button>
         </>
       }
     >
-      <Tabs label="디스플레이 설정" value="appearance" onChange={() => {}} tabs={[{ value: 'appearance', label: '모양' }]}>
+      <Tabs
+        label="디스플레이 설정"
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { value: 'appearance', label: '모양' },
+          { value: 'screensaver', label: '화면 보호기' },
+        ]}
+      >
+        {tab === 'screensaver' ? (
+          <div className="flex flex-col gap-3">
+            <div className="mx-auto grid h-[120px] w-[220px] place-items-center bg-[#000000] shadow-[var(--bevel-in)]" aria-hidden="true">
+              <div className="flex gap-2">
+                <span className="block size-10 rotate-[-6deg] bg-[#ffffff] p-1 pb-3">
+                  <span className="block size-full bg-pink" />
+                </span>
+                <span className="block size-10 translate-y-4 rotate-[5deg] bg-[#ffffff] p-1 pb-3">
+                  <span className="block size-full bg-lav" />
+                </span>
+              </div>
+            </div>
+            <label htmlFor="saver-kind" className="label mb-0">
+              화면 보호기
+            </label>
+            <select
+              id="saver-kind"
+              className="field"
+              value={saver.enabled ? 'photos' : 'none'}
+              onChange={(e) => setSaver((s) => ({ ...s, enabled: e.target.value === 'photos' }))}
+            >
+              <option value="photos">우리 사진 (떠다니는 사진)</option>
+              <option value="none">사용 안 함</option>
+            </select>
+            <div className="flex flex-wrap items-end gap-2">
+              <div>
+                <label htmlFor="saver-wait" className="label">
+                  대기 시간
+                </label>
+                <select
+                  id="saver-wait"
+                  className="field w-[120px]"
+                  value={saver.minutes}
+                  disabled={!saver.enabled}
+                  onChange={(e) => setSaver((s) => ({ ...s, minutes: Number(e.target.value) }))}
+                >
+                  {SCREENSAVER_MINUTES.map((minutes) => (
+                    <option key={minutes} value={minutes}>
+                      {minutes}분
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Button
+                onClick={() => {
+                  onClose();
+                  setTimeout(previewScreensaver, 150);
+                }}
+              >
+                미리 보기
+              </Button>
+            </div>
+            <p className="hint">공간에 올린 사진과 낙서가 떠다녀요. 마우스를 움직이거나 화면을 누르면 돌아와요. 이 기기에서만 적용돼요.</p>
+          </div>
+        ) : (
+          <>
         <MonitorPreview themeId={choice} />
         <label htmlFor="color-scheme" className="label mt-5">
           색 구성표
@@ -88,6 +164,8 @@ export default function DisplaySettingsDialog({ open, onClose }) {
         </select>
         <p className="hint">{selected.description}</p>
         <p className="hint">이 기기에서만 바뀌어요. 친구 화면에는 영향이 없어요.</p>
+          </>
+        )}
       </Tabs>
     </Dialog>
   );

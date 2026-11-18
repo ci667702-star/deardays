@@ -28,6 +28,14 @@ export function describeNotification(notification, meId) {
         to: diary ? `/diaries/${diary.id}` : '/room',
         roomId,
       };
+    case 'COMMENT_REPLIED':
+      return {
+        icon: 'letter',
+        text: `${who} '${diaryTitle}'에서 내 댓글에 답글을 남겼어요`,
+        detail: preview,
+        to: diary ? `/diaries/${diary.id}` : '/room',
+        roomId,
+      };
     case 'LIKE_CREATED':
       return { icon: 'heart', text: `${who} '${diaryTitle}'에 공감했어요`, to: diary ? `/diaries/${diary.id}` : '/room', roomId };
     case 'STAMP_CREATED':

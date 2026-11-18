@@ -3,6 +3,7 @@ import { NOTIFICATION_LIST_LIMIT } from '../config/constants.js';
 import { HttpError } from '../utils/HttpError.js';
 import { localTodayString, toDbDate } from '../utils/date.js';
 import { toNotification } from '../utils/serializers.js';
+import { pushNotification } from './pushService.js';
 
 const clip = (text, max = 120) => {
   if (!text) return null;
@@ -38,6 +39,10 @@ export async function notify({ roomId, actorId, type, diaryId = null, letterId =
         preview: clip(preview),
       })),
     });
+    // 휴대폰 알림은 기다리지 않는다 (느린 푸시 서비스가 요청을 붙잡지 않게)
+    pushNotification({ type, roomId, actorId, diaryId, letterId, preview: clip(preview, 80), recipientIds: targets }).catch((error) =>
+      console.warn('[push] 휴대폰 알림을 보내지 못했어요:', error.message),
+    );
   } catch (error) {
     console.warn(`[notify] ${type} 알림을 만들지 못했어요:`, error.message);
   }

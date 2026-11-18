@@ -6,6 +6,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createECDH, randomBytes } from 'node:crypto';
+import { TOPIC_PROMPTS } from '../src/config/topicPrompts.js';
 
 const API = process.env.API_URL ?? 'http://localhost:4000';
 const BACKEND_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -333,6 +335,48 @@ async function main() {
   r = await call('DELETE', `/api/comments/${comment.id}`, { token: tokenB });
   check('본인 댓글 삭제 204', r.status === 204);
 
+  console.log('\n[답글]');
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenB, json: { content: '답글 테스트 원댓글' } });
+  const rootComment = r.data.comment;
+  check('원댓글은 parentId 없음', r.status === 201 && rootComment.parentId === null && rootComment.isDeleted === false);
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenA, json: { content: '답글이에요 A', parentId: rootComment.id } });
+  const replyA = r.data.comment;
+  check('답글 달기 201 (parentId = 원댓글)', r.status === 201 && replyA.parentId === rootComment.id, JSON.stringify(r.data));
+  r = await call('GET', '/api/notifications', { token: tokenB });
+  check('답글 받은 사람에게 COMMENT_REPLIED', r.data.items.some((n) => n.type === 'COMMENT_REPLIED' && n.preview === '답글이에요 A'));
+  check('답글 받은 사람에게 같은 글로 댓글 알림이 또 가지 않음', !r.data.items.some((n) => n.type === 'COMMENT_CREATED' && n.preview === '답글이에요 A'));
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenB, json: { content: '@앨리스 답글의 답글', parentId: replyA.id } });
+  const replyB = r.data.comment;
+  check('답글의 답글은 맨 위 댓글 아래로', r.status === 201 && replyB.parentId === rootComment.id);
+  r = await call('GET', '/api/notifications', { token: tokenA });
+  check('답글의 답글: 그 답글을 쓴 사람에게 알림', r.data.items.some((n) => n.type === 'COMMENT_REPLIED' && n.preview === '@앨리스 답글의 답글'));
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenA, json: { content: 'x', parentId: 999999999 } });
+  check('없는 댓글에 답글 400', r.status === 400 && r.data.code === 'PARENT_NOT_FOUND');
+  r = await call('POST', `/api/diaries/${diary2.id}/comments`, { token: tokenA, json: { content: 'x', parentId: rootComment.id } });
+  check('다른 일기의 댓글에 답글 400', r.status === 400 && r.data.code === 'PARENT_NOT_FOUND');
+  r = await call('GET', `/api/diaries/${diary1.id}/comments`, { token: tokenA });
+  check('댓글 목록에 답글이 parentId 와 함께', r.data.comments.length === 3 && r.data.comments.filter((c) => c.parentId === rootComment.id).length === 2);
+
+  r = await call('DELETE', `/api/comments/${rootComment.id}`, { token: tokenB });
+  check('답글 달린 댓글 지우기 204', r.status === 204);
+  r = await call('GET', `/api/diaries/${diary1.id}/comments`, { token: tokenA });
+  const ghost = r.data.comments.find((c) => c.id === rootComment.id);
+  check(
+    '답글이 있으면 자리만 남기고 내용·작성자 숨김',
+    ghost?.isDeleted === true && ghost.content === '' && ghost.author === null && r.data.comments.length === 3,
+    JSON.stringify(ghost),
+  );
+  r = await call('GET', `/api/diaries/${diary1.id}`, { token: tokenA });
+  check('지운 댓글은 댓글 수에서 빠짐', r.data.diary.commentCount === 2, String(r.data.diary.commentCount));
+  r = await call('PUT', `/api/comments/${rootComment.id}`, { token: tokenB, json: { content: '되살리기' } });
+  check('지운 댓글 수정 404', r.status === 404);
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenA, json: { content: 'x', parentId: rootComment.id } });
+  check('지운 댓글에 답글 400', r.status === 400 && r.data.code === 'PARENT_DELETED');
+  await call('DELETE', `/api/comments/${replyA.id}`, { token: tokenA });
+  r = await call('DELETE', `/api/comments/${replyB.id}`, { token: tokenB });
+  r = await call('GET', `/api/diaries/${diary1.id}/comments`, { token: tokenA });
+  check('답글이 모두 지워지면 자리만 남은 댓글도 정리', r.data.comments.length === 0, JSON.stringify(r.data.comments));
+
   console.log('\n[할 일]');
   r = await call('POST', '/api/todos', {
     token: tokenA,
@@ -586,7 +630,7 @@ async function main() {
   r = await call('GET', '/api/admin/status', { token: tokenA });
   check('관리자 상태', r.status === 200 && r.data.enabled === ADMIN_PW.length >= 8 && r.data.isAdmin === false, JSON.stringify(r.data));
   r = await call('GET', '/api/topics/today', { token: tokenB });
-  check('오늘의 주제 조회 (없으면 null)', r.status === 200 && r.data.date === localDate(0) && 'topic' in r.data);
+  check('오늘의 주제 조회', r.status === 200 && r.data.date === localDate(0) && Boolean(r.data.topic));
 
   if (ADMIN_PW.length < 8) {
     console.log('  (ADMIN_PASSWORD 가 없어 관리자 기능이 꺼진 경우만 확인합니다)');
@@ -711,6 +755,95 @@ async function main() {
     check('관리자 그만하기', r.status === 200 && r.data.user.isAdmin === false);
     r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '다시 막힘' } });
     check('그만둔 뒤 주제 추가 403', r.status === 403);
+  }
+
+  console.log('\n[하루 하나 글쓰기]');
+  r = await call('GET', '/api/topics/today', { token: tokenB });
+  const todayTopic = r.data.topic;
+  check('오늘은 언제나 주제가 있음', r.status === 200 && Boolean(todayTopic?.content) && todayTopic.date === localDate(0), JSON.stringify(r.data));
+  if (todayTopic?.isAuto) {
+    check('관리자가 안 넣은 날은 글감 목록에서 자동', TOPIC_PROMPTS.includes(todayTopic.content), todayTopic.content);
+    r = await call('GET', '/api/topics/today', { token: tokenA });
+    check('같은 날은 누가 열어도 같은 글감', r.data.topic.id === todayTopic.id);
+    r = await call('GET', `/api/diaries?roomId=${room.id}&topicId=${todayTopic.id}`, { token: tokenA });
+    if (ADMIN_PW.length >= 8 && r.data.total === 0) {
+      await call('POST', '/api/admin/unlock', { token: tokenA, json: { password: ADMIN_PW } });
+      r = await call('POST', '/api/admin/topics', { token: tokenA, json: { content: '테스트: 관리자가 바꾼 오늘', date: localDate(0) } });
+      check('자동 글감 자리에 관리자가 주제를 넣으면 바꿔 줌', r.status === 201 && r.data.topic.id === todayTopic.id && r.data.topic.isAuto === false, JSON.stringify(r.data));
+      await call('DELETE', `/api/admin/topics/${todayTopic.id}`, { token: tokenA });
+      r = await call('GET', '/api/topics/today', { token: tokenB });
+      check('관리자 주제를 지우면 다시 자동 글감', r.data.topic?.isAuto === true && r.data.topic.id !== todayTopic.id);
+      await call('POST', '/api/admin/lock', { token: tokenA });
+    }
+  } else {
+    console.log('  (오늘은 관리자가 넣은 주제가 있어 자동 글감 확인은 건너뜁니다)');
+  }
+
+  console.log('\n[기념일 D-day]');
+  r = await call('POST', `/api/rooms/${room.id}/anniversaries`, { token: tokenA, json: { title: '하루 생일', date: '2008-02-29', yearly: true } });
+  const birthday = r.data.anniversary;
+  check('해마다 반복하는 기념일 201', r.status === 201 && birthday.yearly && birthday.dday >= 0 && birthday.years > 0 && birthday.isMine, JSON.stringify(r.data));
+  r = await call('POST', `/api/rooms/${room.id}/anniversaries`, { token: tokenA, json: { title: '기말고사', date: localDate(10) } });
+  const exam = r.data.anniversary;
+  check('한 번만 있는 날: D-10', r.status === 201 && exam.dday === 10 && exam.yearly === false && exam.nextDate === localDate(10));
+  r = await call('POST', `/api/rooms/${room.id}/anniversaries`, { token: tokenB, json: { title: '지난 여행', date: localDate(-5) } });
+  const trip = r.data.anniversary;
+  check('지난 날은 D+ (음수)', r.status === 201 && trip.dday === -5);
+  r = await call('POST', `/api/rooms/${room.id}/anniversaries`, { token: tokenA, json: { title: '', date: localDate(1) } });
+  check('이름 없는 기념일 400', r.status === 400);
+  r = await call('POST', `/api/rooms/${room.id}/anniversaries`, { token: tokenA, json: { title: '이상한 날', date: '2026-02-30' } });
+  check('없는 날짜 400', r.status === 400);
+  r = await call('GET', `/api/rooms/${room.id}/anniversaries`, { token: tokenB });
+  const items = r.data.items ?? [];
+  const upcoming = items.filter((a) => a.dday >= 0);
+  check(
+    '목록: 다가오는 날이 가까운 순, 지난 날은 뒤',
+    r.status === 200 && items.length === 3 && items.at(-1).id === trip.id && upcoming.every((a, i) => i === 0 || upcoming[i - 1].dday <= a.dday),
+    JSON.stringify(items.map((a) => [a.title, a.dday])),
+  );
+  r = await call('GET', `/api/rooms/${room.id}/anniversaries`, { token: tokenC });
+  check('멤버 아닌 사람 기념일 404', r.status === 404);
+  r = await call('PUT', `/api/anniversaries/${exam.id}`, { token: tokenB, json: { title: '남의 것', date: localDate(3) } });
+  check('남이 넣은 기념일 수정 403', r.status === 403);
+  r = await call('PUT', `/api/anniversaries/${exam.id}`, { token: tokenA, json: { title: '기말고사 (수학)', date: localDate(3), yearly: false } });
+  check('내 기념일 수정', r.status === 200 && r.data.anniversary.title === '기말고사 (수학)' && r.data.anniversary.dday === 3);
+  r = await call('DELETE', `/api/anniversaries/${trip.id}`, { token: tokenA });
+  check('남이 넣은 기념일 삭제 403', r.status === 403);
+  for (const [item, token] of [[birthday, tokenA], [exam, tokenA], [trip, tokenB]]) {
+    await call('DELETE', `/api/anniversaries/${item.id}`, { token });
+  }
+  r = await call('GET', `/api/rooms/${room.id}/anniversaries`, { token: tokenA });
+  check('기념일 삭제', r.data.items.length === 0);
+
+  console.log('\n[휴대폰 푸시 알림]');
+  r = await call('GET', '/api/push', { token: tokenA });
+  const pushEnabled = r.data.enabled;
+  check('푸시 상태 조회', r.status === 200 && typeof pushEnabled === 'boolean' && (pushEnabled ? Boolean(r.data.publicKey) : r.data.publicKey === null));
+  // 실제 브라우저처럼 P-256 공개키와 auth 비밀값을 만든다 (보내는 곳은 없는 주소라 전송은 실패해야 정상)
+  const ecdh = createECDH('prime256v1');
+  ecdh.generateKeys();
+  const fakeSub = {
+    endpoint: `https://push.invalid/send/${RUN}`,
+    keys: { p256dh: ecdh.getPublicKey().toString('base64url'), auth: randomBytes(16).toString('base64url') },
+  };
+  if (!pushEnabled) {
+    console.log('  (VAPID 키가 없어 푸시 알림이 꺼진 경우만 확인합니다)');
+    r = await call('POST', '/api/push/subscribe', { token: tokenA, json: fakeSub });
+    check('푸시가 꺼져 있으면 구독 403', r.status === 403 && r.data.code === 'PUSH_DISABLED');
+  } else {
+    r = await call('POST', '/api/push/subscribe', { token: tokenA, json: { ...fakeSub, endpoint: 'http://push.invalid/x' } });
+    check('https 가 아닌 알림 주소 400', r.status === 400);
+    r = await call('POST', '/api/push/subscribe', { token: tokenA, json: fakeSub });
+    check('이 기기 구독 201', r.status === 201 && r.data.subscribed === true);
+    r = await call('POST', '/api/push/subscribe', { token: tokenA, json: fakeSub });
+    r = await call('GET', '/api/push', { token: tokenA });
+    check('같은 기기를 다시 구독해도 하나', r.data.devices === 1);
+    r = await call('POST', '/api/push/test', { token: tokenA });
+    check('시험 알림: 보내기를 시도하고 실패를 셈 (없는 주소)', r.status === 200 && r.data.sent === 0 && r.data.failed === 1, JSON.stringify(r.data));
+    r = await call('DELETE', '/api/push/subscribe', { token: tokenA, json: { endpoint: fakeSub.endpoint } });
+    check('구독 끄기', r.status === 200 && r.data.subscribed === false);
+    r = await call('GET', '/api/push', { token: tokenA });
+    check('끈 뒤 기기 0', r.data.devices === 0);
   }
 
   console.log('\n[연말 결산]');

@@ -69,7 +69,7 @@ export function toStamp(stamp) {
 
 /** 오늘의 주제 (관리자 화면에는 만든 시각도 함께) */
 export function toTopic(topic) {
-  return { id: topic.id, date: fromDbDate(topic.date), content: topic.content };
+  return { id: topic.id, date: fromDbDate(topic.date), content: topic.content, isAuto: Boolean(topic.isAuto) };
 }
 
 export function toTopicForAdmin(topic) {
@@ -138,14 +138,18 @@ export function toLetter(letter, viewerId, todayDb) {
   };
 }
 
+/** 댓글·답글. 지운 댓글이 답글 때문에 자리만 남아 있으면 내용과 작성자를 숨긴다. */
 export function toComment(comment, viewerId) {
+  const isDeleted = Boolean(comment.deletedAt);
   return {
     id: comment.id,
     diaryId: comment.diaryId,
-    content: comment.content,
+    parentId: comment.parentId ?? null,
+    isDeleted,
+    content: isDeleted ? '' : comment.content,
     createdAt: comment.createdAt,
     updatedAt: comment.updatedAt,
-    author: toPublicUser(comment.user),
-    isMine: comment.userId === viewerId,
+    author: isDeleted ? null : toPublicUser(comment.user),
+    isMine: !isDeleted && comment.userId === viewerId,
   };
 }

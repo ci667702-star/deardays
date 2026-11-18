@@ -53,4 +53,11 @@ export const env = {
   // 요청 제한이 사용자 IP 를 제대로 알아보는 데 쓰인다.
   trustProxy: Math.max(0, Number.parseInt(process.env.TRUST_PROXY ?? '1', 10) || 0),
   adminPassword: adminPassword.length >= 8 ? adminPassword : null,
+  // 휴대폰 푸시 알림 (Web Push). 키가 없으면 푸시 알림만 꺼지고 나머지는 그대로
+  vapid: {
+    publicKey: process.env.VAPID_PUBLIC_KEY?.trim() || null,
+    privateKey: process.env.VAPID_PRIVATE_KEY?.trim() || null,
+    // 푸시 서비스가 연락할 주소 (mailto: 또는 https). 비우면 대신할 주소를 쓴다
+    subject: process.env.VAPID_SUBJECT?.trim() || 'mailto:deardays@localhost.invalid',
+  },
 };

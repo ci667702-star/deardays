@@ -6,8 +6,9 @@ export const commentService = {
     return data.comments;
   },
 
-  async create(diaryId, content) {
-    const { data } = await api.post(`/diaries/${diaryId}/comments`, { content });
+  /** parentId 를 주면 그 댓글에 다는 답글 */
+  async create(diaryId, content, parentId) {
+    const { data } = await api.post(`/diaries/${diaryId}/comments`, { content, parentId: parentId || undefined });
     return data.comment;
   },
 

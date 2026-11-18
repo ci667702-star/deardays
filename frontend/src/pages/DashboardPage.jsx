@@ -17,7 +17,9 @@ import Window from '../components/ui/Window.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRooms } from '../context/RoomContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useAnniversaries } from '../hooks/useAnniversaries.js';
 import { useCalendarDays } from '../hooks/useCalendarDays.js';
+import { anniversariesInMonth } from '../utils/anniversaries.js';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js';
 import { useFetch } from '../hooks/useFetch.js';
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus.js';
@@ -122,6 +124,7 @@ function Dashboard() {
     return { year, monthIndex };
   });
   const calendar = useCalendarDays(roomId, view.year, view.monthIndex);
+  const anniversaries = useAnniversaries(roomId);
 
   // 대시보드에 들어올 때마다 친구가 새로 참여했는지 등 공간 정보를 갱신
   useEffect(() => {
@@ -239,6 +242,7 @@ function Dashboard() {
               days={calendar.days}
               meId={user.id}
               loading={calendar.loading}
+              anniversaries={anniversariesInMonth(anniversaries.data, view.year, view.monthIndex)}
               onMonthChange={(year, monthIndex) => setView({ year, monthIndex })}
               onSelectDate={(date) => navigate(`/calendar?date=${date}`)}
             />

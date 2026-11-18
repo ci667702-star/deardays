@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Camera, FolderOpen, LogOut, Save, Trash2 } from 'lucide-react';
 import AccountSettings from '../components/account/AccountSettings.jsx';
+import PushSettings from '../components/account/PushSettings.jsx';
 import { ACCEPT_ATTR, checkImageFiles } from '../components/diary/imageRules.js';
 import Avatar from '../components/ui/Avatar.jsx';
 import Button from '../components/ui/Button.jsx';
@@ -260,10 +261,12 @@ export default function MyPage() {
                   <span className="hint mt-0 block">이 기기에서만 적용돼요.</span>
                 </p>
                 <Button size="sm" onClick={openDisplaySettings} icon={<PixelIcon name="computer" size={14} />}>
-                  화면 색 바꾸기...
+                  화면 설정...
                 </Button>
               </div>
             </GroupBox>
+
+            <PushSettings />
 
             <AccountSettings />
 

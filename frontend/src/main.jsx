@@ -24,3 +24,10 @@ createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </StrictMode>,
 );
+
+// 휴대폰·브라우저 푸시 알림을 받는 서비스 워커 (https 또는 localhost 에서만 동작)
+if ('serviceWorker' in navigator && window.isSecureContext && !window.deardaysDesktop) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

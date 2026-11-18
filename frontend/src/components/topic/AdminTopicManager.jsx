@@ -87,6 +87,11 @@ function TopicRow({ topic, today, onSaved, onDelete }) {
       <span className="list-meta flex items-center gap-1.5">
         {formatShortDate(topic.date)}
         {topic.date === today && <span className="chip chip--today">오늘</span>}
+        {topic.isAuto && (
+          <span className="chip" title="관리자가 넣지 않아 글감 목록에서 자동으로 고른 주제">
+            자동
+          </span>
+        )}
       </span>
       <span className="ink col-span-2 row-start-2 min-w-0 break-keep text-[15px] sm:col-span-1 sm:row-start-auto">{topic.content}</span>
       <span className="list-meta hidden sm:block">글 {topic.diaryCount}편</span>

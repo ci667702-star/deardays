@@ -3,10 +3,12 @@ import { Link } from 'react-router';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useRooms } from '../../context/RoomContext.jsx';
 import { useClock } from '../../hooks/useClock.js';
+import { useAnniversaries } from '../../hooks/useAnniversaries.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus.js';
 import { diaryService } from '../../services/diaryService.js';
-import { WEEKDAYS, addDays, daysUntil, parseDateString, todayString } from '../../utils/date.js';
+import { ddayLabel } from '../../utils/anniversaries.js';
+import { WEEKDAYS, addDays, daysUntil, formatShortDate, parseDateString, todayString } from '../../utils/date.js';
 import { prefs } from '../../utils/storage.js';
 import { cx } from '../../utils/cx.js';
 import { PARTNER_SEAL } from '../diary/DiaryList.jsx';
@@ -148,6 +150,42 @@ function ThisWeek({ room, meId }) {
   );
 }
 
+/** 다가오는 기념일 세 개 */
+function UpcomingDays({ room }) {
+  const { data, reload } = useAnniversaries(room.id);
+  useRefreshOnFocus(reload);
+  const upcoming = (data ?? []).filter((item) => item.dday >= 0).slice(0, 3);
+  return (
+    <Window title="다가오는 날" icon={<PixelIcon name="cake" size={14} />} maximizable={false} animate={false}>
+      {upcoming.length === 0 ? (
+        <p className="font-small text-center text-[12px] text-muted">
+          다가오는 기념일이 없어요.
+          <br />
+          <Link to="/calendar">달력</Link>에서 넣을 수 있어요.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {upcoming.map((item) => (
+            <li key={item.id} className="flex items-center gap-2">
+              <span
+                className={cx(
+                  'font-small w-[52px] shrink-0 py-0.5 text-center text-[11px] font-bold',
+                  item.dday === 0 ? 'bg-select text-select-text' : 'bg-pink-soft shadow-[var(--bevel-thin-in)]',
+                )}
+              >
+                {ddayLabel(item.dday)}
+              </span>
+              <Link to={`/calendar?date=${item.nextDate}`} className="min-w-0 flex-1 truncate text-[13px] text-inherit no-underline hover:underline" title={`${item.title} · ${formatShortDate(item.nextDate)}`}>
+                {item.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Window>
+  );
+}
+
 /** 나만 보는 메모. 이 기기에만 저장된다 */
 function MemoGadget({ userId }) {
   const key = `memo:${userId}`;
@@ -207,6 +245,7 @@ export function RightGadgets() {
   const { currentRoom } = useRooms();
   return (
     <div className="flex flex-col gap-4">
+      {currentRoom && <UpcomingDays room={currentRoom} />}
       {currentRoom && <ThisWeek room={currentRoom} meId={user.id} />}
       <MemoGadget userId={user.id} />
     </div>

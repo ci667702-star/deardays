@@ -108,6 +108,12 @@ export const commentSchema = z.object({
   content: requiredText('댓글', 500),
 });
 
+/** 새 댓글. parentId 를 주면 그 댓글에 다는 답글 */
+export const createCommentSchema = z.object({
+  content: requiredText('댓글', 500),
+  parentId: z.preprocess((value) => (value === '' || value === null ? undefined : value), idSchema('답글 대상').optional()),
+});
+
 export const stampSchema = z.object({
   kind: z.enum(STAMP_KINDS, { error: '도장 종류가 올바르지 않아요.' }),
 });

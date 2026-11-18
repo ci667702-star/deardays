@@ -35,6 +35,25 @@ const face = (eyes, mouth1, mouth2, extra = {}) => [
 ];
 
 export const ICONS = {
+  // 케이크: 기념일
+  cake: [
+    '................',
+    '.......y........',
+    '......yry.......',
+    '.......y........',
+    '......kwk.......',
+    '......kpk.......',
+    '......kwk.......',
+    '..kkkkkkkkkkkk..',
+    '..kpwpppwpppwk..',
+    '..kppppppppppk..',
+    '..kcccccccccck..',
+    '..kppppppppppk..',
+    '..kcccccccccck..',
+    '.kkkkkkkkkkkkkk.',
+    '.kGGGGGGGGGGGGk.',
+    '..kkkkkkkkkkkk..',
+  ],
   // 도장: 손잡이 + 나무 몸통 + 빨간 고무
   stamp: [
     '................',

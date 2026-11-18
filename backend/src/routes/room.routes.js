@@ -3,7 +3,8 @@ import * as roomController from '../controllers/roomController.js';
 import { requireAuth } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
 import { roomIdParamSchema } from '../validators/common.js';
-import { joinRoomSchema, recapQuerySchema, roomNameSchema } from '../validators/room.validators.js';
+import { anniversarySchema, joinRoomSchema, recapQuerySchema, roomNameSchema } from '../validators/room.validators.js';
+import * as anniversaryController from '../controllers/anniversaryController.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -26,5 +27,8 @@ router.post(
 router.delete('/:roomId/members/me', validate(roomIdParamSchema, 'params'), roomController.leaveRoom);
 // 연말 결산: 그해 공간의 기록 모아 보기
 router.get('/:roomId/recap', validate(roomIdParamSchema, 'params'), validate(recapQuerySchema, 'query'), roomController.getRecap);
+// 기념일 (D-day)
+router.get('/:roomId/anniversaries', validate(roomIdParamSchema, 'params'), anniversaryController.list);
+router.post('/:roomId/anniversaries', validate(roomIdParamSchema, 'params'), validate(anniversarySchema), anniversaryController.create);
 
 export default router;

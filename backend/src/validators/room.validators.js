@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isValidInviteCodeFormat, normalizeInviteCode } from '../utils/inviteCode.js';
+import { isValidDateString } from '../utils/date.js';
 import { requiredText } from './common.js';
 
 export const roomNameSchema = z.object({
@@ -22,4 +23,17 @@ export const recapQuerySchema = z.object({
     .min(2000, '2000년 이후만 볼 수 있어요.')
     .max(2100, '연도가 올바르지 않아요.')
     .default(() => new Date().getFullYear()),
+});
+
+const anniversaryDateSchema = z
+  .string({ error: '날짜를 골라 주세요.' })
+  .trim()
+  .refine(isValidDateString, '날짜 형식이 올바르지 않아요. (예: 2026-12-25)')
+  .refine((value) => value >= '1900-01-01' && value <= '2100-12-31', '날짜는 1900년부터 2100년 사이로 골라 주세요.');
+
+/** 기념일: 이름, 날짜, 해마다 반복 */
+export const anniversarySchema = z.object({
+  title: requiredText('기념일 이름', 40),
+  date: anniversaryDateSchema,
+  yearly: z.boolean({ error: '해마다 반복 여부가 올바르지 않아요.' }).default(false),
 });

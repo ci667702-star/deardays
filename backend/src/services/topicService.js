@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma.js';
+import { TOPIC_PROMPTS } from '../config/topicPrompts.js';
 import { HttpError } from '../utils/HttpError.js';
 import { localTodayString, toDbDate } from '../utils/date.js';
 import { toPublicUser, toTopic } from '../utils/serializers.js';
@@ -6,10 +7,34 @@ import { assertRoomMember } from './roomService.js';
 
 const TOPIC_NOT_FOUND = () => HttpError.notFound('주제를 찾을 수 없어요.', 'TOPIC_NOT_FOUND');
 
-/** 오늘의 주제 (없으면 null) */
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** 그날 자동으로 나올 글감: 날짜 순서대로 목록을 한 바퀴씩 돈다 */
+export function promptForDate(date) {
+  const day = Math.floor(toDbDate(date).getTime() / DAY_MS);
+  return TOPIC_PROMPTS[((day % TOPIC_PROMPTS.length) + TOPIC_PROMPTS.length) % TOPIC_PROMPTS.length];
+}
+
+/**
+ * 하루 하나 글쓰기: 오늘 관리자가 넣은 주제가 없으면 글감 목록에서 하나를 골라 오늘의 주제로 만든다.
+ * 누가 먼저 열든 한 번만 만들어진다 (같은 날짜는 하나만: 동시에 만들면 먼저 만든 것을 쓴다).
+ */
+export async function ensureTodayTopic() {
+  const date = toDbDate(localTodayString());
+  const existing = await prisma.dailyTopic.findUnique({ where: { date } });
+  if (existing) return existing;
+  try {
+    return await prisma.dailyTopic.create({ data: { date, content: promptForDate(localTodayString()), isAuto: true } });
+  } catch (error) {
+    if (error.code !== 'P2002') throw error;
+    return prisma.dailyTopic.findUnique({ where: { date } });
+  }
+}
+
+/** 오늘의 주제 (관리자가 넣지 않았으면 자동으로 고른 글감) */
 export async function getTodayTopic() {
   const today = localTodayString();
-  const topic = await prisma.dailyTopic.findUnique({ where: { date: toDbDate(today) } });
+  const topic = await ensureTodayTopic();
   return { date: today, topic: topic ? toTopic(topic) : null };
 }
 
@@ -32,6 +57,7 @@ export async function getTopic(userId, topicId) {
  */
 export async function listRoomTopics(userId, { roomId, page, limit }) {
   await assertRoomMember(roomId, userId);
+  await ensureTodayTopic();
   const where = { date: { lte: toDbDate(localTodayString()) } };
 
   const [total, topics] = await prisma.$transaction([

@@ -19,7 +19,7 @@ export async function getMyPage(userId) {
     findUserOrThrow(userId),
     prisma.diary.count({ where: { authorId: userId } }),
     prisma.like.count({ where: { diary: { authorId: userId } } }),
-    prisma.comment.count({ where: { userId } }),
+    prisma.comment.count({ where: { userId, deletedAt: null } }),
     prisma.todo.count({ where: { completedById: userId } }),
     listRooms(userId),
   ]);

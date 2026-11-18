@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { authService } from '../services/authService.js';
+import { forgetThisDevice } from '../services/pushService.js';
 import { drafts } from '../utils/drafts.js';
 import { tokenStorage } from '../utils/storage.js';
 import { useToast } from './ToastContext.jsx';
@@ -69,6 +70,8 @@ export function AuthProvider({ children }) {
   /** 직접 로그아웃할 때는 이 기기에 남은 임시 저장 일기도 지운다 (같이 쓰는 컴퓨터 대비) */
   const logout = useCallback(() => {
     if (userRef.current) drafts.clearUser(userRef.current.id);
+    // 같이 쓰는 기기에 내 알림이 계속 오지 않게 (토큰을 지우기 전에 시작)
+    forgetThisDevice(tokenStorage.get());
     tokenStorage.clear();
     setUser(null);
     setStatus('guest');

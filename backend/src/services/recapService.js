@@ -92,7 +92,7 @@ export async function getRecap(userId, roomId, { year }) {
         doodleUrl: true,
         createdAt: true,
         author: true,
-        _count: { select: { images: true, comments: true, likes: true, stamps: true } },
+        _count: { select: { images: true, comments: { where: { deletedAt: null } }, likes: true, stamps: true } },
       },
       orderBy: [{ diaryDate: 'asc' }, { createdAt: 'asc' }],
     }),
@@ -101,7 +101,7 @@ export async function getRecap(userId, roomId, { year }) {
 
   const inRoom = { diary: { diaryRoomId: roomId }, createdAt: timeRange };
   const [comments, likes, stamps, letters, todosDone] = await Promise.all([
-    prisma.comment.groupBy({ by: ['userId'], where: inRoom, _count: { _all: true } }),
+    prisma.comment.groupBy({ by: ['userId'], where: { ...inRoom, deletedAt: null }, _count: { _all: true } }),
     prisma.like.groupBy({ by: ['userId'], where: inRoom, _count: { _all: true } }),
     prisma.stamp.groupBy({ by: ['userId', 'kind'], where: inRoom, _count: { _all: true } }),
     prisma.letter.count({ where: { diaryRoomId: roomId, createdAt: timeRange } }),

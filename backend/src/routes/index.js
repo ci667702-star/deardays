@@ -10,6 +10,8 @@ import notificationRoutes from './notification.routes.js';
 import letterRoutes from './letter.routes.js';
 import topicRoutes from './topic.routes.js';
 import adminRoutes from './admin.routes.js';
+import anniversaryRoutes from './anniversary.routes.js';
+import pushRoutes from './push.routes.js';
 
 const router = Router();
 
@@ -28,5 +30,7 @@ router.use('/notifications', notificationRoutes);
 router.use('/letters', letterRoutes);
 router.use('/topics', topicRoutes);
 router.use('/admin', adminRoutes);
+router.use('/anniversaries', anniversaryRoutes);
+router.use('/push', pushRoutes);
 
 export default router;

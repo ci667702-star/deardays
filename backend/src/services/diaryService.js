@@ -13,7 +13,7 @@ const diaryInclude = (viewerId) => ({
   images: { orderBy: { id: 'asc' } },
   stamps: { include: { user: true }, orderBy: { id: 'asc' } },
   likes: { where: { userId: viewerId }, select: { userId: true } },
-  _count: { select: { likes: true, comments: true } },
+  _count: { select: { likes: true, comments: { where: { deletedAt: null } } } },
 });
 
 const DIARY_NOT_FOUND = () => HttpError.notFound('일기를 찾을 수 없어요. 삭제되었을 수도 있어요.', 'DIARY_NOT_FOUND');

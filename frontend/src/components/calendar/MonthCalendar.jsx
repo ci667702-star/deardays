@@ -37,6 +37,7 @@ export default function MonthCalendar({
   onMonthChange,
   size = 'lg',
   loading = false,
+  anniversaries,
 }) {
   const compact = size === 'sm';
   const today = todayString();
@@ -128,13 +129,14 @@ export default function MonthCalendar({
         <div ref={gridRef} role="group" aria-label={`${year}년 ${monthIndex + 1}월 달력`} className="grid grid-cols-7">
           {cells.map((cell) => {
             const entries = days.get(cell.value) ?? [];
+            const special = anniversaries?.get(cell.value) ?? [];
             const mine = entries.find((d) => d.authorId === meId);
             const theirs = entries.find((d) => d.authorId !== meId);
             const isToday = cell.value === today;
             const isSelected = cell.value === selectedDate;
             const label = `${parseDateString(cell.value).monthIndex + 1}월 ${cell.day}일${isToday ? ', 오늘' : ''}${
               entries.length ? `, 일기 ${entries.length}편` : ''
-            }`;
+            }${special.length ? `, 기념일 ${special.map((a) => a.title).join(', ')}` : ''}`;
 
             return (
               <button
@@ -167,6 +169,14 @@ export default function MonthCalendar({
                 >
                   {cell.day}
                 </span>
+                {special.length > 0 && (
+                  <span className={cx('absolute', compact ? 'right-0.5 top-0.5' : 'right-1 top-1')} title={special.map((a) => a.title).join(', ')} aria-hidden="true">
+                    <PixelIcon name="cake" size={compact ? 10 : 14} />
+                  </span>
+                )}
+                {!compact && special.length > 0 && (
+                  <span className="font-small hidden w-full truncate px-0.5 text-[11px] leading-tight text-pink-deep sm:block">{special[0].title}</span>
+                )}
                 {(mine || theirs) && (
                   <span className="flex items-center gap-0.5" aria-hidden="true">
                     {mine && <DayMarker entry={mine} mine size={compact ? 10 : 13} />}
@@ -194,6 +204,11 @@ export default function MonthCalendar({
         <span className="inline-flex items-center gap-1">
           <PixelIcon name="moodHappy" size={11} palette={FACE_MINE} /> 표정은 그날 기분
         </span>
+        {anniversaries && (
+          <span className="inline-flex items-center gap-1">
+            <PixelIcon name="cake" size={11} /> 기념일
+          </span>
+        )}
         {!compact && (
           <span className="inline-flex items-center gap-1">
             <span className="inline-block size-3 bg-select" /> 오늘

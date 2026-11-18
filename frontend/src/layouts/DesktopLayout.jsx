@@ -4,6 +4,7 @@ import ErrorBoundary from '../components/ui/ErrorBoundary.jsx';
 import { Loading } from '../components/ui/Feedback.jsx';
 import PixelIcon from '../components/ui/PixelIcon.jsx';
 import Window from '../components/ui/Window.jsx';
+import ScreenSaver from '../components/layout/ScreenSaver.jsx';
 import { LeftGadgets, RightGadgets } from '../components/layout/SideGadgets.jsx';
 import Taskbar from '../components/layout/Taskbar.jsx';
 import { prefetchPages } from '../pages/lazyPages.js';
@@ -31,6 +32,7 @@ export default function DesktopLayout() {
       style={{ paddingTop: 'calc(var(--taskbar-h) + var(--safe-top))', paddingBottom: 'calc(var(--safe-bottom) + 20px)' }}
     >
       <Taskbar />
+      <ScreenSaver />
       {/* 아주 넓은 화면에서는 본문 양옆에 작은 창(함께한 날·시계 / 이번 주·메모장)을 둔다 */}
       <div className="mx-auto max-w-[1440px] px-2.5 pt-2.5 sm:px-5 sm:pt-5 min-[1600px]:grid min-[1600px]:max-w-[1920px] min-[1600px]:grid-cols-[250px_minmax(0,1fr)_250px] min-[1600px]:items-start min-[1600px]:gap-5">
         <aside aria-label="왼쪽 작은 창" className="sticky top-[calc(var(--taskbar-h)+20px)] hidden min-[1600px]:block">

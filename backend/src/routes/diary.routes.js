@@ -6,7 +6,7 @@ import { validate } from '../middlewares/validate.js';
 import { idParamSchema } from '../validators/common.js';
 import {
   calendarQuerySchema,
-  commentSchema,
+  createCommentSchema,
   createDiarySchema,
   listDiaryQuerySchema,
   stampParamSchema,
@@ -36,7 +36,7 @@ router.put(
 router.delete('/:id', byId, diaryController.deleteDiary);
 
 router.get('/:id/comments', byId, diaryController.listComments);
-router.post('/:id/comments', byId, validate(commentSchema), diaryController.createComment);
+router.post('/:id/comments', byId, validate(createCommentSchema), diaryController.createComment);
 
 router.post('/:id/likes', byId, diaryController.likeDiary);
 router.delete('/:id/likes', byId, diaryController.unlikeDiary);

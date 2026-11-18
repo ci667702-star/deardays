@@ -66,7 +66,7 @@ export default function StartMenu({ open, onClose, onLogout, anchorRef, user }) 
           }}
         >
           <PixelIcon name="computer" size={24} />
-          <span>화면 색 바꾸기...</span>
+          <span>화면 설정...</span>
         </button>
         {window.deardaysDesktop && (
           <button

@@ -37,6 +37,8 @@ model User {
   lettersReceived     Letter[]          @relation("LetterRecipient")
   stamps              Stamp[]
   topicsCreated       DailyTopic[]
+  anniversaries       Anniversary[]
+  pushSubscriptions   PushSubscription[]
 
   @@map("users")
 }
@@ -52,6 +54,7 @@ model DiaryRoom {
   todos         Todo[]
   notifications Notification[]
   letters       Letter[]
+  anniversaries Anniversary[]
 
   @@map("diary_rooms")
 }
@@ -115,19 +118,26 @@ model DiaryImage {
   @@map("diary_images")
 }
 
+// 댓글. parentId 가 있으면 그 댓글에 단 답글 (한 단계만: 답글의 답글도 맨 위 댓글 아래에 붙는다)
 model Comment {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   diaryId   Int
   userId    Int
-  content   String   @db.VarChar(500)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  parentId  Int?
+  content   String    @db.VarChar(500)
+  // 답글이 달린 댓글을 지우면 자리만 남긴다 ("삭제된 댓글이에요"). 답글이 없으면 바로 지운다.
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  diary Diary @relation(fields: [diaryId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  diary   Diary     @relation(fields: [diaryId], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
 
   @@index([diaryId, createdAt])
   @@index([userId])
+  @@index([parentId])
   @@map("comments")
 }
 
@@ -164,10 +174,12 @@ model Stamp {
 }
 
 // 오늘의 주제: 관리자가 날짜마다 하나씩 넣어 두면 모든 공간에 그날의 글감으로 보인다.
+// 관리자가 넣지 않은 날은 서버에 들어 있는 글감 목록에서 하나를 골라 자동으로 만든다(isAuto).
 model DailyTopic {
   id          Int      @id @default(autoincrement())
   date        DateTime @unique @db.Date
   content     String   @db.VarChar(200)
+  isAuto      Boolean  @default(false)
   createdById Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -177,6 +189,43 @@ model DailyTopic {
 
   @@index([createdById])
   @@map("daily_topics")
+}
+
+// 기념일: 생일·시험·여행 같은 날. 공간 사람 모두에게 보이고, 해마다 반복할 수 있다(yearly).
+model Anniversary {
+  id          Int      @id @default(autoincrement())
+  diaryRoomId Int
+  creatorId   Int
+  title       String   @db.VarChar(40)
+  date        DateTime @db.Date
+  yearly      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  diaryRoom DiaryRoom @relation(fields: [diaryRoomId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([diaryRoomId, date])
+  @@index([creatorId])
+  @@map("anniversaries")
+}
+
+// 휴대폰·브라우저 푸시 알림 구독 (기기마다 하나). endpoint 가 길어서 같은 기기 확인은 해시로 한다.
+model PushSubscription {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  endpoint     String   @db.VarChar(1000)
+  endpointHash String   @unique @db.Char(64)
+  p256dh       String   @db.VarChar(255)
+  auth         String   @db.VarChar(255)
+  userAgent    String?  @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 // 공유 공간의 '우리 할 일' 목록. 두 사람 모두 추가하고 완료 표시할 수 있다.
@@ -207,7 +256,7 @@ model Todo {
 }
 
 // 새 소식 알림. 받는 사람(recipient)마다 한 줄씩 만든다.
-// type: DIARY_CREATED, COMMENT_CREATED, LIKE_CREATED, STAMP_CREATED, TODO_ASSIGNED, MEMBER_JOINED,
+// type: DIARY_CREATED, COMMENT_CREATED, COMMENT_REPLIED, LIKE_CREATED, STAMP_CREATED, TODO_ASSIGNED, MEMBER_JOINED,
 //       LETTER_SENT, LETTER_ARRIVED, LETTER_OPENED
 model Notification {
   id          Int      @id @default(autoincrement())

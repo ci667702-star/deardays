@@ -90,8 +90,23 @@ async function assertDateFree(date, exceptId = null) {
   if (existing && existing.id !== exceptId) throw DATE_TAKEN(date);
 }
 
+/** 자동으로 고른 글감이고 아직 그 주제로 쓴 일기가 없으면 관리자가 덮어쓸 수 있다 */
+async function replaceableAutoTopic(date) {
+  const existing = await prisma.dailyTopic.findUnique({ where: { date: toDbDate(date) }, include: withCount });
+  return existing?.isAuto && existing._count.diaries === 0 ? existing : null;
+}
+
 export async function createTopic(userId, { content, date }) {
   const target = date ?? (await nextEmptyDates(1))[0];
+  const auto = await replaceableAutoTopic(target);
+  if (auto) {
+    const topic = await prisma.dailyTopic.update({
+      where: { id: auto.id },
+      data: { content, isAuto: false, createdById: userId },
+      include: withCount,
+    });
+    return toTopicForAdmin(topic);
+  }
   await assertDateFree(target);
   try {
     const topic = await prisma.dailyTopic.create({
@@ -135,7 +150,8 @@ export async function updateTopic(topicId, { content, date }) {
   try {
     const topic = await prisma.dailyTopic.update({
       where: { id: topicId },
-      data: { content, date: toDbDate(date) },
+      // 관리자가 고친 주제는 더 이상 '자동'이 아니다
+      data: { content, date: toDbDate(date), isAuto: false },
       include: withCount,
     });
     return toTopicForAdmin(topic);
