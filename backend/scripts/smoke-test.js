@@ -136,9 +136,6 @@ async function main() {
 
   r = await call('POST', '/api/rooms/join', { token: tokenA, json: { inviteCode: room.inviteCode } });
   check('이미 참여 중 409', r.status === 409);
-  r = await call('POST', '/api/rooms/join', { token: tokenC, json: { inviteCode: room.inviteCode } });
-  check('세 번째 사람 참여 불가 409 ROOM_FULL', r.status === 409 && r.data.code === 'ROOM_FULL');
-
   r = await call('GET', `/api/rooms/${room.id}`, { token: tokenC });
   check('멤버 아닌 사람 공간 조회 404', r.status === 404);
   r = await call('GET', '/api/rooms', { token: tokenB });
@@ -801,19 +798,52 @@ async function main() {
   check('마지막 멤버 나가기 → 공간 삭제', r.status === 200 && r.data.roomDeleted === true);
   check('공간 삭제 시 사진 파일도 삭제', diary1Updated.images.every((img) => !uploadExists(img.imageUrl)));
 
-  console.log('\n[동시 참여 경쟁]');
-  r = await call('POST', '/api/rooms', { token: tokenA, json: { name: '경쟁 테스트' } });
-  const raceRoom = r.data.room;
-  const [joinB, joinC] = await Promise.all([
-    call('POST', '/api/rooms/join', { token: tokenB, json: { inviteCode: raceRoom.inviteCode } }),
-    call('POST', '/api/rooms/join', { token: tokenC, json: { inviteCode: raceRoom.inviteCode } }),
+  console.log('\n[여럿이 쓰는 공간 · 정원 6명 · 동시 참여 경쟁]');
+  // A·B·C + 새 사람 4명. 다섯 명이 먼저 들어간 뒤, 남은 한 자리에 두 사람이 동시에 들어온다.
+  const guests = [];
+  for (let i = 1; i <= 4; i += 1) {
+    const reg = await call('POST', '/api/auth/register', { json: { email: `x${i}_${RUN}@test.dev`, nickname: `손님${i}`, password: pw } });
+    guests.push(reg.data);
+  }
+  check('함께 쓸 사람 4명 더 가입', guests.every((x) => x?.token));
+  r = await call('POST', '/api/rooms', { token: tokenA, json: { name: '여럿이 쓰는 공간' } });
+  const groupRoom = r.data.room;
+  for (const token of [tokenB, tokenC, guests[0].token, guests[1].token]) {
+    await call('POST', '/api/rooms/join', { token, json: { inviteCode: groupRoom.inviteCode } });
+  }
+  r = await call('GET', `/api/rooms/${groupRoom.id}`, { token: tokenA });
+  check('다섯 명이 한 공간에', r.status === 200 && r.data.room.members.length === 5, JSON.stringify(r.data.room?.members?.length));
+  r = await call('GET', '/api/notifications', { token: tokenB });
+  check('먼저 있던 사람 모두에게 참여 알림', r.data.items.some((n) => n.type === 'MEMBER_JOINED' && n.actor?.id === guests[1].user.id));
+
+  const [join5, join6] = await Promise.all([
+    call('POST', '/api/rooms/join', { token: guests[2].token, json: { inviteCode: groupRoom.inviteCode } }),
+    call('POST', '/api/rooms/join', { token: guests[3].token, json: { inviteCode: groupRoom.inviteCode } }),
   ]);
-  const statuses = [joinB.status, joinC.status].sort().join(',');
-  check('동시에 두 명이 참여해도 한 명만 성공 (201,409)', statuses === '201,409', statuses);
-  r = await call('GET', `/api/rooms/${raceRoom.id}`, { token: tokenA });
-  check('공간 인원은 정확히 2명', r.data.room.members.length === 2);
-  for (const token of [tokenA, tokenB, tokenC]) {
-    await call('DELETE', `/api/rooms/${raceRoom.id}/members/me`, { token });
+  const statuses = [join5.status, join6.status].sort().join(',');
+  check('마지막 한 자리에 동시에 두 명 → 한 명만 성공 (201,409)', statuses === '201,409', statuses);
+  const loser = join5.status === 409 ? join5 : join6;
+  check('정원이 차면 ROOM_FULL', loser.data?.code === 'ROOM_FULL' && loser.data.message.includes('6명'), JSON.stringify(loser.data));
+  r = await call('GET', `/api/rooms/${groupRoom.id}`, { token: tokenA });
+  check('공간 인원은 정확히 6명', r.data.room.members.length === 6);
+
+  r = await call('POST', '/api/diaries', {
+    token: tokenC,
+    json: { roomId: groupRoom.id, title: '여럿이', content: '모두에게 알림', diaryDate: '2026-11-18' },
+  });
+  const groupDiary = r.data.diary;
+  const others = await Promise.all([tokenA, tokenB, guests[0].token].map((token) => call('GET', '/api/notifications', { token })));
+  check('여럿이 쓰는 공간: 새 일기 알림이 나머지 모두에게', others.every((res) => res.data.items.some((n) => n.type === 'DIARY_CREATED' && n.diary?.id === groupDiary.id)));
+  r = await call('POST', `/api/diaries/${groupDiary.id}/stamps`, { token: guests[0].token, json: { kind: 'best' } });
+  check('여럿이 쓰는 공간: 누구나 도장', r.status === 200 && r.data.stamps.length === 1);
+
+  r = await call('DELETE', `/api/rooms/${groupRoom.id}/members/me`, { token: tokenB });
+  check('여섯 명 중 한 명이 나가도 공간 유지', r.status === 200 && r.data.roomDeleted === false);
+  for (const token of [tokenA, tokenC, ...guests.map((x) => x.token)]) {
+    await call('DELETE', `/api/rooms/${groupRoom.id}/members/me`, { token });
+  }
+  for (const x of guests) {
+    await call('DELETE', '/api/users/me', { token: x.token, json: { password: pw } });
   }
 
   console.log('\n[비밀번호 변경]');

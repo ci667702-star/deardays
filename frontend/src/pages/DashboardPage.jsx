@@ -25,6 +25,7 @@ import { diaryService } from '../services/diaryService.js';
 import { parseDateString, todayString, weekdayOf } from '../utils/date.js';
 import { getErrorMessage } from '../utils/errors.js';
 import { DAILY_NOTES, noteIndexForDate } from '../utils/quotes.js';
+import { MAX_ROOM_MEMBERS, groupLabel, namesOf, othersOf } from '../utils/rooms.js';
 
 export default function DashboardPage() {
   useDocumentTitle('홈');
@@ -108,7 +109,7 @@ function RecapInvite() {
 
 function Dashboard() {
   const { user } = useAuth();
-  const { currentRoom, partner, refreshRoom } = useRooms();
+  const { currentRoom, others, refreshRoom } = useRooms();
   const toast = useToast();
   const navigate = useNavigate();
   const roomId = currentRoom.id;
@@ -140,8 +141,8 @@ function Dashboard() {
       const room = await refreshRoom(roomId);
       recent.reload();
       calendar.reload();
-      const joined = room.members.find((m) => m.id !== user.id);
-      if (joined) toast.success(`${joined.nickname}님이 들어왔어요!`);
+      const joined = othersOf(room.members, user.id);
+      if (joined.length > 0) toast.success(`${namesOf(joined)}이 함께하고 있어요!`);
       else toast.info('아직 친구가 들어오지 않았어요.');
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -199,13 +200,19 @@ function Dashboard() {
 
       <div className="grid min-w-0 content-start items-start gap-4 md:grid-cols-2 lg:grid-cols-1">
         <RecapInvite />
-        <Window title="우리 둘" icon={<PixelIcon name="heart" size={14} />}>
+        <Window title={groupLabel(currentRoom.members.length)} icon={<PixelIcon name="heart" size={14} />}>
           <MemberPair
             members={currentRoom.members}
             meId={user.id}
             emptySeat={<p className="font-small text-[12px] text-muted">초대 코드를 보내 주세요</p>}
           />
-          {!partner && (
+          {others.length > 0 && currentRoom.members.length < MAX_ROOM_MEMBERS && (
+            <p className="font-small mt-3 text-center text-[12px] text-muted">
+              {MAX_ROOM_MEMBERS - currentRoom.members.length}자리가 남았어요. 초대 코드는{' '}
+              <Link to="/room">우리 일기장</Link>에 있어요.
+            </p>
+          )}
+          {others.length === 0 && (
             <div className="mt-4 flex flex-col gap-2">
               <hr className="etched" />
               <p className="font-small text-[12px] text-muted">친구가 이 코드를 입력하면 함께 쓸 수 있어요.</p>

@@ -56,7 +56,7 @@ function sentStatus(letter) {
 
 function LettersView() {
   const { user } = useAuth();
-  const { currentRoom, partner } = useRooms();
+  const { currentRoom, others } = useRooms();
   const toast = useToast();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -230,7 +230,7 @@ function LettersView() {
           ]}
         >
           {tab === 'write' ? (
-            <LetterComposer me={user} partner={partner} onSend={send} />
+            <LetterComposer me={user} others={others} onSend={send} />
           ) : (
             <>
               {loading && !data && <Loading label="편지함을 여는 중..." />}

@@ -45,7 +45,7 @@ export async function createRoom(userId, { name }) {
 export async function joinRoom(userId, { inviteCode }) {
   const room = await prisma.$transaction(
     async (tx) => {
-      // 두 사람이 동시에 같은 코드로 참여하는 경우를 막기 위해 공간 행을 먼저 잠근다.
+      // 마지막 한 자리에 여러 사람이 동시에 참여하는 경우를 막기 위해 공간 행을 먼저 잠근다.
       const [locked] = await tx.$queryRaw`
         SELECT id FROM diary_rooms WHERE inviteCode = ${inviteCode} FOR UPDATE`;
       if (!locked) {
@@ -61,7 +61,7 @@ export async function joinRoom(userId, { inviteCode }) {
         throw HttpError.conflict('이미 참여하고 있는 공간이에요.', 'ALREADY_MEMBER');
       }
       if (members.length >= MAX_ROOM_MEMBERS) {
-        throw HttpError.conflict('이미 두 사람이 함께 쓰고 있는 공간이라 참여할 수 없어요.', 'ROOM_FULL');
+        throw HttpError.conflict(`이미 ${MAX_ROOM_MEMBERS}명이 함께 쓰고 있는 공간이라 참여할 수 없어요.`, 'ROOM_FULL');
       }
 
       await tx.diaryRoomMember.create({ data: { userId, diaryRoomId: roomId } });

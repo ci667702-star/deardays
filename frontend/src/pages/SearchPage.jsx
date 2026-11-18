@@ -67,7 +67,7 @@ function useSearchResults(roomId, filters, enabled) {
 
 function SearchView() {
   const { user } = useAuth();
-  const { currentRoom, partner } = useRooms();
+  const { currentRoom, others } = useRooms();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
 
@@ -88,7 +88,8 @@ function SearchView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
-  const authorId = applied.author === 'me' ? user.id : applied.author === 'friend' ? partner?.id : undefined;
+  // author: '' (모두) | 'me' | 사람 번호
+  const authorId = applied.author === 'me' ? user.id : Number(applied.author) || undefined;
   const results = useSearchResults(
     currentRoom.id,
     { q: applied.q.trim(), authorId, from: applied.from, to: applied.to },
@@ -148,7 +149,11 @@ function SearchView() {
             <select id="search-author" className="field" value={form.author} onChange={update('author')}>
               <option value="">모두</option>
               <option value="me">나 ({user.nickname})</option>
-              {partner && <option value="friend">{partner.nickname}</option>}
+              {others.map((friend) => (
+                <option key={friend.id} value={String(friend.id)}>
+                  {friend.nickname}
+                </option>
+              ))}
             </select>
           </div>
           {/* 날짜 칸은 브라우저가 정한 최소 폭보다 줄지 않으므로 좁은 화면에서는 위아래로 */}

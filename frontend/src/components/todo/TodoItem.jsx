@@ -10,7 +10,7 @@ import TodoForm from './TodoForm.jsx';
 function AssigneeChip({ assignee, meId }) {
   if (!assignee) {
     return (
-      <span className="chip" title="두 사람이 함께 하는 일">
+      <span className="chip" title="모두 함께 하는 일">
         <PixelIcon name="heartSmall" size={10} />
         함께
       </span>
@@ -27,7 +27,7 @@ function AssigneeChip({ assignee, meId }) {
 const who = (person, meId, suffix) => (person?.id === meId ? `내가 ${suffix}` : `${person?.nickname ?? '알 수 없음'}님이 ${suffix}`);
 
 /**
- * 할 일 한 줄. 체크박스는 두 사람 모두 누를 수 있고, 수정·삭제는 적은 사람에게만 보인다.
+ * 할 일 한 줄. 체크박스는 공간 사람 누구나 누를 수 있고, 수정·삭제는 적은 사람에게만 보인다.
  * compact: 홈 화면 미리보기용 (적은 사람·버튼 숨김)
  */
 export default function TodoItem({ todo, meId, members, onToggle, onUpdate, onDelete, compact = false }) {

@@ -8,7 +8,7 @@ export default function AuthLayout() {
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-3 py-10">
       <div className="flex flex-col items-center gap-2 text-center text-desk-text">
         <Logo />
-        <p className="font-small text-[12px]">둘이서 주고받는 교환 일기</p>
+        <p className="font-small text-[12px]">친구와 주고받는 교환 일기</p>
       </div>
       <div className="w-full max-w-[460px]">
         <Suspense fallback={<div className="progress mx-auto w-48" aria-label="불러오는 중"><span /></div>}>

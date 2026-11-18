@@ -115,7 +115,7 @@ export async function updateTodo(userId, todoId, { content, dueDate, assigneeId 
   return toTodo(updated, userId);
 }
 
-/** 완료 표시는 두 사람 모두 할 수 있다. 누가 끝냈는지 기록한다. */
+/** 완료 표시는 공간 사람 누구나 할 수 있다. 누가 끝냈는지 기록한다. */
 export async function setTodoDone(userId, todoId, { isDone }) {
   const todo = await findTodoForMember(todoId, userId);
 

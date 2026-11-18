@@ -171,7 +171,7 @@ function Welcome({ data, year, empty, onYear }) {
       <p className="text-[15px] leading-relaxed">
         <b>{data.room.name}</b>의 {year}년을 정리해 주는 마법사예요.
         <br />
-        일기, 사진, 댓글, 도장까지 한 해 동안 둘이 남긴 흔적을 한 장씩 넘겨 보세요.
+        일기, 사진, 댓글, 도장까지 한 해 동안 함께 남긴 흔적을 한 장씩 넘겨 보세요.
       </p>
       <label className="flex flex-wrap items-center gap-2 text-[14px]">
         <span>어느 해를 볼까요?</span>
@@ -222,7 +222,7 @@ function Numbers({ data }) {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <Tile label="쓴 일기" value={t.diaries} unit="편" note={`일기를 쓴 날 ${fmt(t.daysWritten)}일`} />
         <Tile label="쓴 글자" value={t.characters} unit="자" />
-        <Tile label="둘 다 쓴 날" value={t.bothWroteDays} unit="일" />
+        <Tile label={data.members.length <= 2 ? '둘 다 쓴 날' : '두 명 이상 쓴 날'} value={t.bothWroteDays} unit="일" />
         <Tile label="올린 사진" value={t.photos} unit="장" />
         <Tile label="그린 낙서" value={t.doodles} unit="장" />
         <Tile label="주제로 쓴 글" value={t.topicDiaries} unit="편" />

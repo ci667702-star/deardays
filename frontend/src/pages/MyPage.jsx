@@ -12,6 +12,7 @@ import PixelIcon from '../components/ui/PixelIcon.jsx';
 import TextField from '../components/ui/TextField.jsx';
 import Window from '../components/ui/Window.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { namesOf, othersOf } from '../utils/rooms.js';
 import { useRooms } from '../context/RoomContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { THEMES } from '../utils/theme.js';
@@ -225,14 +226,14 @@ export default function MyPage() {
               ) : (
                 <ul className="flex flex-col gap-2">
                   {me.rooms.map((room) => {
-                    const partner = room.members.find((m) => m.id !== profile.id);
+                    const friends = othersOf(room.members, profile.id);
                     return (
                       <li key={room.id} className="flex flex-wrap items-center gap-3 bg-hilite px-3 py-2 shadow-[var(--bevel-thin-in)]">
                         <PixelIcon name="book" size={24} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate">{room.name}</p>
                           <p className="font-small text-[12px] text-muted">
-                            {partner ? `${partner.nickname}님과 함께` : '친구를 기다리는 중'}, 일기 {room.diaryCount}편
+                            {friends.length > 0 ? `${namesOf(friends)}과 함께` : '친구를 기다리는 중'}, 일기 {room.diaryCount}편
                           </p>
                         </div>
                         <Button

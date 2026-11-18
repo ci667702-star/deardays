@@ -16,11 +16,11 @@ const PRESETS = [
   { label: '1년 뒤', days: 365 },
 ];
 
-/** 타임캡슐 편지 쓰기: 받는 사람(친구/나), 여는 날, 제목, 내용 */
-export default function LetterComposer({ me, partner, onSend }) {
+/** 타임캡슐 편지 쓰기: 받는 사람(공간의 친구 누구나 / 나), 여는 날, 제목, 내용 */
+export default function LetterComposer({ me, others = [], onSend }) {
   const today = todayString();
   const [form, setForm] = useState({
-    recipientId: String(partner?.id ?? me.id),
+    recipientId: String(others[0]?.id ?? me.id),
     openAt: addDays(today, 30),
     title: '',
     content: '',
@@ -71,7 +71,11 @@ export default function LetterComposer({ me, partner, onSend }) {
             받는 사람
           </label>
           <select id="letter-to" className="field" value={form.recipientId} onChange={update('recipientId')}>
-            {partner && <option value={partner.id}>{partner.nickname}</option>}
+            {others.map((friend) => (
+              <option key={friend.id} value={friend.id}>
+                {friend.nickname}
+              </option>
+            ))}
             <option value={me.id}>미래의 나에게</option>
           </select>
         </div>

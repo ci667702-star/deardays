@@ -16,6 +16,7 @@ import TextField from '../components/ui/TextField.jsx';
 import Window from '../components/ui/Window.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRooms } from '../context/RoomContext.jsx';
+import { MAX_ROOM_MEMBERS } from '../utils/rooms.js';
 import { useToast } from '../context/ToastContext.jsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js';
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus.js';
@@ -116,7 +117,7 @@ function RoomView() {
     }
   };
 
-  const full = room.members.length >= 2;
+  const full = room.members.length >= MAX_ROOM_MEMBERS;
 
   return (
     <>
@@ -170,7 +171,7 @@ function RoomView() {
         statusBar={
           <>
             <span className="flex-1">일기 {list.total}편</span>
-            <span>함께하는 사람 {room.members.length}/2</span>
+            <span>함께하는 사람 {room.members.length}/{MAX_ROOM_MEMBERS}</span>
             <span className="hidden sm:block">{formatDateTime(room.createdAt)} 시작</span>
           </>
         }
@@ -188,8 +189,8 @@ function RoomView() {
             <div className="flex h-full flex-col gap-3">
               <p className="font-small text-[12px] text-muted">
                 {full
-                  ? '두 사람이 모두 모였어요. 이 공간에는 더 참여할 수 없어요.'
-                  : '친구에게 이 코드를 보내 주세요. 코드를 입력하면 바로 이 공간에 들어와요.'}
+                  ? `${MAX_ROOM_MEMBERS}명이 모두 모였어요. 이 공간에는 더 참여할 수 없어요.`
+                  : `친구에게 이 코드를 보내 주세요. 코드를 입력하면 바로 이 공간에 들어와요. (${room.members.length}/${MAX_ROOM_MEMBERS}명)`}
               </p>
               <InviteCodeBox code={room.inviteCode} onRegenerate={() => setConfirmRegenerate(true)} />
             </div>

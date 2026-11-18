@@ -1,7 +1,7 @@
 {
-  "name": "DearDays - 둘이서 쓰는 교환 일기",
+  "name": "DearDays - 친구와 쓰는 교환 일기",
   "short_name": "DearDays",
-  "description": "친구와 둘이서 주고받는 교환 일기",
+  "description": "친구와 함께 주고받는 교환 일기",
   "lang": "ko",
   "start_url": "/",
   "scope": "/",

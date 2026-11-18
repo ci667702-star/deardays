@@ -84,11 +84,12 @@ export function RoomProvider({ children }) {
   );
 
   const currentRoom = rooms.find((room) => room.id === currentRoomId) ?? null;
-  const partner = currentRoom?.members.find((member) => member.id !== userId) ?? null;
+  const others = useMemo(() => (currentRoom?.members ?? []).filter((member) => member.id !== userId), [currentRoom, userId]);
+  const partner = others[0] ?? null;
 
   const value = useMemo(
-    () => ({ rooms, currentRoom, partner, status, error, reload, selectRoom, upsertRoom, refreshRoom, removeRoom }),
-    [rooms, currentRoom, partner, status, error, reload, selectRoom, upsertRoom, refreshRoom, removeRoom],
+    () => ({ rooms, currentRoom, others, partner, status, error, reload, selectRoom, upsertRoom, refreshRoom, removeRoom }),
+    [rooms, currentRoom, others, partner, status, error, reload, selectRoom, upsertRoom, refreshRoom, removeRoom],
   );
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;

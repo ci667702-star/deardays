@@ -1,7 +1,7 @@
 // 서비스 전반에서 쓰는 규칙 값
 
-/** 하나의 공유 공간에 참여할 수 있는 최대 인원 */
-export const MAX_ROOM_MEMBERS = 2;
+/** 하나의 공유 공간에 참여할 수 있는 최대 인원 (화면: frontend/src/utils/rooms.js 와 같은 값) */
+export const MAX_ROOM_MEMBERS = 6;
 
 /** 일기 한 편에 첨부할 수 있는 최대 사진 수 */
 export const MAX_DIARY_IMAGES = 6;

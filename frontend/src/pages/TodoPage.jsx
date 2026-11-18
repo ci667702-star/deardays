@@ -11,6 +11,7 @@ import Tabs from '../components/ui/Tabs.jsx';
 import Window from '../components/ui/Window.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRooms } from '../context/RoomContext.jsx';
+import { namesOf } from '../utils/rooms.js';
 import { useToast } from '../context/ToastContext.jsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js';
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus.js';
@@ -35,7 +36,7 @@ const EMPTY_TEXT = {
 
 function TodoView() {
   const { user } = useAuth();
-  const { currentRoom, partner } = useRooms();
+  const { currentRoom, others } = useRooms();
   const toast = useToast();
   const navigate = useNavigate();
   const todos = useTodos(currentRoom.id);
@@ -102,7 +103,7 @@ function TodoView() {
               <span style={{ width: `${percent}%` }} />
             </div>
             <p className="font-small mt-2 text-[12px] text-muted">
-              {partner ? `${partner.nickname}님과 함께 보는 목록이에요. 누구든 체크할 수 있어요.` : '친구가 들어오면 같은 목록을 함께 보고 체크할 수 있어요.'}
+              {others.length > 0 ? `${namesOf(others)}과 함께 보는 목록이에요. 누구든 체크할 수 있어요.` : '친구가 들어오면 같은 목록을 함께 보고 체크할 수 있어요.'}
             </p>
           </GroupBox>
         </div>
@@ -124,7 +125,7 @@ function TodoView() {
               <EmptyState
                 icon="checklist"
                 title="아직 할 일이 없어요"
-                description="함께 하고 싶은 일이나 잊으면 안 되는 약속을 적어 보세요. 두 사람 모두 체크할 수 있어요."
+                description="함께 하고 싶은 일이나 잊으면 안 되는 약속을 적어 보세요. 공간 사람 누구나 체크할 수 있어요."
               />
             )}
             {!todos.loading && !todos.error && counts.total > 0 && visible.length === 0 && filter !== 'all' && (

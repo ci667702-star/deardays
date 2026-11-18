@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DoorOpen, Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { MAX_ROOM_MEMBERS, namesOf, othersOf } from '../../utils/rooms.js';
 import { useRooms } from '../../context/RoomContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { roomService } from '../../services/roomService.js';
@@ -55,8 +56,8 @@ export default function RoomSetupForm({ onDone, defaultTab = 'create' }) {
     setError('');
     try {
       const room = await roomService.join(normalized);
-      const partner = room.members.find((m) => m.id !== user?.id);
-      toast.success(`'${room.name}'에 참여했어요. ${partner ? `${partner.nickname}님과 ` : ''}함께 써 봐요!`);
+      const friends = othersOf(room.members, user?.id);
+      toast.success(`'${room.name}'에 참여했어요. ${friends.length ? `${namesOf(friends)}과 ` : ''}함께 써 봐요!`);
       finish(room);
     } catch (err) {
       setError(getErrorMessage(err));
@@ -102,7 +103,7 @@ export default function RoomSetupForm({ onDone, defaultTab = 'create' }) {
       ) : (
         <form onSubmit={handleJoin} className="flex flex-col gap-4" noValidate>
           <p className="font-small text-[12px] text-muted">
-            친구가 보내 준 8자리 코드를 입력하세요. 한 공간에는 두 사람까지만 함께할 수 있어요.
+            친구가 보내 준 8자리 코드를 입력하세요. 한 공간에는 {MAX_ROOM_MEMBERS}명까지 함께할 수 있어요.
           </p>
           <TextField
             label="초대 코드"

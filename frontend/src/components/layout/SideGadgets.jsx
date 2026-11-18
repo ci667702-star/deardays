@@ -34,20 +34,31 @@ function TogetherDays({ room, meId }) {
   const next = nextMilestone(day);
   const partner = room.members.find((member) => member.id !== meId);
   const me = room.members.find((member) => member.id === meId);
+  const many = room.members.length > 2;
 
   return (
     <Window title="함께한 날" icon={<PixelIcon name="heart" size={14} />} maximizable={false} animate={false}>
-      <div className="flex items-center justify-center gap-2">
-        <Avatar user={me} size={36} />
-        <PixelIcon name="heart" size={22} />
-        {partner ? (
-          <Avatar user={partner} size={36} />
-        ) : (
-          <span className="grid size-9 place-items-center border-2 border-dashed border-shade text-[16px] text-muted" aria-hidden="true">
-            ?
-          </span>
-        )}
-      </div>
+      {many ? (
+        <ul className="flex flex-wrap justify-center gap-1.5" aria-label={`함께 쓰는 사람 ${room.members.length}명`}>
+          {[me, ...room.members.filter((member) => member.id !== meId)].filter(Boolean).map((member) => (
+            <li key={member.id} title={member.nickname}>
+              <Avatar user={member} size={30} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="flex items-center justify-center gap-2">
+          <Avatar user={me} size={36} />
+          <PixelIcon name="heart" size={22} />
+          {partner ? (
+            <Avatar user={partner} size={36} />
+          ) : (
+            <span className="grid size-9 place-items-center border-2 border-dashed border-shade text-[16px] text-muted" aria-hidden="true">
+              ?
+            </span>
+          )}
+        </div>
+      )}
       <p className="mt-3 text-center text-[13px]">{room.name}</p>
       <p className="text-center text-[30px] font-bold leading-tight">{day}일째</p>
       <p className="font-small mt-1 text-center text-[12px] text-muted">
