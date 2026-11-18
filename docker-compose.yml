@@ -44,6 +44,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?.env 에 JWT_SECRET 을 설정해 주세요 (32자 이상)}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CLIENT_ORIGIN: ${PUBLIC_URL:-http://localhost}
+      # 화면을 Vercel 같은 다른 곳에도 올렸다면 그 주소 (쉼표로 여러 개)
+      EXTRA_ORIGINS: ${EXTRA_ORIGINS:-}
       AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-30}
       TRUST_PROXY: ${TRUST_PROXY:-1}
       # 관리자 비밀번호: 화면에서 이걸 입력한 계정이 '오늘의 주제'를 관리한다 (비우면 관리자 기능 꺼짐)

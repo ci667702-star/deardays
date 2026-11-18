@@ -40,9 +40,11 @@ export const env = {
   port: Number(process.env.PORT ?? 4000),
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
-  clientOrigins: (process.env.CLIENT_ORIGIN ?? 'http://localhost:5173')
+  // 화면을 열 수 있는 주소. CLIENT_ORIGIN(이 서버의 주소) + EXTRA_ORIGINS(Vercel 등 다른 곳에 올린 화면 주소)
+  clientOrigins: [process.env.CLIENT_ORIGIN ?? 'http://localhost:5173', process.env.EXTRA_ORIGINS ?? '']
+    .join(',')
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => origin.trim().replace(/\/$/, ''))
     .filter(Boolean),
   uploadDir: path.resolve(BACKEND_ROOT, process.env.UPLOAD_DIR ?? 'uploads'),
   maxImageSizeMb: Number(process.env.MAX_IMAGE_SIZE_MB ?? 5),

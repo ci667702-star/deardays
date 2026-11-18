@@ -15,6 +15,7 @@
 1. [기능 한눈에 보기](#기능-한눈에-보기)
 2. [내 컴퓨터에서 실행하기 (개발용)](#내-컴퓨터에서-실행하기-개발용)
 3. [서버에 배포하기 (Docker)](#서버에-배포하기-docker)
+   - [화면만 Vercel 에 올리기 (선택)](#화면만-vercel-에-올리기-선택)
 4. [데스크톱 앱 (Windows)](#데스크톱-앱-windows)
 5. [휴대폰에서 쓰기](#휴대폰에서-쓰기)
 6. [관리자: 오늘의 주제 넣기](#관리자-오늘의-주제-넣기)
@@ -326,6 +327,7 @@ cp .env.example .env
 | `PUBLIC_URL` | | `http://localhost` | 사람들이 접속하는 주소 (예: `http://10.20.30.40:8080`) |
 | `AUTH_RATE_LIMIT` | | `30` | 15분 동안 한 IP에서 허용할 로그인 실패·회원가입 횟수 |
 | `TRUST_PROXY` | | `1` | 앞에 있는 프록시 수. 그대로 두고, [HTTPS 프록시](#9단계-선택-https-붙이기)를 하나 더 두면 `2` |
+| `EXTRA_ORIGINS` | | (비어 있음) | 화면을 [Vercel](#화면만-vercel-에-올리기-선택) 같은 다른 곳에도 올렸다면 그 주소. 쉼표로 여러 개, 끝에 `/` 없이 |
 | `ADMIN_PASSWORD` | | (비어 있음) | 관리자 비밀번호, **8자 이상**. 앱에서 이 값을 넣은 계정이 오늘의 주제를 관리합니다. 비우면 관리자 기능이 꺼집니다 ([관리자](#관리자-오늘의-주제-넣기)) |
 
 **비밀번호와 키 만들기**: 직접 지어도 되지만, 아래 명령으로 무작위 값을 만들면 안전합니다. 나온 값을 복사해 `.env` 에 붙여 넣으세요. (세 값은 서로 다르게)
@@ -533,7 +535,7 @@ services:
     environment:
       DB_HOST: db                       # 'db' = 위 서비스 이름 (Docker 내부 주소)
       DB_NAME, DB_USER, DB_PASSWORD     # .env 의 RDB_* 값. 시작할 때 DATABASE_URL 로 합침
-      JWT_SECRET, JWT_EXPIRES_IN(7d), CLIENT_ORIGIN(=PUBLIC_URL),
+      JWT_SECRET, JWT_EXPIRES_IN(7d), CLIENT_ORIGIN(=PUBLIC_URL), EXTRA_ORIGINS,
       AUTH_RATE_LIMIT, TRUST_PROXY, ADMIN_PASSWORD, MAX_IMAGE_SIZE_MB(5), TZ(Asia/Seoul)
     volumes:
       - uploads:/data/uploads           # 올린 사진
@@ -643,6 +645,70 @@ docker compose up -d
 </details>
 
 ---
+
+## 화면만 Vercel 에 올리기 (선택)
+
+학교 서버에는 지금처럼 Docker 로 전부(화면 + API + DB) 띄워 두고, **화면만 Vercel 에도** 올리는 방법입니다.
+`git push` 할 때마다 Vercel 이 화면을 알아서 새로 배포해 주고, 화면이 빨리 뜹니다.
+
+```
+ 브라우저 ── https://deardays.vercel.app  (화면: Vercel)
+    │
+    └──── https://학교서버주소/api, /uploads  (API·사진·DB: 학교 서버 Docker)
+```
+
+> ⚠️ **학교 서버가 `https://` 로 열려야 합니다.** Vercel 화면은 항상 https 라서, `http://` 서버는 브라우저가 막습니다(Mixed Content).
+> 아직이면 [9단계. HTTPS 붙이기](#9단계-선택-https-붙이기)를 먼저 하세요.
+
+### 1. Vercel 에 프로젝트 만들기
+
+1. [vercel.com](https://vercel.com) 에 GitHub 계정으로 가입·로그인합니다.
+2. **Add New... → Project** → GitHub 저장소 `deardays` 를 **Import** 합니다.
+3. 설정 화면에서 이렇게 고릅니다.
+
+| 항목 | 값 |
+| --- | --- |
+| Root Directory | `frontend` (Edit 을 눌러 고르기) |
+| Framework Preset | Vite (`frontend/vercel.json` 덕분에 자동으로 맞춰짐) |
+| Build Command / Output Directory | 그대로 (`npm run build` / `dist`) |
+| Environment Variables | 이름 `VITE_API_URL`, 값 `https://학교서버주소` |
+
+`VITE_API_URL` 은 학교 서버 주소만 적습니다. **끝에 `/` 나 `/api` 를 붙이지 마세요.** (예: `https://diary.school.ac.kr`)
+
+4. **Deploy** 를 누르고 1~2분 기다리면 `https://deardays-xxxx.vercel.app` 같은 주소가 나옵니다. 이 주소를 복사해 둡니다.
+
+### 2. 학교 서버가 Vercel 화면을 받아 주게 하기
+
+API 는 정해 둔 주소에서 온 요청만 받습니다. 학교 서버의 `.env` 에 Vercel 주소를 추가합니다.
+
+```env
+EXTRA_ORIGINS=https://deardays-xxxx.vercel.app
+```
+
+```bash
+docker compose up -d
+```
+
+`up -d` 는 바뀐 설정을 알아채고 api 만 다시 만듭니다. Vercel 에 내 도메인을 연결했다면 그 주소도 쉼표로 이어 적습니다.
+
+### 3. 확인
+
+Vercel 주소로 접속해 로그인해 보세요. 일기와 사진이 보이면 끝입니다.
+
+| 증상 (브라우저 F12 → Console) | 해결 |
+| --- | --- |
+| `blocked by CORS policy` | 학교 서버 `.env` 의 `EXTRA_ORIGINS` 가 Vercel 주소와 똑같은지(https, 끝에 `/` 없이) 보고 `docker compose up -d` |
+| `Mixed Content` | `VITE_API_URL` 이 `http://` 입니다. `https://` 로 고치고 Vercel 에서 **Redeploy** |
+| 로그인 버튼을 눌러도 "서버에 연결할 수 없어요" | `VITE_API_URL` 오타, 또는 학교 서버가 꺼짐. `https://학교서버주소/api/health` 가 열리는지 확인 |
+| 환경변수를 바꿨는데 그대로 | `VITE_API_URL` 은 빌드할 때 들어갑니다. Vercel → Deployments → 최신 배포 → **Redeploy** |
+
+### 그다음부터
+
+- **화면만 바뀐 경우**: `git push` 하면 Vercel 이 알아서 다시 배포합니다.
+- **API·DB 가 바뀐 경우**: 지금처럼 학교 서버에서 `git pull` → `docker compose up -d --build`.
+- 학교 서버의 화면(`https://학교서버주소`)도 그대로 남아 있어서 예비로 쓸 수 있고, **데스크톱 앱은 학교 서버 주소를 그대로** 쓰면 됩니다.
+- Vercel 이 브랜치마다 만드는 미리보기 주소는 `EXTRA_ORIGINS` 에 없어서 로그인이 안 됩니다. 정식 주소로 접속하세요.
+- 사진 업로드는 Vercel 을 거치지 않고 학교 서버로 바로 가므로 Vercel 의 요청 크기 제한과 상관없습니다.
 
 ## 데스크톱 앱 (Windows)
 
@@ -853,6 +919,7 @@ deardays/
 ├── frontend/
 │   ├── Dockerfile               # web 이미지 (빌드 → nginx)
 │   ├── nginx.conf               # 화면 제공 + /api, /uploads 를 api 로 전달
+│   ├── vercel.json              # 화면만 Vercel 에 올릴 때 설정 (새로 고침 404 방지, 캐시)
 │   ├── public/                  # 파비콘, 앱 아이콘, manifest.webmanifest (홈 화면에 추가)
 │   ├── src/
 │   │   ├── components/          # ui(창·버튼·대화상자 등), diary(도장·낙서 포함), topic, room, todo, calendar, layout
