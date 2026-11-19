@@ -2,7 +2,7 @@
 FROM node:24-bookworm-slim
 
 # Prisma 엔진이 쓰는 OpenSSL
-RUN apt-get update \
+RUN apt-get update -o APT::Update::Error-Mode=any \
     && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
