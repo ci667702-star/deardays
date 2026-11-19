@@ -6,7 +6,7 @@ export const THEMES = [
     id: 'rose',
     name: '벚꽃 (밝은 분홍)',
     description: '옛 윈도우 창 그대로, 밝은 벚꽃색 바탕과 하얀빛 창, 산딸기색 제목 표시줄',
-    themeColor: '#ffffff',
+    themeColor: '#ffeded',
   },
   {
     id: 'classic',
