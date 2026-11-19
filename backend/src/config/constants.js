@@ -41,5 +41,10 @@ export const STAMP_KINDS = ['great', 'wow', 'lol', 'pat', 'same', 'best'];
 export const TOPIC_MAX_LENGTH = 200;
 export const TOPIC_BULK_MAX = 100;
 
+/** 문의: 종류, 글자 수, 아직 처리 안 된 문의를 한 사람이 몇 개까지 둘 수 있는지 (도배 방지) */
+export const INQUIRY_CATEGORIES = ['bug', 'idea', 'account', 'etc'];
+export const INQUIRY_MAX_LENGTH = 2000;
+export const INQUIRY_OPEN_MAX = 10;
+
 /** 낙서 그림의 최대 가로·세로 (픽셀) */
 export const DOODLE_MAX_SIZE = 1200;

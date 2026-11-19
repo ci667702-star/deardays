@@ -81,6 +81,28 @@ export function toTopicForAdmin(topic) {
   };
 }
 
+/** 문의 (보낸 사람이 보는 모양) */
+export function toInquiry(inquiry) {
+  return {
+    id: inquiry.id,
+    category: inquiry.category,
+    content: inquiry.content,
+    status: inquiry.status,
+    answer: inquiry.answer ?? null,
+    answeredAt: inquiry.answeredAt ?? null,
+    createdAt: inquiry.createdAt,
+    updatedAt: inquiry.updatedAt,
+  };
+}
+
+/** 문의 (관리자가 보는 모양): 보낸 사람과 연락할 이메일까지 */
+export function toInquiryForAdmin(inquiry) {
+  return {
+    ...toInquiry(inquiry),
+    user: inquiry.user ? { ...toPublicUser(inquiry.user), email: inquiry.user.email } : null,
+  };
+}
+
 export function toTodo(todo, viewerId) {
   return {
     id: todo.id,

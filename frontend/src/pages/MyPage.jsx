@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Camera, FolderOpen, LogOut, Save, Trash2 } from 'lucide-react';
 import AccountSettings from '../components/account/AccountSettings.jsx';
+import InquirySection from '../components/account/InquirySection.jsx';
 import PushSettings from '../components/account/PushSettings.jsx';
 import { ACCEPT_ATTR, checkImageFiles } from '../components/diary/imageRules.js';
 import Avatar from '../components/ui/Avatar.jsx';
@@ -145,6 +146,9 @@ export default function MyPage() {
           <>
             <span className="flex-1">{formatDateTime(profile.createdAt)} 가입</span>
             <span>DearDays와 {daysSince(profile.createdAt)}일째</span>
+            <Link to="/admin" className="text-inherit" title="관리자 비밀번호가 있으면 주제 편집과 문의함을 볼 수 있어요">
+              {user.isAdmin ? '관리자 화면' : '관리자...'}
+            </Link>
           </>
         }
       >
@@ -267,6 +271,8 @@ export default function MyPage() {
             </GroupBox>
 
             <PushSettings />
+
+            <InquirySection />
 
             <AccountSettings />
 

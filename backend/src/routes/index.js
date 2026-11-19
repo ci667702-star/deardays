@@ -12,6 +12,7 @@ import topicRoutes from './topic.routes.js';
 import adminRoutes from './admin.routes.js';
 import anniversaryRoutes from './anniversary.routes.js';
 import pushRoutes from './push.routes.js';
+import inquiryRoutes from './inquiry.routes.js';
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use('/topics', topicRoutes);
 router.use('/admin', adminRoutes);
 router.use('/anniversaries', anniversaryRoutes);
 router.use('/push', pushRoutes);
+router.use('/inquiries', inquiryRoutes);
 
 export default router;

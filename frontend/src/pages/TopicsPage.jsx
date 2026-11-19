@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { PenLine } from 'lucide-react';
 import RoomGate from '../components/room/RoomGate.jsx';
-import AdminTopicManager from '../components/topic/AdminTopicManager.jsx';
-import AdminUnlockDialog from '../components/topic/AdminUnlockDialog.jsx';
 import TopicEntries from '../components/topic/TopicEntries.jsx';
 import Button, { ButtonLink } from '../components/ui/Button.jsx';
 import { EmptyState, ErrorMessage, Loading } from '../components/ui/Feedback.jsx';
@@ -88,17 +86,9 @@ function TopicCard({ topic, members, big = false }) {
 function Topics() {
   const { user } = useAuth();
   const { currentRoom } = useRooms();
-  const { hash } = useLocation();
+  const navigate = useNavigate();
   const history = useTopicHistory(currentRoom.id);
-  const [unlockOpen, setUnlockOpen] = useState(false);
   useRefreshOnFocus(history.reload);
-
-  // 홈의 '주제 넣으러 가기'(#admin)로 왔으면 관리 창으로 스크롤
-  useEffect(() => {
-    if (hash === '#admin' && user.isAdmin) {
-      requestAnimationFrame(() => document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' }));
-    }
-  }, [hash, user.isAdmin]);
 
   const today = todayString();
   const todayTopic = history.items[0]?.date === today ? history.items[0] : null;
@@ -110,13 +100,15 @@ function Topics() {
       <Window
         title={`오늘의 주제 - ${formatDiaryDate(today, { withYear: false })}`}
         icon={<PixelIcon name="note" size={14} />}
+        onClose={() => navigate('/')}
+        closeLabel="홈으로"
         statusBar={
           <>
             <span className="flex-1">주제는 날마다 하나씩 열려요</span>
-            {!user.isAdmin && (
-              <button type="button" className="text-inherit underline" onClick={() => setUnlockOpen(true)}>
-                관리자 모드...
-              </button>
+            {user.isAdmin && (
+              <Link to="/admin" className="text-inherit">
+                주제 편집 (관리자)
+              </Link>
             )}
           </>
         }
@@ -164,9 +156,6 @@ function Topics() {
         )}
       </Window>
 
-      {user.isAdmin && <AdminTopicManager onChange={history.reload} />}
-
-      <AdminUnlockDialog open={unlockOpen} onClose={() => setUnlockOpen(false)} />
     </div>
   );
 }

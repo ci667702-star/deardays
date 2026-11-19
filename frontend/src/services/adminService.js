@@ -1,6 +1,6 @@
 import { api } from './api.js';
 
-/** 관리자: 관리자 비밀번호로 켜고, 오늘의 주제를 넣고 고친다 */
+/** 관리자: 관리자 비밀번호로 켜고, 오늘의 주제를 넣고 고치고, 문의함을 본다 */
 export const adminService = {
   async status() {
     const { data } = await api.get('/admin/status');
@@ -39,5 +39,20 @@ export const adminService = {
 
   async deleteTopic(id) {
     await api.delete(`/admin/topics/${id}`);
+  },
+
+  async listInquiries({ status = 'open', page = 1, limit = 30 } = {}) {
+    const { data } = await api.get('/admin/inquiries', { params: { status, page, limit } });
+    return data; // { items, total, hasMore, counts: { open, done } }
+  },
+
+  /** answer 를 빼면 답변은 그대로, '' 이면 답변을 지운다. status: 'open' | 'done' */
+  async updateInquiry(id, { answer, status }) {
+    const { data } = await api.put(`/admin/inquiries/${id}`, { answer, status });
+    return data.inquiry;
+  },
+
+  async deleteInquiry(id) {
+    await api.delete(`/admin/inquiries/${id}`);
   },
 };

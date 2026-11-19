@@ -9,6 +9,7 @@ import DesktopLayout from './layouts/DesktopLayout.jsx';
 import { Pages } from './pages/lazyPages.js';
 
 const {
+  AdminPage,
   CalendarPage,
   DashboardPage,
   DiaryDetailPage,
@@ -65,6 +66,7 @@ function AppRoutes() {
           <Route path="/topics" element={<TopicsPage />} />
           <Route path="/recap" element={<RecapPage />} />
           <Route path="/me" element={<MyPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
       </Route>
 

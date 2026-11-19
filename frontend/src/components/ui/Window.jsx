@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { cx } from '../../utils/cx.js';
 
 function Glyph({ type }) {
@@ -39,9 +39,28 @@ export default function Window({
   const titleId = useId();
   const [collapsed, setCollapsed] = useState(false);
   const [maximized, setMaximized] = useState(false);
+  // 닫기(×): 창이 살짝 작아지며 사라진 뒤에 onClose (보통 바탕화면으로 이동)
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef(null);
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+  const close = () => {
+    if (closing) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      onClose();
+      return;
+    }
+    setClosing(true);
+    closeTimer.current = setTimeout(() => {
+      setClosing(false);
+      onClose();
+    }, 120);
+  };
 
   return (
-    <Tag className={cx('win', maximized && 'win--max', animate && 'win-open', className)} aria-labelledby={titleId}>
+    <Tag
+      className={cx('win', maximized && 'win--max', closing ? 'win-close' : animate && 'win-open', className)}
+      aria-labelledby={titleId}
+    >
       <header className={cx('win-title', inactive && 'win-title--inactive')}>
         <span className="flex min-w-0 items-center gap-1.5">
           {icon}
@@ -75,7 +94,7 @@ export default function Window({
             </button>
           )}
           {onClose && (
-            <button type="button" className="win-title-btn ml-0.5" onClick={onClose} aria-label={closeLabel} title={closeLabel}>
+            <button type="button" className="win-title-btn ml-0.5" onClick={close} aria-label={closeLabel} title={closeLabel}>
               <Glyph type="close" />
             </button>
           )}

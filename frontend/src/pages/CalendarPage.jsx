@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { PenLine } from 'lucide-react';
 import AnniversaryWindow from '../components/calendar/AnniversaryWindow.jsx';
 import MonthCalendar from '../components/calendar/MonthCalendar.jsx';
@@ -32,6 +32,7 @@ export default function CalendarPage() {
 function CalendarView() {
   const { user } = useAuth();
   const { currentRoom } = useRooms();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryDate = searchParams.get('date');
   const selected = isValidDateString(queryDate) ? queryDate : todayString();
@@ -75,6 +76,8 @@ function CalendarView() {
       <Window
         title={`달력 - ${currentRoom.name}`}
         icon={<PixelIcon name="calendar" size={14} />}
+        onClose={() => navigate('/')}
+        closeLabel="홈으로"
         statusBar={
           <>
             <span className="flex-1">

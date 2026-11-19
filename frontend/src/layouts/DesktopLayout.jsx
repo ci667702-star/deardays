@@ -1,5 +1,6 @@
 import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import DesktopBackdrop from '../components/desktop/DesktopBackdrop.jsx';
 import ErrorBoundary from '../components/ui/ErrorBoundary.jsx';
 import { Loading } from '../components/ui/Feedback.jsx';
 import PixelIcon from '../components/ui/PixelIcon.jsx';
@@ -17,7 +18,7 @@ function PageLoading() {
   );
 }
 
-/** 로그인 후 화면: 창들이 놓이는 영역 + 작업 표시줄 (화면 이동은 시작 메뉴와 작업 표시줄로) */
+/** 로그인 후 화면: 도트 하늘 바탕 + 창들이 놓이는 영역 + 작업 표시줄 (화면 이동은 시작 메뉴와 작업 표시줄로) */
 export default function DesktopLayout() {
   const { pathname } = useLocation();
 
@@ -28,13 +29,14 @@ export default function DesktopLayout() {
 
   return (
     <div
-      className="min-h-dvh"
+      className="relative min-h-dvh"
       style={{ paddingTop: 'calc(var(--taskbar-h) + var(--safe-top))', paddingBottom: 'calc(var(--safe-bottom) + 20px)' }}
     >
+      <DesktopBackdrop />
       <Taskbar />
       <ScreenSaver />
       {/* 아주 넓은 화면에서는 본문 양옆에 작은 창(함께한 날·시계 / 이번 주·메모장)을 둔다 */}
-      <div className="mx-auto max-w-[1440px] px-2.5 pt-2.5 sm:px-5 sm:pt-5 min-[1600px]:grid min-[1600px]:max-w-[1920px] min-[1600px]:grid-cols-[250px_minmax(0,1fr)_250px] min-[1600px]:items-start min-[1600px]:gap-5">
+      <div className="relative z-[1] mx-auto max-w-[1440px] px-2.5 pt-2.5 sm:px-5 sm:pt-5 min-[1600px]:grid min-[1600px]:max-w-[1920px] min-[1600px]:grid-cols-[250px_minmax(0,1fr)_250px] min-[1600px]:items-start min-[1600px]:gap-5">
         <aside aria-label="왼쪽 작은 창" className="sticky top-[calc(var(--taskbar-h)+20px)] hidden min-[1600px]:block">
           <LeftGadgets />
         </aside>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DearDays</string>
+    <string name="launch_url">https://deardays.https.gsmsv.site/</string>
+    <!-- 웹의 /.well-known/assetlinks.json 이 이 앱을 가리키고, 앱은 이 웹을 가리킨다 (서로 확인되면 주소창이 사라진다) -->
+    <string name="asset_statements" translatable="false">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://deardays.https.gsmsv.site\"}}]</string>
+</resources>

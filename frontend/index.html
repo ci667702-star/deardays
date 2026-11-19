@@ -13,10 +13,12 @@
     <script>
       // 저장된 색 구성표를 화면을 그리기 전에 적용해 색이 깜빡이지 않게 한다.
       try {
+        // 테마 이름과 주소창 색 (src/utils/theme.js 의 THEMES 와 같아야 한다)
+        var colors = { rose: '#ffeded', classic: '#008080', blue: '#A8D0EF', 'rose-sky': '#ffadc0', 'blue-sky': '#99c3e4' };
         var t = localStorage.getItem('deardays:theme-v2');
-        if (t === 'classic') {
+        if (colors[t]) {
           document.documentElement.dataset.theme = t;
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#008080');
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', colors[t]);
         }
       } catch (e) {}
     </script>

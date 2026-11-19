@@ -15,6 +15,7 @@ const loaders = {
   TopicsPage: () => import('./TopicsPage.jsx'),
   RecapPage: () => import('./RecapPage.jsx'),
   MyPage: () => import('./MyPage.jsx'),
+  AdminPage: () => import('./AdminPage.jsx'),
   NotFoundPage: () => import('./NotFoundPage.jsx'),
 };
 

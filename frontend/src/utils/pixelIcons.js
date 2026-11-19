@@ -35,6 +35,25 @@ const face = (eyes, mouth1, mouth2, extra = {}) => [
 ];
 
 export const ICONS = {
+  // 열쇠: 관리자
+  key: [
+    '................',
+    '................',
+    '................',
+    '..kkkk..........',
+    '.kyyyyk.........',
+    'kywyyyyk........',
+    'kyykkyykkkkkkkk.',
+    'kyk..kyyyyyyyyyk',
+    'kyykkyykkkyykyk.',
+    'kyyyyyyk.kyykyk.',
+    '.kyyyyk..kkkkkk.',
+    '..kkkk..........',
+    '................',
+    '................',
+    '................',
+    '................',
+  ],
   // 케이크: 기념일
   cake: [
     '................',

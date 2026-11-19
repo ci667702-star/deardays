@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useFetch } from '../../hooks/useFetch.js';
 import { adminService } from '../../services/adminService.js';
@@ -13,7 +12,6 @@ import GroupBox from '../ui/GroupBox.jsx';
 import PixelIcon from '../ui/PixelIcon.jsx';
 import Tabs from '../ui/Tabs.jsx';
 import TextField from '../ui/TextField.jsx';
-import Window from '../ui/Window.jsx';
 
 const MAX_LENGTH = 200;
 const MAX_LINES = 100;
@@ -109,9 +107,8 @@ function TopicRow({ topic, today, onSaved, onDelete }) {
   );
 }
 
-/** 관리자 화면: 오늘의 주제 넣기·고치기·지우기 */
+/** 관리자 화면의 '오늘의 주제' 탭: 하루 하나 글쓰기 주제 넣기·고치기·지우기 */
 export default function AdminTopicManager({ onChange }) {
-  const { updateUser } = useAuth();
   const toast = useToast();
   const [scope, setScope] = useState('upcoming');
   const list = useFetch(() => adminService.listTopics({ scope, limit: 100 }), [scope]);
@@ -121,7 +118,6 @@ export default function AdminTopicManager({ onChange }) {
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
-  const [locking, setLocking] = useState(false);
 
   const lines = text
     .split('\n')
@@ -176,38 +172,16 @@ export default function AdminTopicManager({ onChange }) {
     }
   };
 
-  const stopAdmin = async () => {
-    setLocking(true);
-    try {
-      await adminService.lock();
-      updateUser({ isAdmin: false });
-      toast.info('관리자 모드를 껐어요.');
-    } catch (err) {
-      toast.error(getErrorMessage(err));
-      setLocking(false);
-    }
-  };
-
   let hint = '';
   if (multi) hint = `${lines.length}개를 ${nextDate ? formatShortDate(nextDate) : '오늘'}부터 비어 있는 날짜에 차례로 넣어요.`;
   else if (!date && nextDate) hint = `날짜를 비우면 다음 빈 날짜(${formatShortDate(nextDate)})에 들어가요.`;
 
   return (
-    <div id="admin" className="scroll-mt-4">
-      <Window
-        title="주제 관리 (관리자)"
-        icon={<PixelIcon name="computer" size={14} />}
-        statusBar={
-          <>
-            <span className="flex-1">
-              {scope === 'upcoming' ? '오늘과 앞으로' : '지난 주제'} {list.data?.total ?? '-'}개
-            </span>
-            <button type="button" className="text-inherit underline" onClick={stopAdmin} disabled={locking}>
-              관리자 그만하기
-            </button>
-          </>
-        }
-      >
+    <div>
+      <div>
+        <p className="mb-3 text-[14px]">
+          날마다 하나씩 열리는 글쓰기 주제예요. 주제를 넣지 않은 날은 글감 목록에서 자동으로 하나가 열려요.
+        </p>
         <form onSubmit={add} noValidate>
           <GroupBox title="주제 넣기" className="flex flex-col gap-3">
           <TextField
@@ -268,9 +242,14 @@ export default function AdminTopicManager({ onChange }) {
                 ))}
               </ul>
             )}
+            {list.data && (
+              <p className="mt-2 text-[12px] text-muted">
+                {scope === 'upcoming' ? '오늘과 앞으로' : '지난 주제'} {list.data.total}개
+              </p>
+            )}
           </Tabs>
         </div>
-      </Window>
+      </div>
 
       <ConfirmDialog
         open={Boolean(deleting)}

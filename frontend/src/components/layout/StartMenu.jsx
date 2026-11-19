@@ -55,6 +55,12 @@ export default function StartMenu({ open, onClose, onLogout, anchorRef, user }) 
             <span>{item.label}</span>
           </Link>
         ))}
+        {user?.isAdmin && (
+          <Link to="/admin" role="menuitem" className="start-item" onClick={onClose}>
+            <PixelIcon name="key" size={24} />
+            <span>관리자</span>
+          </Link>
+        )}
         <hr className="etched mx-1 my-1" />
         <button
           type="button"

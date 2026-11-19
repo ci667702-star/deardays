@@ -2,22 +2,30 @@ import { useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext.jsx';
 import { SCREENSAVER_MINUTES, previewScreensaver, readScreensaver, saveScreensaver } from '../../utils/screensaver.js';
 import { THEMES } from '../../utils/theme.js';
+import DesktopBackdrop from '../desktop/DesktopBackdrop.jsx';
 import Button from '../ui/Button.jsx';
 import Dialog from '../ui/Dialog.jsx';
 import PixelIcon from '../ui/PixelIcon.jsx';
 import Tabs from '../ui/Tabs.jsx';
 
-/** 옛 '디스플레이 등록 정보' 창의 모니터 미리 보기. 화면 안쪽만 고른 색 구성표로 칠한다. */
+/**
+ * 옛 '디스플레이 등록 정보' 창의 모니터 미리 보기. 화면 안쪽만 고른 색 구성표로 칠한다.
+ * 바탕 그림은 진짜 바탕화면(DesktopBackdrop)을 4배 크게 그려 1/4 로 줄인 것 (transform 이 있으면 fixed 가 이 상자 기준이 된다).
+ */
 function MonitorPreview({ themeId }) {
   return (
     <div data-theme="classic" className="mx-auto w-[264px] select-none" aria-hidden="true">
       <div className="bg-face p-[10px] pb-[8px]" style={{ boxShadow: 'var(--bevel-raised)' }}>
-        <div data-theme={themeId} className="relative h-[156px] overflow-hidden bg-desk" style={{ boxShadow: 'var(--bevel-in)' }}>
-          <div className="win absolute left-[10px] top-[10px] w-[150px]">
+        <div data-theme={themeId} className="relative h-[156px] overflow-hidden bg-desk">
+          <div className="absolute left-0 top-0 h-[624px] w-[1056px] origin-top-left" style={{ transform: 'scale(0.25)' }}>
+            <DesktopBackdrop />
+          </div>
+          <div className="absolute inset-x-0 top-0 h-[14px] bg-face" style={{ boxShadow: 'inset 0 -1px var(--color-shade)' }} />
+          <div className="win absolute left-[10px] top-[24px] w-[150px]">
             <div className="win-title win-title--inactive !min-h-0 !py-[1px] !text-[10px]">비활성 창</div>
             <div className="h-[34px]" />
           </div>
-          <div className="win absolute left-[38px] top-[44px] w-[178px]">
+          <div className="win absolute left-[38px] top-[56px] w-[178px]">
             <div className="win-title !min-h-0 !py-[1px] !text-[10px]">활성 창</div>
             <div className="p-[6px] text-[11px] leading-tight">
               <p>창 글자</p>
@@ -27,7 +35,7 @@ function MonitorPreview({ themeId }) {
               </div>
             </div>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-[14px] bg-face" style={{ boxShadow: 'inset 0 1px var(--color-hilite)' }} />
+          <span className="pointer-events-none absolute inset-0" style={{ boxShadow: 'var(--bevel-in)' }} />
         </div>
         <div className="mt-[6px] flex justify-end pr-1">
           <span className="block size-[5px] bg-[#2fbf4a]" />

@@ -1,13 +1,34 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { cx } from '../../utils/cx.js';
 
+// 열려 있는 대화상자 순서. Esc 는 맨 위 대화상자 하나만 닫는다 (대화상자 위에 확인 창이 뜬 경우)
+const openStack = [];
+
+const CLOSE_MS = 130;
+const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
 /**
  * 모달 대화상자. Esc 또는 바깥 클릭으로 닫히고, 닫히면 원래 포커스로 돌아간다.
+ * 열릴 때는 살짝 커지며 나타나고, 닫힐 때는 살짝 작아지며 사라진다.
  */
 export default function Dialog({ open, title, icon, onClose, children, footer, width = 440, className, bodyClassName }) {
   const titleId = useId();
   const panelRef = useRef(null);
+  // 닫히는 애니메이션 동안만 그대로 그려 둔다
+  const [closing, setClosing] = useState(false);
+  const wasOpen = useRef(open);
+  useEffect(() => {
+    if (wasOpen.current && !open && !reducedMotion()) {
+      setClosing(true);
+      const timer = setTimeout(() => setClosing(false), CLOSE_MS);
+      wasOpen.current = open;
+      return () => clearTimeout(timer);
+    }
+    wasOpen.current = open;
+    setClosing(false);
+    return undefined;
+  }, [open]);
   // 부모가 매번 새 함수를 넘겨도 효과가 다시 실행되지 않도록 ref 로 보관
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -15,7 +36,10 @@ export default function Dialog({ open, title, icon, onClose, children, footer, w
   useEffect(() => {
     if (!open) return undefined;
     const previouslyFocused = document.activeElement;
+    const token = {};
+    openStack.push(token);
     const onKeyDown = (event) => {
+      if (openStack[openStack.length - 1] !== token) return;
       if (event.key === 'Escape') onCloseRef.current?.();
       // 포커스가 대화상자 밖으로 나가지 않게 가둔다
       if (event.key === 'Tab' && panelRef.current) {
@@ -41,17 +65,18 @@ export default function Dialog({ open, title, icon, onClose, children, footer, w
     });
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      openStack.splice(openStack.indexOf(token), 1);
       if (previouslyFocused instanceof HTMLElement && previouslyFocused.isConnected) previouslyFocused.focus();
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!open && !closing) return null;
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[70] grid place-items-center bg-[rgb(42_36_49/0.28)] p-3"
+      className={cx('fixed inset-0 z-[70] grid place-items-center bg-[rgb(42_36_49/0.28)] p-3', closing && 'pointer-events-none')}
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose?.();
+        if (open && event.target === event.currentTarget) onClose?.();
       }}
     >
       <div
@@ -60,7 +85,7 @@ export default function Dialog({ open, title, icon, onClose, children, footer, w
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={cx('win win-open max-h-[calc(100dvh-24px)] w-full overflow-auto outline-none', className)}
+        className={cx('win max-h-[calc(100dvh-24px)] w-full overflow-auto outline-none', closing ? 'win-close' : 'win-open', className)}
         style={{ maxWidth: width }}
       >
         <div className="win-title">

@@ -13,7 +13,7 @@ import TopicEntries from './TopicEntries.jsx';
 /**
  * 홈의 '오늘의 주제' 창. 오늘 주제가 없으면 보이지 않는다 (관리자에게는 넣으라는 안내).
  */
-export default function TodayTopicWindow({ room }) {
+export default function TodayTopicWindow({ room, className }) {
   const { user } = useAuth();
   const { data, reload } = useFetch(() => topicService.list({ roomId: room.id, limit: 1 }), [room.id]);
   useRefreshOnFocus(reload);
@@ -25,10 +25,10 @@ export default function TodayTopicWindow({ room }) {
   if (!topic) {
     if (!user.isAdmin) return null;
     return (
-      <Window title="오늘의 주제" icon={<PixelIcon name="note" size={14} />}>
+      <Window title="오늘의 주제" icon={<PixelIcon name="note" size={14} />} className={className}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[14px]">오늘은 아직 주제가 없어요. 관리자라서 보이는 안내예요.</p>
-          <ButtonLink to="/topics#admin" size="sm">
+          <ButtonLink to="/admin" size="sm">
             주제 넣으러 가기
           </ButtonLink>
         </div>
@@ -42,6 +42,7 @@ export default function TodayTopicWindow({ room }) {
     <Window
       title="오늘의 주제"
       icon={<PixelIcon name="note" size={14} />}
+      className={className}
       statusBar={
         <>
           <span className="flex-1">

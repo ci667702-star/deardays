@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 앱을 누르면 곧바로 크롬 화면으로 넘어가므로 런처 화면은 투명하게 -->
+    <style name="LauncherTheme" parent="@android:style/Theme.Translucent.NoTitleBar" />
+</resources>

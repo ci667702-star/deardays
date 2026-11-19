@@ -19,7 +19,19 @@ export const THEMES = [
     name: '파란색',
     description: ' 옛 윈도우 그대로: 노란 창, 파란 바탕, 바다색 제목 표시줄',
     themeColor: '#A8D0EF'
-  }
+  },
+  {
+    id: 'rose-sky',
+    name: '벚꽃 하늘 (구름)',
+    description: '벚꽃과 같은 창에, 분홍 도트 하늘과 흘러가는 흰 구름 바탕',
+    themeColor: '#ffadc0',
+  },
+  {
+    id: 'blue-sky',
+    name: '파란 하늘 (구름)',
+    description: '파란색과 같은 창에, 파란 도트 하늘과 흘러가는 흰 구름 바탕',
+    themeColor: '#99c3e4',
+  },
 ];
 
 export const DEFAULT_THEME = 'classic';

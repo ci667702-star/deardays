@@ -7,7 +7,8 @@
    - 바탕 화면은 무늬 없는 한 가지 색
    - 글꼴은 하나: 굴림 비트맵을 닮은 픽셀 글꼴 Galmuri11
    색 구성표
-   - rose    : 밝은 벚꽃색 바탕 + 하얀빛 창 + 산딸기색 제목 표시줄 (기본값)
+   - rose    : 밝은 벚꽃색 바탕 + 하얀빛 창 + 산딸기색 제목 표시줄
+   - rose-sky / blue-sky : 창 색은 rose / blue 와 같고 바탕만 도트 하늘(구름)
    - classic : 회색 창 + 청록 바탕 + 남색 제목 표시줄 (Windows 95 기본) */
 @theme {
   --font-ui: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
@@ -39,9 +40,12 @@
   --color-paper: #ffffff;
   --color-rule: #f3dce3;
   --color-margin: #f2a7bc;
+  --color-accent: #d6246e;
+  --color-accent-text: #ffffff;
 }
 
-[data-theme='rose'] {
+[data-theme='rose'],
+[data-theme='rose-sky'] {
   --color-desk: #FFD7DB;
   --color-desk-text: #4f3a40;
   --color-face: #fffbf3;
@@ -66,6 +70,14 @@
   --color-paper: #ffffff;
   --color-rule: #f3dce3;
   --color-margin: #f2a7bc;
+  --color-accent: #d6246e;
+  --color-accent-text: #ffffff;
+  --title-shadow: 1px 1px 0 #b81d5c;
+  --desk-bg: var(--color-desk);
+  --desk-label-shadow: none;
+  --show-sky: none;
+  --show-sun: none;
+  --show-sea: none;
 }
 
 [data-theme='classic'] {
@@ -93,11 +105,20 @@
   --color-paper: #fffef8;
   --color-rule: #d5dcef;
   --color-margin: #f2a7c2;
+  --color-accent: #000080;
+  --color-accent-text: #ffffff;
+  --title-shadow: none;
+  --desk-bg: var(--color-desk);
+  --desk-label-shadow: none;
+  --show-sky: none;
+  --show-sun: none;
+  --show-sea: none;
 }
 
-[data-theme='blue'] {
+[data-theme='blue'],
+[data-theme='blue-sky'] {
   --color-desk: #E2EFF6;
-  --color-desk-text: #ffffff;
+  --color-desk-text: #163a6b;
   --color-face: #FFF9E6;
   --color-hilite: #ffffff;
   --color-light: #dfdfdf;
@@ -111,7 +132,7 @@
   --color-select-text: #ffffff;
   --color-focus: #A8D0EF;
   --color-accent-face: #c0c0c0;
-  --color-pink: #e9729f;
+  --color-pink: #ff0062;
   --color-pink-deep: #c24f7e;
   --color-pink-soft: #fde4ee;
   --color-lav: #9fd8dd;
@@ -120,6 +141,47 @@
   --color-paper: #fffef8;
   --color-rule: #d5dcef;
   --color-margin: #f2a7c2;
+  --color-accent: #1f4fc4;
+  --color-accent-text: #ffffff;
+  --title-shadow: 1px 1px 0 #1f4fc4;
+  --desk-bg: var(--color-desk);
+  --desk-label-shadow: none;
+  --show-sky: none;
+  --show-sun: none;
+  --show-sea: none;
+}
+
+/* 구름 바탕 두 가지: 창·버튼 색은 위의 벚꽃·파랑과 같고, 바탕만 도트 하늘 + 해 + 구름 + 아래 구름 바다 */
+[data-theme='rose-sky'] {
+  --sky-1: #ffadc0;
+  --sky-2: #ffc2cf;
+  --sky-3: #ffd7db;
+  --sky-4: #ffe8ec;
+  --cloud: #ffffff;
+  --cloud-shade: #ffdce5;
+  --sun-core: #fff8db;
+  --sun-glow: #fff3f6;
+  --desk-label-shadow: 1px 1px 0 rgb(255 255 255 / 0.8);
+  --desk-bg: linear-gradient(180deg, var(--sky-1) 0 22%, var(--sky-2) 22% 44%, var(--sky-3) 44% 68%, var(--sky-4) 68% 100%);
+  --show-sky: block;
+  --show-sun: block;
+  --show-sea: block;
+}
+
+[data-theme='blue-sky'] {
+  --sky-1: #99c3e4;
+  --sky-2: #a8d0ef;
+  --sky-3: #c1e4f3;
+  --sky-4: #e3f1fb;
+  --cloud: #ffffff;
+  --cloud-shade: #d6ebfa;
+  --sun-core: #fffbe6;
+  --sun-glow: #ffffff;
+  --desk-label-shadow: 1px 1px 0 rgb(255 255 255 / 0.85);
+  --desk-bg: linear-gradient(180deg, var(--sky-1) 0 22%, var(--sky-2) 22% 44%, var(--sky-3) 44% 68%, var(--sky-4) 68% 100%);
+  --show-sky: block;
+  --show-sun: block;
+  --show-sea: block;
 }
 
 :root {
@@ -130,6 +192,20 @@
   --line: 32px;
   /* 줄 노트의 줄을 글자 바로 아래에 긋는 위치 (Galmuri11 16px 기준으로 잰 값) */
   --rule-shift: 13px;
+}
+
+/* 테마 속성이 없을 때의 바탕화면 기본값(= rose). :where 로 우선순위를 0 으로 둬서 [data-theme] 블록이 항상 이긴다 */
+:where(:root) {
+  --sky-1: #ffadc0;
+  --sky-2: #ffc2cf;
+  --sky-3: #ffd7db;
+  --sky-4: #ffe8ec;
+  --cloud: #ffffff;
+  --cloud-shade: #ffdce5;
+  --sun-core: #fff8db;
+  --sun-glow: #fff3f6;
+  --desk-label-shadow: 1px 1px 0 rgb(255 255 255 / 0.8);
+  --title-shadow: 1px 1px 0 #b81d5c;
 }
 
 /* 입체 테두리: 색 구성표가 바뀌는 요소마다 다시 계산되도록 [data-theme] 에도 선언한다.
@@ -217,6 +293,11 @@
     animation: win-open 160ms steps(4, end);
   }
 
+  .win-close {
+    animation: win-close 130ms steps(3, end) forwards;
+    pointer-events: none;
+  }
+
   .win-title {
     display: flex;
     align-items: center;
@@ -226,6 +307,7 @@
     padding: 2px 3px 2px 6px;
     background: var(--color-title);
     color: var(--color-title-text);
+    text-shadow: var(--title-shadow, none);
     font-family: var(--font-small);
     font-size: 12px;
     font-weight: 700;
@@ -235,6 +317,7 @@
   .win-title--inactive {
     background: var(--color-shade);
     color: var(--color-light);
+    text-shadow: none;
   }
 
   .win-title-btn {
@@ -769,6 +852,7 @@
     padding: 10px 0;
     background: var(--color-title);
     color: var(--color-title-text);
+    text-shadow: var(--title-shadow, none);
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     font-size: 18px;
@@ -822,6 +906,63 @@
 
   .like-pop {
     animation: like-pop 280ms steps(3, end);
+  }
+}
+
+/* ───────────────────────── 바탕화면: 하늘 · 구름 · 언덕 · 아이콘 ───────────────────────── */
+@layer components {
+  /* 화면 전체 뒤에 깔리는 그림. 클래식은 단색, 벚꽃·파랑은 도트 하늘.
+     무엇을 보일지는 테마 블록의 --show-* 변수로 정한다 (변수는 가장 가까운 [data-theme] 값을 따르므로
+     '화면 설정'의 미리 보기처럼 테마 안에 다른 테마가 들어 있어도 맞게 그려진다) */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--desk-bg, var(--color-desk));
+  }
+
+  /* 띠 경계를 체크무늬로 섞어 옛 게임 하늘처럼 */
+  .backdrop-seam {
+    position: absolute;
+    inset-inline: 0;
+    height: 8px;
+    background: repeating-conic-gradient(var(--seam-a) 0 25%, var(--seam-b) 0 50%) 0 0 / 8px 8px;
+  }
+
+  .backdrop-art,
+  .backdrop-seam {
+    display: var(--show-sky, none);
+  }
+
+  .backdrop-sun {
+    display: var(--show-sun, none);
+  }
+
+  .backdrop-floor {
+    display: var(--show-sea, none);
+  }
+
+  .backdrop-cloud {
+    position: absolute;
+  }
+
+  .backdrop-cloud--drift {
+    animation: cloud-drift var(--drift-time, 48s) ease-in-out infinite alternate;
+  }
+
+  .backdrop-cloud-bob {
+    display: block;
+    animation: cloud-bob var(--bob-time, 6s) ease-in-out var(--bob-delay, 0s) infinite alternate;
+  }
+
+  .backdrop-floor {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    width: 100%;
+    height: clamp(90px, 20vh, 220px);
   }
 }
 
@@ -1004,6 +1145,31 @@
   }
 }
 
+@keyframes win-close {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes cloud-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--drift, 60px));
+  }
+}
+
+@keyframes cloud-bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--bob, -8px));
+  }
+}
+
 @keyframes progress-walk {
   from {
     transform: translateX(-100%);
@@ -1031,6 +1197,17 @@
   *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  /* 바탕의 구름만은 아주 느리고 작게 움직이니 그대로 둔다 (윈도우에서 애니메이션 효과를 꺼 둔 경우에도) */
+  .backdrop-cloud--drift {
+    animation-duration: var(--drift-time, 48s) !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .backdrop-cloud-bob {
+    animation-duration: var(--bob-time, 6s) !important;
+    animation-iteration-count: infinite !important;
   }
 }
 

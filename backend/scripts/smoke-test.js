@@ -779,6 +779,53 @@ async function main() {
     console.log('  (오늘은 관리자가 넣은 주제가 있어 자동 글감 확인은 건너뜁니다)');
   }
 
+  console.log('\n[문의]');
+  r = await call('POST', '/api/inquiries', { token: tokenB, json: { category: 'bug', content: '사진이 안 올라가요. 확인 부탁해요!' } });
+  const inquiry = r.data.inquiry;
+  check('문의 보내기 201', r.status === 201 && inquiry?.status === 'open' && inquiry.category === 'bug' && inquiry.answer === null, JSON.stringify(r.data));
+  r = await call('POST', '/api/inquiries', { token: tokenB, json: { category: 'bug', content: '짧' } });
+  check('너무 짧은 문의 400', r.status === 400);
+  r = await call('POST', '/api/inquiries', { token: tokenB, json: { category: 'nope', content: '종류가 이상한 문의' } });
+  check('없는 종류 400', r.status === 400);
+  r = await call('GET', '/api/inquiries', { token: tokenB });
+  check('내 문의 목록', r.status === 200 && r.data.items.some((item) => item.id === inquiry.id));
+  r = await call('GET', '/api/inquiries', { token: tokenC });
+  check('남의 문의는 안 보임', r.status === 200 && !r.data.items.some((item) => item.id === inquiry.id));
+  r = await call('DELETE', `/api/inquiries/${inquiry.id}`, { token: tokenC });
+  check('남의 문의 지우기 404', r.status === 404);
+  r = await call('GET', '/api/admin/inquiries', { token: tokenB });
+  check('관리자 아니면 문의함 403', r.status === 403);
+  if (ADMIN_PW.length >= 8) {
+    await call('POST', '/api/admin/unlock', { token: tokenA, json: { password: ADMIN_PW } });
+    r = await call('GET', '/api/admin/inquiries?status=open', { token: tokenA });
+    const seen = r.data.items?.find((item) => item.id === inquiry.id);
+    check('관리자 문의함에 보임 (보낸 사람·이메일)', r.status === 200 && Boolean(seen?.user?.nickname && seen.user.email) && r.data.counts.open >= 1);
+    r = await call('PUT', `/api/admin/inquiries/${inquiry.id}`, { token: tokenA, json: { answer: '고쳤어요. 다시 해 보세요!', status: 'done' } });
+    check('답변하고 처리함', r.status === 200 && r.data.inquiry.status === 'done' && r.data.inquiry.answer === '고쳤어요. 다시 해 보세요!' && Boolean(r.data.inquiry.answeredAt));
+    r = await call('GET', '/api/inquiries', { token: tokenB });
+    check('보낸 사람이 답변을 봄', r.data.items.find((item) => item.id === inquiry.id)?.answer === '고쳤어요. 다시 해 보세요!');
+    r = await call('PUT', `/api/admin/inquiries/${inquiry.id}`, { token: tokenA, json: { status: 'open' } });
+    check('다시 확인 전으로 (답변은 그대로)', r.status === 200 && r.data.inquiry.status === 'open' && Boolean(r.data.inquiry.answer));
+    r = await call('PUT', `/api/admin/inquiries/${inquiry.id}`, { token: tokenA, json: { answer: '', status: 'done' } });
+    check('답변 지우기', r.status === 200 && r.data.inquiry.answer === null && r.data.inquiry.answeredAt === null);
+    r = await call('PUT', '/api/admin/inquiries/999999', { token: tokenA, json: { status: 'done' } });
+    check('없는 문의 404', r.status === 404);
+    await call('POST', '/api/admin/lock', { token: tokenA });
+  } else {
+    r = await call('GET', '/api/admin/inquiries', { token: tokenA });
+    check('관리자 기능이 꺼져 있으면 문의함 403', r.status === 403 && r.data.code === 'ADMIN_DISABLED');
+  }
+  const spam = [];
+  for (let i = 0; i < 10; i += 1) {
+    r = await call('POST', '/api/inquiries', { token: tokenC, json: { category: 'etc', content: `테스트 문의 ${i + 1}번` } });
+    if (r.status === 201) spam.push(r.data.inquiry.id);
+  }
+  r = await call('POST', '/api/inquiries', { token: tokenC, json: { category: 'etc', content: '열한 번째 문의' } });
+  check('확인 전 문의가 10개면 더 못 보냄 409', spam.length === 10 && r.status === 409 && r.data.code === 'TOO_MANY_OPEN_INQUIRIES');
+  for (const id of spam) await call('DELETE', `/api/inquiries/${id}`, { token: tokenC });
+  r = await call('DELETE', `/api/inquiries/${inquiry.id}`, { token: tokenB });
+  check('내 문의 지우기 204', r.status === 204);
+
   console.log('\n[기념일 D-day]');
   r = await call('POST', `/api/rooms/${room.id}/anniversaries`, { token: tokenA, json: { title: '하루 생일', date: '2008-02-29', yearly: true } });
   const birthday = r.data.anniversary;
