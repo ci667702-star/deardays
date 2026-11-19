@@ -15,7 +15,16 @@ export const WEATHERS = [
   { id: 'windy', label: '바람', icon: 'weatherWindy' },
 ];
 
+/** 댓글에 다는 얼굴 이모티콘: 기분 얼굴 5개 + 3개 (서버 COMMENT_FACES 와 같은 값) */
+export const COMMENT_FACES = [
+  ...MOODS,
+  { id: 'love', label: '반함', icon: 'moodLove' },
+  { id: 'surprised', label: '놀람', icon: 'moodSurprised' },
+  { id: 'laugh', label: '웃김', icon: 'moodLaugh' },
+];
+
 export const moodOf = (id) => MOODS.find((mood) => mood.id === id) ?? null;
+export const faceOf = (id) => COMMENT_FACES.find((face) => face.id === id) ?? null;
 export const weatherOf = (id) => WEATHERS.find((weather) => weather.id === id) ?? null;
 
 /** 달력에서 누가 쓴 일기인지 얼굴색으로 구분 (분홍 = 나, 라벤더 = 친구) */

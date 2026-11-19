@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "site.gsmsv.deardays"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         // 새 APK 를 낼 때마다 versionCode 를 1씩 올린다 (같거나 작으면 업데이트 설치가 안 된다)
         versionCode = 1

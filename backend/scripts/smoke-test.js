@@ -826,6 +826,27 @@ async function main() {
   r = await call('DELETE', `/api/inquiries/${inquiry.id}`, { token: tokenB });
   check('내 문의 지우기 204', r.status === 204);
 
+  console.log('\n[댓글 얼굴 이모티콘]');
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenB, json: { content: '', face: 'laugh' } });
+  const faceOnly = r.data.comment;
+  check('얼굴만 단 댓글 201', r.status === 201 && faceOnly?.face === 'laugh' && faceOnly.content === '', JSON.stringify(r.data));
+  r = await call('GET', '/api/notifications', { token: tokenA });
+  check('얼굴만 단 댓글 알림은 (웃김 얼굴)', (r.data.items ?? []).some((n) => n.type === 'COMMENT_CREATED' && n.preview === '(웃김 얼굴)'));
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenB, json: { content: '좋다', face: 'wink' } });
+  check('없는 얼굴 400', r.status === 400);
+  r = await call('POST', `/api/diaries/${diary1.id}/comments`, { token: tokenB, json: { content: '  ', face: null } });
+  check('글도 얼굴도 없는 댓글 400', r.status === 400);
+  r = await call('PUT', `/api/comments/${faceOnly.id}`, { token: tokenB, json: { content: '진짜 웃기다' } });
+  check('얼굴은 두고 글만 고치기', r.status === 200 && r.data.comment.face === 'laugh' && r.data.comment.content === '진짜 웃기다');
+  r = await call('PUT', `/api/comments/${faceOnly.id}`, { token: tokenB, json: { content: '', face: null } });
+  check('수정해서 글도 얼굴도 비우면 400', r.status === 400);
+  r = await call('PUT', `/api/comments/${faceOnly.id}`, { token: tokenB, json: { content: '진짜 웃기다', face: 'love' } });
+  check('얼굴 바꾸기', r.status === 200 && r.data.comment.face === 'love');
+  r = await call('PUT', `/api/comments/${faceOnly.id}`, { token: tokenB, json: { content: '진짜 웃기다', face: null } });
+  check('얼굴 빼기', r.status === 200 && r.data.comment.face === null);
+  r = await call('DELETE', `/api/comments/${faceOnly.id}`, { token: tokenB });
+  check('얼굴 댓글 지우기 204', r.status === 204);
+
   console.log('\n[기념일 D-day]');
   r = await call('POST', `/api/rooms/${room.id}/anniversaries`, { token: tokenA, json: { title: '하루 생일', date: '2008-02-29', yearly: true } });
   const birthday = r.data.anniversary;

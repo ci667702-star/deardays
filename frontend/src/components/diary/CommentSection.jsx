@@ -1,31 +1,105 @@
-import { useState } from 'react';
-import { CornerDownRight, Pencil, Send, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { CornerDownRight, Pencil, Send, Trash2, X } from 'lucide-react';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useFetch } from '../../hooks/useFetch.js';
 import { commentService } from '../../services/commentService.js';
 import { formatDateTime, formatRelative, wasEdited } from '../../utils/date.js';
 import { getErrorMessage } from '../../utils/errors.js';
+import { COMMENT_FACES, faceOf } from '../../utils/moods.js';
 import { cx } from '../../utils/cx.js';
 import Avatar from '../ui/Avatar.jsx';
 import Button from '../ui/Button.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import { ErrorMessage, Loading } from '../ui/Feedback.jsx';
+import PixelIcon from '../ui/PixelIcon.jsx';
 
 const MAX_LENGTH = 500;
+const EMPTY_MESSAGE = '내용을 입력하거나 얼굴을 골라 주세요.';
+
+/**
+ * 얼굴 이모티콘 고르기: 버튼을 누르면 얼굴 8개가 펼쳐진다. 고른 얼굴을 다시 누르거나 ×로 뺀다.
+ * 얼굴만 달고 글은 비워도 된다.
+ */
+function FacePicker({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef(null);
+  const current = faceOf(value);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onPointerDown = (event) => {
+      if (!boxRef.current?.contains(event.target)) setOpen(false);
+    };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={boxRef} className="relative flex items-center gap-0.5">
+      <button
+        type="button"
+        className="btn-tool min-h-[30px] px-1.5 text-[12px]"
+        aria-expanded={open}
+        aria-haspopup="true"
+        title="얼굴 이모티콘 달기"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <PixelIcon name={current?.icon ?? 'moodHappy'} size={18} className={current ? undefined : 'opacity-60'} />
+        {current ? current.label : '얼굴'}
+      </button>
+      {current && (
+        <button type="button" className="btn-tool min-h-[30px] px-1" onClick={() => onChange(null)} title="얼굴 빼기" aria-label="얼굴 빼기">
+          <X size={12} aria-hidden="true" />
+        </button>
+      )}
+      {open && (
+        <div
+          role="group"
+          aria-label="얼굴 이모티콘 고르기"
+          className="win absolute bottom-full left-0 z-20 mb-1 grid w-max grid-cols-4 gap-1 !p-1.5"
+        >
+          {COMMENT_FACES.map((face) => (
+            <button
+              key={face.id}
+              type="button"
+              className="btn-tool flex-col !gap-0.5 px-2 py-1 text-[11px]"
+              aria-pressed={face.id === value}
+              onClick={() => {
+                onChange(face.id === value ? null : face.id);
+                setOpen(false);
+              }}
+            >
+              <PixelIcon name={face.icon} size={27} />
+              {face.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** 댓글 수정·답글 쓰기에 같이 쓰는 작은 입력칸 */
-function CommentEditor({ id, label, initial = '', placeholder, saveLabel = '저장', onSave, onCancel }) {
+function CommentEditor({ id, label, initial = '', initialFace = null, placeholder, saveLabel = '저장', onSave, onCancel }) {
   const [value, setValue] = useState(initial);
+  const [face, setFace] = useState(initialFace);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const save = async () => {
     const trimmed = value.trim();
-    if (!trimmed) return setError('내용을 입력해 주세요.');
+    if (!trimmed && !face) return setError(EMPTY_MESSAGE);
     setSaving(true);
     setError('');
     try {
-      await onSave(trimmed);
+      await onSave({ content: trimmed, face });
     } catch (err) {
       setError(getErrorMessage(err));
       setSaving(false);
@@ -57,7 +131,15 @@ function CommentEditor({ id, label, initial = '', placeholder, saveLabel = '저�
         autoFocus
       />
       {error && <p className="hint hint--error">{error}</p>}
-      <div className="mt-2 flex justify-end gap-2">
+      <div className="mt-2 flex items-center gap-2">
+        <FacePicker
+          value={face}
+          onChange={(next) => {
+            setFace(next);
+            if (error) setError('');
+          }}
+        />
+        <span className="flex-1" />
         <Button size="sm" variant="default" onClick={save} loading={saving}>
           {saveLabel}
         </Button>
@@ -113,9 +195,21 @@ function CommentItem({ comment, isReply, editing, onReply, onEdit, onDelete, onS
           )}
         </div>
         {editing ? (
-          <CommentEditor id={`comment-edit-${comment.id}`} label="댓글 수정" initial={comment.content} onSave={onSaveEdit} onCancel={onCancelEdit} />
+          <CommentEditor
+            id={`comment-edit-${comment.id}`}
+            label="댓글 수정"
+            initial={comment.content}
+            initialFace={comment.face}
+            onSave={onSaveEdit}
+            onCancel={onCancelEdit}
+          />
         ) : (
-          <p className="ink mt-1 whitespace-pre-wrap break-words text-[15px] leading-relaxed">{comment.content}</p>
+          <>
+            {faceOf(comment.face) && (
+              <PixelIcon name={faceOf(comment.face).icon} size={45} title={faceOf(comment.face).label} className="mt-1.5 block" />
+            )}
+            {comment.content && <p className="ink mt-1 whitespace-pre-wrap break-words text-[15px] leading-relaxed">{comment.content}</p>}
+          </>
         )}
       </div>
     </div>
@@ -131,6 +225,7 @@ export default function CommentSection({ diaryId, onCountChange }) {
   const toast = useToast();
   const { data: comments, loading, error, reload, setData } = useFetch(() => commentService.list(diaryId), [diaryId]);
   const [draft, setDraft] = useState('');
+  const [draftFace, setDraftFace] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -146,13 +241,14 @@ export default function CommentSection({ diaryId, onCountChange }) {
   const submit = async (event) => {
     event?.preventDefault();
     const content = draft.trim();
-    if (!content) return setFormError('댓글 내용을 입력해 주세요.');
+    if (!content && !draftFace) return setFormError(EMPTY_MESSAGE);
     setSubmitting(true);
     setFormError('');
     try {
-      const comment = await commentService.create(diaryId, content);
+      const comment = await commentService.create(diaryId, { content, face: draftFace });
       setData((list) => [...(list ?? []), comment]);
       setDraft('');
+      setDraftFace(null);
       onCountChange?.(1);
     } catch (err) {
       setFormError(getErrorMessage(err));
@@ -167,15 +263,15 @@ export default function CommentSection({ diaryId, onCountChange }) {
     setReplyTo({ rootId, targetId: comment.id, mention: comment.parentId ? comment.author.nickname : null });
   };
 
-  const sendReply = async (content) => {
-    const reply = await commentService.create(diaryId, content, replyTo.targetId);
+  const sendReply = async ({ content, face }) => {
+    const reply = await commentService.create(diaryId, { content, face, parentId: replyTo.targetId });
     setData((list) => [...(list ?? []), reply]);
     setReplyTo(null);
     onCountChange?.(1);
   };
 
-  const saveEdit = async (commentId, content) => {
-    const updated = await commentService.update(commentId, content);
+  const saveEdit = async (commentId, changes) => {
+    const updated = await commentService.update(commentId, changes);
     setData((list) => list.map((c) => (c.id === commentId ? updated : c)));
     setEditingId(null);
     toast.success('댓글을 수정했어요.');
@@ -207,7 +303,7 @@ export default function CommentSection({ diaryId, onCountChange }) {
       setEditingId(comment.id);
     },
     onDelete: () => setDeleteTarget(comment),
-    onSaveEdit: (content) => saveEdit(comment.id, content),
+    onSaveEdit: (changes) => saveEdit(comment.id, changes),
     onCancelEdit: () => setEditingId(null),
   });
 
@@ -284,8 +380,15 @@ export default function CommentSection({ diaryId, onCountChange }) {
           aria-invalid={formError ? true : undefined}
           aria-describedby="new-comment-hint"
         />
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <p id="new-comment-hint" className={formError ? 'hint hint--error mt-0' : 'hint mt-0'}>
+        <div className="mt-2 flex items-center gap-2">
+          <FacePicker
+            value={draftFace}
+            onChange={(next) => {
+              setDraftFace(next);
+              if (formError) setFormError('');
+            }}
+          />
+          <p id="new-comment-hint" className={cx('min-w-0 flex-1', formError ? 'hint hint--error mt-0' : 'hint mt-0')}>
             {formError || `${draft.length}/${MAX_LENGTH}자, Ctrl+Enter로 등록`}
           </p>
           <Button type="submit" variant="default" size="sm" loading={submitting} icon={<Send size={12} />}>

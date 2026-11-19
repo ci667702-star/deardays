@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_DIARY_IMAGES, MOODS, STAMP_KINDS, WEATHERS } from '../config/constants.js';
+import { COMMENT_FACES, MAX_DIARY_IMAGES, MOODS, STAMP_KINDS, WEATHERS } from '../config/constants.js';
 import { isValidDateString, isValidMonthString } from '../utils/date.js';
 import { idSchema, requiredText } from './common.js';
 
@@ -104,15 +104,34 @@ export const calendarQuerySchema = z.object({
     .refine(isValidMonthString, '월 형식이 올바르지 않아요. (예: 2026-11)'),
 });
 
+const commentText = z
+  .string({ error: '댓글 형식이 올바르지 않아요.' })
+  .trim()
+  .max(500, '댓글은 500자 이하로 써 주세요.')
+  .default('');
+
+/** 얼굴 이모티콘: 빼면 그대로(수정할 때), null 이면 없앰 */
+const commentFace = z
+  .enum(Object.keys(COMMENT_FACES), { error: '얼굴 이모티콘이 올바르지 않아요.' })
+  .nullable()
+  .optional();
+
+const EMPTY_COMMENT = '댓글 내용을 입력하거나 얼굴을 골라 주세요.';
+
+/** 댓글 수정. 글이 비면 얼굴이 있어야 한다 (지금 달린 얼굴은 서비스에서 확인) */
 export const commentSchema = z.object({
-  content: requiredText('댓글', 500),
+  content: commentText,
+  face: commentFace,
 });
 
-/** 새 댓글. parentId 를 주면 그 댓글에 다는 답글 */
-export const createCommentSchema = z.object({
-  content: requiredText('댓글', 500),
-  parentId: z.preprocess((value) => (value === '' || value === null ? undefined : value), idSchema('답글 대상').optional()),
-});
+/** 새 댓글. parentId 를 주면 그 댓글에 다는 답글. 글이나 얼굴 중 하나는 있어야 한다 */
+export const createCommentSchema = z
+  .object({
+    content: commentText,
+    face: commentFace,
+    parentId: z.preprocess((value) => (value === '' || value === null ? undefined : value), idSchema('답글 대상').optional()),
+  })
+  .refine((value) => Boolean(value.content || value.face), { message: EMPTY_COMMENT, path: ['content'] });
 
 export const stampSchema = z.object({
   kind: z.enum(STAMP_KINDS, { error: '도장 종류가 올바르지 않아요.' }),

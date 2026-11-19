@@ -272,6 +272,9 @@ export const ICONS = {
   moodCalm: face('kffkfkffk', 'kfffffffk', 'kffkkkffk'),
   moodSad: face('kffkfkffk', 'kffkkkffk', 'kfkfffkfk', { cheek: 'kfufffffk' }),
   moodAngry: face('kffkfkffk', 'kffkkkffk', 'kfkfffkfk', { brows: 'kfkfffkfk' }),
+  moodLove: face('krrrfrrrk', 'kfkfffkfk', 'kffkkkffk', { brows: 'kfrfffrfk', cheek: 'kfrfffrfk' }),
+  moodSurprised: face('kffkfkffk', 'kfffkfffk', 'kffkfkffk', { brows: 'kffkfkffk', chin: '.kffkffk.' }),
+  moodLaugh: face('kkfkfkfkk', 'kfkkkkkfk', 'kfkrrrkfk', { brows: 'kfkfffkfk', chin: '.kfkkkfk.' }),
   weatherSunny: [
     '....Y....',
     '.Y..Y..Y.',

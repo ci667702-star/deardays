@@ -169,6 +169,7 @@ export function toComment(comment, viewerId) {
     parentId: comment.parentId ?? null,
     isDeleted,
     content: isDeleted ? '' : comment.content,
+    face: isDeleted ? null : (comment.face ?? null),
     createdAt: comment.createdAt,
     updatedAt: comment.updatedAt,
     author: isDeleted ? null : toPublicUser(comment.user),

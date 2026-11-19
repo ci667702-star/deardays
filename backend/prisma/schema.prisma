@@ -126,6 +126,8 @@ model Comment {
   userId    Int
   parentId  Int?
   content   String    @db.VarChar(500)
+  // 얼굴 이모티콘 (config/constants.js 의 COMMENT_FACES). 얼굴만 달고 글은 비워도 된다.
+  face      String?   @db.VarChar(16)
   // 답글이 달린 댓글을 지우면 자리만 남긴다 ("삭제된 댓글이에요"). 답글이 없으면 바로 지운다.
   deletedAt DateTime?
   createdAt DateTime  @default(now())

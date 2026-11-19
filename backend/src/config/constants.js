@@ -37,6 +37,18 @@ export const NOTIFICATION_LIST_LIMIT = 50;
 /** 도장 종류 (화면의 도장 모양·글자와 짝: frontend/src/utils/stamps.js) */
 export const STAMP_KINDS = ['great', 'wow', 'lol', 'pat', 'same', 'best'];
 
+/** 댓글에 다는 얼굴 이모티콘 (화면: frontend/src/utils/moods.js 의 COMMENT_FACES 와 짝) */
+export const COMMENT_FACES = {
+  happy: '기쁨',
+  excited: '설렘',
+  calm: '평온',
+  sad: '우울',
+  angry: '화남',
+  love: '반함',
+  surprised: '놀람',
+  laugh: '웃김',
+};
+
 /** 오늘의 주제: 글자 수, 한 번에 여러 개 넣을 때 최대 개수 */
 export const TOPIC_MAX_LENGTH = 200;
 export const TOPIC_BULK_MAX = 100;

@@ -1,3 +1,4 @@
+import { COMMENT_FACES } from '../config/constants.js';
 import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/HttpError.js';
 import { toComment } from '../utils/serializers.js';
@@ -38,14 +39,21 @@ async function resolveParent(diaryId, parentId) {
   return { rootId: parent.parentId ?? parent.id, repliedUserId: parent.userId };
 }
 
-export async function createComment(userId, diaryId, { content, parentId = null }) {
+/** 알림에 보일 짧은 내용: 글이 없으면 '(웃김 얼굴)' 처럼 */
+function commentPreview(content, face) {
+  if (content) return content;
+  return face ? `(${COMMENT_FACES[face]} 얼굴)` : '';
+}
+
+export async function createComment(userId, diaryId, { content, face = null, parentId = null }) {
   const diary = await findDiaryForMember(diaryId, userId);
   const reply = parentId ? await resolveParent(diaryId, parentId) : null;
 
   const comment = await prisma.comment.create({
-    data: { diaryId, userId, content, parentId: reply?.rootId ?? null },
+    data: { diaryId, userId, content, face: face ?? null, parentId: reply?.rootId ?? null },
     include: { user: true },
   });
+  const preview = commentPreview(content, face);
 
   // 답글이면 답글 받은 사람에게 '답글' 알림, 나머지 공간 사람들에게는 평소처럼 '댓글' 알림 (한 사람에게 두 번 가지 않게)
   const repliedTo = reply && reply.repliedUserId !== userId ? reply.repliedUserId : null;
@@ -55,7 +63,7 @@ export async function createComment(userId, diaryId, { content, parentId = null 
       actorId: userId,
       type: 'COMMENT_REPLIED',
       diaryId,
-      preview: content,
+      preview,
       recipientIds: [repliedTo],
     });
   }
@@ -65,7 +73,7 @@ export async function createComment(userId, diaryId, { content, parentId = null 
     actorId: userId,
     type: 'COMMENT_CREATED',
     diaryId,
-    preview: content,
+    preview,
     recipientIds: members.map((member) => member.userId).filter((id) => id !== repliedTo),
   });
   return toComment(comment, userId);
@@ -75,7 +83,7 @@ export async function createComment(userId, diaryId, { content, parentId = null 
 async function findOwnComment(userId, commentId, action) {
   const comment = await prisma.comment.findUnique({
     where: { id: commentId },
-    select: { id: true, userId: true, parentId: true, deletedAt: true, diary: { select: { diaryRoomId: true } } },
+    select: { id: true, userId: true, parentId: true, face: true, deletedAt: true, diary: { select: { diaryRoomId: true } } },
   });
   if (!comment || comment.deletedAt) throw COMMENT_NOT_FOUND();
 
@@ -91,11 +99,14 @@ async function findOwnComment(userId, commentId, action) {
   return comment;
 }
 
-export async function updateComment(userId, commentId, { content }) {
-  await findOwnComment(userId, commentId, '수정');
+export async function updateComment(userId, commentId, { content, face }) {
+  const existing = await findOwnComment(userId, commentId, '수정');
+  // face 를 안 보냈으면 지금 얼굴을 그대로 둔다
+  const nextFace = face === undefined ? existing.face : face;
+  if (!content && !nextFace) throw HttpError.badRequest('댓글 내용을 입력하거나 얼굴을 골라 주세요.', 'VALIDATION_ERROR');
   const comment = await prisma.comment.update({
     where: { id: commentId },
-    data: { content },
+    data: { content, face: nextFace ?? null },
     include: { user: true },
   });
   return toComment(comment, userId);
@@ -111,7 +122,7 @@ export async function deleteComment(userId, commentId) {
 
   const replyCount = await prisma.comment.count({ where: { parentId: commentId } });
   if (replyCount > 0) {
-    await prisma.comment.update({ where: { id: commentId }, data: { deletedAt: new Date(), content: '' } });
+    await prisma.comment.update({ where: { id: commentId }, data: { deletedAt: new Date(), content: '', face: null } });
   } else {
     await prisma.comment.delete({ where: { id: commentId } });
   }

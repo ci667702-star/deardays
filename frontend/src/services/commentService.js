@@ -6,14 +6,14 @@ export const commentService = {
     return data.comments;
   },
 
-  /** parentId 를 주면 그 댓글에 다는 답글 */
-  async create(diaryId, content, parentId) {
-    const { data } = await api.post(`/diaries/${diaryId}/comments`, { content, parentId: parentId || undefined });
+  /** face: 얼굴 이모티콘(없으면 null). parentId 를 주면 그 댓글에 다는 답글 */
+  async create(diaryId, { content, face = null, parentId }) {
+    const { data } = await api.post(`/diaries/${diaryId}/comments`, { content, face, parentId: parentId || undefined });
     return data.comment;
   },
 
-  async update(commentId, content) {
-    const { data } = await api.put(`/comments/${commentId}`, { content });
+  async update(commentId, { content, face = null }) {
+    const { data } = await api.put(`/comments/${commentId}`, { content, face });
     return data.comment;
   },
 
