@@ -42,23 +42,23 @@
 }
 
 [data-theme='rose'] {
-  --color-desk: #fff0f0;
+  --color-desk: #FFD7DB;
   --color-desk-text: #4f3a40;
-  --color-face: #fbeff2;
+  --color-face: #fffbf3;
   --color-hilite: #ffffff;
   --color-light: #fff8fa;
   --color-shade: #c9a9b3;
   --color-dark: #4f3a40;
   --color-ink: #3a2a2f;
   --color-muted: #7a5f67;
-  --color-title: #c23b6c;
+  --color-title: #ff9cb8;
   --color-title-text: #ffffff;
-  --color-select: #c23b6c;
+  --color-select: #ff9cb8;
   --color-select-text: #ffffff;
   --color-focus: #4f3a40;
   --color-accent-face: #ffd6e2;
   --color-pink: #ec6c94;
-  --color-pink-deep: #c23b6c;
+  --color-pink-deep: #ff9cb8;
   --color-pink-soft: #ffe3ea;
   --color-lav: #8fdde4;
   --color-lav-soft: #e3f7f8;
@@ -116,7 +116,7 @@
   --color-pink-soft: #fde4ee;
   --color-lav: #9fd8dd;
   --color-lav-soft: #e2f4f5;
-  --color-cream: #ffffe1;
+  --color-cream: #ffffff;
   --color-paper: #fffef8;
   --color-rule: #d5dcef;
   --color-margin: #f2a7c2;

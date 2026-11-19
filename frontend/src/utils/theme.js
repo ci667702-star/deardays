@@ -22,7 +22,7 @@ export const THEMES = [
   }
 ];
 
-export const DEFAULT_THEME = 'rose';
+export const DEFAULT_THEME = 'classic';
 
 // 분홍 테마를 기본으로 바꾸면서 저장 이름을 새로 정했다. 예전 값은 읽지 않고 기본 테마로 시작한다.
 const STORAGE_KEY = 'theme-v2';
