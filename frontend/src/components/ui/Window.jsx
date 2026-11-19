@@ -85,7 +85,7 @@ export default function Window({
       {!collapsed && (
         <>
           {toolbar && <div className="win-toolbar">{toolbar}</div>}
-          <div className={cx('min-w-0 flex-1 p-3 sm:p-4', bodyClassName)}>{children}</div>
+          <div className={cx('min-w-0 flex-1 p-4 sm:p-5', bodyClassName)}>{children}</div>
           {statusBar && <footer className="win-status">{statusBar}</footer>}
         </>
       )}

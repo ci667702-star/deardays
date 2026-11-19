@@ -4,9 +4,9 @@ import { prefs } from './storage.js';
 export const THEMES = [
   {
     id: 'rose',
-    name: '장미 (차분한 분홍)',
-    description: '옛 윈도우 창 그대로, 차분한 장미색 바탕과 진한 장미색 제목 표시줄',
-    themeColor: '#b98b93',
+    name: '벚꽃 (밝은 분홍)',
+    description: '옛 윈도우 창 그대로, 밝은 벚꽃색 바탕과 하얀빛 창, 산딸기색 제목 표시줄',
+    themeColor: '#f6cfda',
   },
   {
     id: 'classic',

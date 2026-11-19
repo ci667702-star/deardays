@@ -84,7 +84,7 @@ function createWindow() {
     minHeight: 560,
     title: 'DearDays',
     icon: ICON_PATH,
-    backgroundColor: '#b98b93',
+    backgroundColor: '#f6cfda',
     autoHideMenuBar: true, // Alt 키를 누르면 메뉴가 보인다
     show: false,
     webPreferences: {

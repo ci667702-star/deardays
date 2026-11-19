@@ -7,7 +7,7 @@
    - 바탕 화면은 무늬 없는 한 가지 색
    - 글꼴은 하나: 굴림 비트맵을 닮은 픽셀 글꼴 Galmuri11
    색 구성표
-   - rose    : 차분한 장미색 바탕 + 분홍빛 도는 회색 창 + 진한 장미색 제목 표시줄 (기본값)
+   - rose    : 밝은 벚꽃색 바탕 + 하얀빛 창 + 산딸기색 제목 표시줄 (기본값)
    - classic : 회색 창 + 청록 바탕 + 남색 제목 표시줄 (Windows 95 기본) */
 @theme {
   --font-ui: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
@@ -15,62 +15,87 @@
   --font-paper: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 
   /* 기본값 = rose (아래 [data-theme='rose'] 블록과 같은 값) */
-  --color-desk: #b98b93;
-  --color-desk-text: #2b1d20;
-  --color-face: #d7c9cc;
+  --color-desk: #f6cfda;
+  --color-desk-text: #4f3a40;
+  --color-face: #fbeff2;
   --color-hilite: #ffffff;
-  --color-light: #ece4e6;
-  --color-shade: #8a7b7e;
-  --color-dark: #000000;
-  --color-ink: #000000;
-  --color-muted: #4b4547;
-  --color-title: #8e3b57;
+  --color-light: #fff8fa;
+  --color-shade: #c9a9b3;
+  --color-dark: #4f3a40;
+  --color-ink: #3a2a2f;
+  --color-muted: #7a5f67;
+  --color-title: #c23b6c;
   --color-title-text: #ffffff;
-  --color-select: #8e3b57;
+  --color-select: #c23b6c;
   --color-select-text: #ffffff;
-  --color-focus: #000000;
-  --color-accent-face: #e7d2d7;
-  --color-pink: #d9577f;
-  --color-pink-deep: #a8325a;
-  --color-pink-soft: #f3dce2;
-  --color-lav: #9ed0d4;
-  --color-lav-soft: #e3f1f2;
-  --color-cream: #ffffe1;
+  --color-focus: #4f3a40;
+  --color-accent-face: #ffd6e2;
+  --color-pink: #ec6c94;
+  --color-pink-deep: #c23b6c;
+  --color-pink-soft: #ffe3ea;
+  --color-lav: #8fdde4;
+  --color-lav-soft: #e3f7f8;
+  --color-cream: #fffbe0;
   --color-paper: #ffffff;
-  --color-rule: #e6dadd;
-  --color-margin: #e3a3b3;
-  --color-ok: #1d6b47;
-  --color-danger: #b0124a;
+  --color-rule: #f3dce3;
+  --color-margin: #f2a7bc;
 }
 
 [data-theme='rose'] {
-  --color-desk: #b98b93;
-  --color-desk-text: #2b1d20;
-  --color-face: #d7c9cc;
+  --color-desk: #fff0f0;
+  --color-desk-text: #4f3a40;
+  --color-face: #fbeff2;
   --color-hilite: #ffffff;
-  --color-light: #ece4e6;
-  --color-shade: #8a7b7e;
-  --color-dark: #000000;
-  --color-ink: #000000;
-  --color-muted: #4b4547;
-  --color-title: #8e3b57;
+  --color-light: #fff8fa;
+  --color-shade: #c9a9b3;
+  --color-dark: #4f3a40;
+  --color-ink: #3a2a2f;
+  --color-muted: #7a5f67;
+  --color-title: #c23b6c;
   --color-title-text: #ffffff;
-  --color-select: #8e3b57;
+  --color-select: #c23b6c;
   --color-select-text: #ffffff;
-  --color-focus: #000000;
-  --color-accent-face: #e7d2d7;
-  --color-pink: #d9577f;
-  --color-pink-deep: #a8325a;
-  --color-pink-soft: #f3dce2;
-  --color-lav: #9ed0d4;
-  --color-lav-soft: #e3f1f2;
-  --color-cream: #ffffe1;
+  --color-focus: #4f3a40;
+  --color-accent-face: #ffd6e2;
+  --color-pink: #ec6c94;
+  --color-pink-deep: #c23b6c;
+  --color-pink-soft: #ffe3ea;
+  --color-lav: #8fdde4;
+  --color-lav-soft: #e3f7f8;
+  --color-cream: #fffbe0;
   --color-paper: #ffffff;
-  --color-rule: #e6dadd;
-  --color-margin: #e3a3b3;
+  --color-rule: #f3dce3;
+  --color-margin: #f2a7bc;
 }
 
 [data-theme='classic'] {
+  --color-desk: #00b1b1;
+  --color-desk-text: #ffffff;
+  --color-face: #c0c0c0;
+  --color-hilite: #ffffff;
+  --color-light: #dfdfdf;
+  --color-shade: #808080;
+  --color-dark: #000000;
+  --color-ink: #000000;
+  --color-muted: #3f3f3f;
+  --color-title: #000080;
+  --color-title-text: #ffffff;
+  --color-select: #000080;
+  --color-select-text: #ffffff;
+  --color-focus: #000080;
+  --color-accent-face: #c0c0c0;
+  --color-pink: #e9729f;
+  --color-pink-deep: #c24f7e;
+  --color-pink-soft: #fde4ee;
+  --color-lav: #9fd8dd;
+  --color-lav-soft: #e2f4f5;
+  --color-cream: #ffffe1;
+  --color-paper: #fffef8;
+  --color-rule: #d5dcef;
+  --color-margin: #f2a7c2;
+}
+
+[data-theme='blue'] {
   --color-desk: #008080;
   --color-desk-text: #ffffff;
   --color-face: #c0c0c0;
