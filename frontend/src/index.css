@@ -96,20 +96,20 @@
 }
 
 [data-theme='blue'] {
-  --color-desk: #008080;
+  --color-desk: #E2EFF6;
   --color-desk-text: #ffffff;
-  --color-face: #c0c0c0;
+  --color-face: #FFF9E6;
   --color-hilite: #ffffff;
   --color-light: #dfdfdf;
   --color-shade: #808080;
   --color-dark: #000000;
   --color-ink: #000000;
   --color-muted: #3f3f3f;
-  --color-title: #000080;
+  --color-title: #A8D0EF;
   --color-title-text: #ffffff;
-  --color-select: #000080;
+  --color-select: #A8D0EF;
   --color-select-text: #ffffff;
-  --color-focus: #000080;
+  --color-focus: #A8D0EF;
   --color-accent-face: #c0c0c0;
   --color-pink: #e9729f;
   --color-pink-deep: #c24f7e;

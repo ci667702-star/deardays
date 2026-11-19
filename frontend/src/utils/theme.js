@@ -14,6 +14,12 @@ export const THEMES = [
     description: '옛 윈도우 그대로: 회색 창, 청록 바탕, 남색 제목 표시줄',
     themeColor: '#008080',
   },
+  {
+    id: 'blue',
+    name: '파란색',
+    description: ' 옛 윈도우 그대로: 노란 창, 파란 바탕, 바다색 제목 표시줄',
+    themeColor: '#A8D0EF'
+  }
 ];
 
 export const DEFAULT_THEME = 'rose';
