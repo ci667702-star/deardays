@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 디버그 빌드에서만: 내 컴퓨터의 테스트 서버(http://localhost, 에뮬레이터의 10.0.2.2)에 http 로 붙을 수 있게 -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

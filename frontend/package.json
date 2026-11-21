@@ -6,9 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:app": "vite build --mode app --outDir dist-app",
+    "app:sync": "npm run build:app && cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.2",
     "axios": "^1.21.1",
     "galmuri": "^2.40.3",
     "lucide-react": "^1.74.0",
@@ -17,6 +22,7 @@
     "react-router": "^7.18.5"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.6.2",
     "@tailwindcss/vite": "^4.3.5",
     "@vitejs/plugin-react": "^5.2.0",
     "tailwindcss": "^4.3.5",

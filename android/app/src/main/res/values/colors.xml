@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 웹 앱 매니페스트의 theme_color / background_color 와 같은 벚꽃색 -->
-    <color name="bar">#F6CFDA</color>
+    <!-- 시작 화면 바탕: 웹 앱 매니페스트의 background_color 와 같은 벚꽃색 -->
     <color name="splash_background">#F6CFDA</color>
 </resources>

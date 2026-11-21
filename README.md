@@ -819,25 +819,34 @@ DearDays 아이콘이 생기고, 누르면 주소창 없이 전체 화면으로 
 
 ### 안드로이드 앱 (APK)
 
-안드로이드는 홈 화면에 추가하는 대신 **APK 파일로 설치**할 수도 있습니다(`android/` 폴더). 앱 안에는 화면 코드가 없고, 배포된 웹 앱(`https://deardays.https.gsmsv.site`)을 크롬으로 주소창 없이 전체 화면에 띄웁니다(TWA, Trusted Web Activity). 그래서 **웹을 배포하면 앱도 바로 바뀌고**, 휴대폰 알림도 웹과 똑같이 옵니다.
+안드로이드는 홈 화면에 추가하는 대신 **진짜 앱(APK)으로 설치**할 수 있습니다(`android/` 폴더). 웹 화면(React)을 통째로 앱 안에 넣은 앱이라(Capacitor), 인터넷 창이 아니라 앱으로 열리고, 일기·로그인 같은 데이터만 서버(`https://deardays.https.gsmsv.site`)의 API 와 주고받습니다.
 
 - 패키지 이름 `site.gsmsv.deardays`, 안드로이드 7.0(API 24) 이상
-- 크롬이 없는 휴대폰에서는 다른 브라우저의 탭으로 엽니다.
+- 폰의 **뒤로** 버튼: 작은 창·시작 메뉴가 떠 있으면 그것부터 닫고, 앞 화면이 있으면 앞 화면으로, 첫 화면이면 앱을 뒤로 보냅니다(다시 열면 보던 화면 그대로).
+- 로그인은 앱을 껐다 켜도 유지됩니다(로그인 상태 유지를 골랐을 때).
+- **푸시 알림은 아직 앱에서 안 됩니다.** 웹 푸시는 브라우저 기능이라 앱 안에서는 받을 수 없어요. 앱을 열면 위쪽 종(새 소식)에서 친구의 새 일기·댓글을 볼 수 있습니다. (앱 알림을 켜려면 Firebase(FCM) 프로젝트를 만들어 서버와 앱에 연결해야 합니다)
 - 아이폰은 APK 를 설치할 수 없어서, 아이폰은 [홈 화면에 추가](#홈-화면에-추가-앱처럼-쓰기)를 씁니다.
 
 #### 설치하기 (친구들)
 
 1. `DearDays-x.y.z.apk` 파일을 휴대폰으로 받습니다(GitHub Releases, 카톡 파일 등).
 2. 파일을 열면 "출처를 알 수 없는 앱" 허용을 묻습니다. 이번만 허용하고 **설치**를 누릅니다.
-3. 처음 열면 알림 권한을 묻습니다. 허용하면 친구의 새 일기·댓글 알림이 옵니다(앱의 내 정보 → 휴대폰 알림에서 켜기).
+3. 예전 버전(1.0.0, 웹 껍데기 앱)을 깔아 둔 폰에는 지우지 않고 그 위에 업데이트로 깔립니다(같은 서명 키).
 
-#### 웹 서버에 둘 파일 (한 번)
+#### 서버에서 해 둘 것 (한 번)
 
-앱과 웹사이트가 서로를 확인해야 앱 위에 주소창이 뜨지 않습니다. 웹의 `frontend/public/.well-known/assetlinks.json` 에 앱의 패키지 이름과 서명 키 지문이 들어 있고, 웹을 다시 배포하면 `https://deardays.https.gsmsv.site/.well-known/assetlinks.json` 으로 열립니다(`frontend/nginx.conf` 가 JSON 으로 내보냄). 이 파일이 없거나 지문이 다르면 앱은 열리지만 위에 주소창이 보입니다.
+앱 안의 화면은 `https://localhost` 라는 출처에서 열리기 때문에, 서버가 이 출처의 요청을 받아 줘야 합니다. `backend/src/config/env.js` 가 앱 출처(`https://localhost`, 아이폰용 `capacitor://localhost`)를 항상 허용하므로 **서버를 최신 코드로 다시 배포하기만** 하면 됩니다. 배포 전에는 앱에서 로그인이 되지 않습니다. (로그인은 쿠키가 아니라 토큰이라, 이 출처를 열어도 다른 사이트가 남의 로그인을 쓸 수는 없습니다)
 
 #### 직접 빌드하기
 
-준비물: JDK 17 이상, Android SDK(안드로이드 스튜디오를 깔면 같이 생김).
+준비물: Node 22 이상, JDK 21, Android SDK(안드로이드 스튜디오를 깔면 같이 생김).
+
+```bash
+cd frontend
+npm run app:sync
+```
+
+화면을 앱용으로 빌드하고(`frontend/.env.app` 의 서버 주소를 씀, 결과는 `frontend/dist-app`), `android/` 프로젝트에 복사합니다. 그다음:
 
 ```bash
 cd android
@@ -846,18 +855,22 @@ cd android
 
 `android/app/build/outputs/apk/release/app-release.apk` 가 생깁니다. 처음 빌드할 때 Gradle 과 빌드 도구를 내려받느라 몇 분 걸립니다. `JAVA_HOME`·`ANDROID_HOME` 이 안 잡혀 있으면 앞에 붙여 실행하세요(예: `JAVA_HOME=~/.jdks/ms-21.0.12.1 ANDROID_HOME=$LOCALAPPDATA/Android/Sdk ./gradlew assembleRelease`).
 
+- 서버 주소를 바꾸려면 `frontend/.env.app` 의 `VITE_API_URL` 을 고치고 다시 빌드합니다.
+- 앱 아이콘은 `frontend/public/icon-512.png` 로 만듭니다: `node android/scripts/make-icons.cjs`
+- 내 컴퓨터의 테스트 서버로 시험하려면: `VITE_API_URL=http://localhost:4001 npx vite build --mode app --outDir dist-app` → `npx cap sync android` → `./gradlew assembleDebug`. 디버그 빌드만 `localhost`·`10.0.2.2` 에 http 로 붙을 수 있습니다(`android/app/src/debug`). 에뮬레이터에서는 `adb reverse tcp:4001 tcp:4001` 로 내 컴퓨터의 4001 번을 연결합니다.
+
 #### 서명 키 (중요)
 
 - APK 는 `deardays` 폴더 **바깥**의 `deardays-android-signing/` 폴더에 있는 키로 서명합니다. 그 안의 `deardays-release.jks`(키)와 `keystore.properties`(비밀번호)는 **저장소에 올리지 않습니다**(`android/.gitignore`).
 - 다른 곳에 두었다면 `./gradlew assembleRelease -Pdeardays.signing=keystore.properties경로` 로 알려 줍니다. 키가 없으면 서명 안 된 APK 가 나와 설치할 수 없습니다.
-- **이 키를 잃어버리면 같은 앱으로 업데이트를 낼 수 없습니다.** (새 키로 만들면 친구들이 지우고 다시 깔아야 하고, `assetlinks.json` 지문도 바꿔야 함) USB나 클라우드에 따로 백업해 두세요.
+- **이 키를 잃어버리면 같은 앱으로 업데이트를 낼 수 없습니다.** (새 키로 만들면 친구들이 지우고 다시 깔아야 함) USB나 클라우드에 따로 백업해 두세요.
 
 #### 새 버전 내기
 
-1. `android/app/build.gradle.kts` 의 `versionCode` 를 1 올리고 `versionName` 을 바꿉니다(예: 2, "1.1.0").
-2. `./gradlew assembleRelease` 로 다시 빌드합니다. 같은 키로 서명되므로 친구들은 새 APK 를 그냥 설치하면 업데이트됩니다.
+화면이 앱 안에 들어 있어서, **화면을 고쳤으면 APK 도 새로 내야** 앱에 반영됩니다. (서버만 고친 거라면 서버만 배포하면 됩니다)
 
-> 화면·기능만 바뀐 거라면 웹만 배포하면 되고 APK 를 다시 낼 필요가 없습니다. 앱 이름·아이콘·주소를 바꿀 때만 새 APK 가 필요합니다.
+1. `android/app/build.gradle` 의 `versionCode` 를 1 올리고 `versionName` 을 바꿉니다(예: 3, "1.2.0").
+2. `npm run app:sync`(frontend) → `./gradlew assembleRelease`(android) 로 다시 빌드합니다. 같은 키로 서명되므로 친구들은 새 APK 를 그냥 설치하면 업데이트됩니다.
 
 ---
 
@@ -1038,7 +1051,7 @@ deardays/
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   └── .env.example
-├── android/                     # 안드로이드 앱 (TWA: 웹 앱을 크롬으로 전체 화면에 띄우는 APK)
+├── android/                     # 안드로이드 앱 (Capacitor: frontend 화면을 앱 안에 넣은 APK)
 ├── desktop/                     # Windows 데스크톱 앱 (Electron)
 │   ├── src/
 │   │   ├── main.js              # 창, 메뉴, 알림, 서버 연결 확인

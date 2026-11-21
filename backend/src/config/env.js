@@ -41,7 +41,9 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   // 화면을 열 수 있는 주소. CLIENT_ORIGIN(이 서버의 주소) + EXTRA_ORIGINS(Vercel 등 다른 곳에 올린 화면 주소)
-  clientOrigins: [process.env.CLIENT_ORIGIN ?? 'http://localhost:5173', process.env.EXTRA_ORIGINS ?? '']
+  // + 휴대폰 앱(Capacitor: 안드로이드 https://localhost, 아이폰 capacitor://localhost).
+  // 로그인은 쿠키가 아니라 Authorization 헤더 토큰이라, 이 출처를 열어도 다른 사이트가 남의 로그인을 쓸 수 없다.
+  clientOrigins: [process.env.CLIENT_ORIGIN ?? 'http://localhost:5173', process.env.EXTRA_ORIGINS ?? '', 'https://localhost,capacitor://localhost']
     .join(',')
     .split(',')
     .map((origin) => origin.trim().replace(/\/$/, ''))

@@ -15,6 +15,7 @@ services:
   db:
     image: mysql:8.4
     restart: unless-stopped
+    container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: ${RDB_ROOT_PASSWORD:?.env 에 RDB_ROOT_PASSWORD 를 설정해 주세요}
       MYSQL_DATABASE: ${RDB_DATABASE:-deardays}
@@ -35,6 +36,7 @@ services:
       context: ./backend
       network: host
     restart: unless-stopped
+    container_name: api
     depends_on:
       db:
         condition: service_healthy
@@ -72,6 +74,7 @@ services:
 
   web:
     build: ./frontend
+    container_name: web
     restart: unless-stopped
     depends_on:
       api:

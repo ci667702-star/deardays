@@ -9,6 +9,7 @@ import PixelIcon from '../ui/PixelIcon.jsx';
 
 const SUPPORT_MESSAGES = {
   'desktop-app': '데스크톱 앱은 앱 자체 알림을 써요. 휴대폰 알림은 휴대폰에서 켜 주세요.',
+  'phone-app': '휴대폰 앱에서는 아직 푸시 알림을 받을 수 없어요. 앱을 열면 위쪽 종(새 소식)에서 친구의 새 일기·댓글을 볼 수 있어요.',
   insecure: '휴대폰 알림은 https 주소로 접속했을 때만 켤 수 있어요.',
   'ios-browser': '아이폰·아이패드는 Safari 의 공유 → "홈 화면에 추가"로 DearDays 를 깐 다음, 그 앱에서 켤 수 있어요. (iOS 16.4 이상)',
   unsupported: '이 브라우저는 푸시 알림을 지원하지 않아요. 크롬·엣지·사파리 최신 버전에서 켜 주세요.',

@@ -1,3 +1,4 @@
+import { isPhoneApp } from '../utils/nativeApp.js';
 import { api } from './api.js';
 
 /** 서버 base64url 공개키 → 브라우저가 원하는 바이트 배열 */
@@ -12,6 +13,7 @@ const withTimeout = (promise, ms) => Promise.race([promise, new Promise((_, reje
 /** 이 브라우저가 푸시 알림을 받을 수 있는지 */
 export function pushSupport() {
   if (window.deardaysDesktop) return 'desktop-app';
+  if (isPhoneApp()) return 'phone-app';
   if (!window.isSecureContext) return 'insecure';
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
